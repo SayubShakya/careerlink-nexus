@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import authIllustration from '@/assets/images/auth-illustration.png';
 import logo from '@assets/images/temporary_logo.png';
 import { ROUTES } from '@/routes/routes';
@@ -109,6 +110,18 @@ const styles = {
 
 const Signup = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const role = localStorage.getItem('role');
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            if (role === 'job_seeker') {
+                navigate(ROUTES.JOBSEEKER_DASHBOARD);
+            } else if (role === 'employer') {
+                navigate(ROUTES.EMPLOYER_DASHBOARD);
+            }
+        }
+    }, [isAuthenticated, role, navigate]);
 
     return (
         <div style={styles.pageContainer}>

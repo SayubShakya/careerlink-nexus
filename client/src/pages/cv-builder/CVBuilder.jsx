@@ -22,8 +22,7 @@ import {
     Phone,
     Globe
 } from 'lucide-react';
-import { toast } from 'react-toastify';
-import cvService from '@/services/cvService';
+import { useGetCVs, usePostCreatePlatformCV, usePutUpdatePlatformCV } from '@/hooks/api/cv/useCVs';
 import { useSearchParams } from 'react-router-dom';
 
 const CVBuilder = () => {
@@ -70,7 +69,6 @@ const CVBuilder = () => {
     });
 
     const [activeSection, setActiveSection] = useState('about');
-    const [isSaving, setIsSaving] = useState(false);
     const [isTitleEditing, setIsTitleEditing] = useState(false);
     const middleScrollRef = useRef(null);
 
@@ -86,27 +84,24 @@ const CVBuilder = () => {
         references: useRef(null)
     };
 
-    // Load existing CV if ID present
+    const { data: cvs = [] } = useGetCVs();
+    const { mutate: createCV, isPending: creating } = usePostCreatePlatformCV();
+    const { mutate: updateCV, isPending: updating } = usePutUpdatePlatformCV();
+
+    const isSaving = creating || updating;
+
     useEffect(() => {
-        if (cvId) {
-            const fetchCV = async () => {
-                try {
-                    const cvs = await cvService.getAllCVs();
-                    const existing = cvs.find(c => c.id === cvId);
-                    if (existing && existing.content) {
-                        setCvData({
-                            ...existing.content,
-                            title: existing.title,
-                            id: existing.id
-                        });
-                    }
-                } catch (err) {
-                    toast.error("Error loading CV data");
-                }
-            };
-            fetchCV();
+        if (cvId && cvs.length > 0) {
+            const existing = cvs.find(c => String(c.id || c._id) === String(cvId));
+            if (existing && existing.content) {
+                setCvData({
+                    ...existing.content,
+                    title: existing.title,
+                    id: existing.id || existing._id
+                });
+            }
         }
-    }, [cvId]);
+    }, [cvId, cvs]);
 
     // 2. Scroll Sync (Intersection Observer)
     useEffect(() => {
@@ -166,26 +161,24 @@ const CVBuilder = () => {
         }));
     };
 
-    const handleSave = async () => {
-        setIsSaving(true);
-        try {
-            if (cvId || cvData.id) {
-                await cvService.updateCV(cvId || cvData.id, {
+    const handleSave = () => {
+        if (cvId || cvData.id) {
+            updateCV({
+                id: cvId || cvData.id,
+                cvData: {
                     title: cvData.title,
                     content: cvData
-                });
-            } else {
-                const saved = await cvService.createPlatformCV({
-                    title: cvData.title || `${cvData.about.firstName} CV`,
-                    content: cvData
-                });
-                setCvData(prev => ({ ...prev, id: saved.id }));
-            }
-            toast.success("CV Saved Successfully!");
-        } catch (err) {
-            toast.error("Failed to save CV");
-        } finally {
-            setIsSaving(false);
+                }
+            });
+        } else {
+            createCV({
+                title: cvData.title || `${cvData.about.firstName} CV`,
+                content: cvData
+            }, {
+                onSuccess: (saved) => {
+                    setCvData(prev => ({ ...prev, id: saved.id || saved._id }));
+                }
+            });
         }
     };
 

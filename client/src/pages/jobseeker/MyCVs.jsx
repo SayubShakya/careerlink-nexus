@@ -18,47 +18,26 @@ import {
     Clock,
     FileSearch
 } from 'lucide-react';
-import { toast } from 'react-toastify';
-import cvService from '@/services/cvService';
+import { useGetCVs, usePostUploadCV, useDeleteCV } from '@/hooks/api/cv/useCVs';
 import { ROUTES } from '@/routes/routes';
 import cvBanner from '@/assets/images/cv-upload-banner.jpg';
 
 const MyCVs = () => {
-    const [cvs, setCvs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
+    const { data: cvs = [], isLoading: loading } = useGetCVs();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
     const fileInputRef = useRef(null);
 
-    useEffect(() => {
-        fetchCVs();
-    }, []);
+    console.log(cvs, "cvs")
+    const { mutate: uploadCV, isPending: uploading } = usePostUploadCV();
+    const { mutate: deleteCV } = useDeleteCV();
 
-    const fetchCVs = async () => {
-        try {
-            const data = await cvService.getAllCVs();
-            setCvs(data || []);
-        } catch (error) {
-            console.error("Failed to fetch CVs", error);
-            toast.error("Could not load your CVs");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         if (!window.confirm("Are you sure you want to delete this CV?")) return;
-        try {
-            await cvService.deleteCV(id);
-            setCvs(cvs.filter(cv => cv.id !== id));
-            toast.success("CV deleted successfully");
-        } catch (error) {
-            toast.error("Failed to delete CV");
-        }
+        deleteCV(id);
     };
 
-    const handleUpload = async (e) => {
+    const handleUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -66,17 +45,11 @@ const MyCVs = () => {
         formData.append('file', file);
         formData.append('title', file.name);
 
-        setUploading(true);
-        try {
-            await cvService.uploadCV(formData);
-            toast.success("CV uploaded successfully!");
-            fetchCVs();
-        } catch (error) {
-            toast.error("Upload failed");
-        } finally {
-            setUploading(false);
-            e.target.value = '';
-        }
+        uploadCV(formData, {
+            onSuccess: () => {
+                e.target.value = '';
+            }
+        });
     };
 
     const handleDownload = (id) => {
@@ -94,11 +67,11 @@ const MyCVs = () => {
         return date.toLocaleDateString();
     };
 
-    const filteredCVs = cvs.filter(cv => {
-        const matchesSearch = cv.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const filteredCVs = Array.isArray(cvs) ? cvs.filter(cv => {
+        const matchesSearch = cv.title?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = activeFilter === 'All' || cv.type === activeFilter;
         return matchesSearch && matchesFilter;
-    });
+    }) : [];
 
     if (loading) return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F8FAFC' }}>

@@ -1,85 +1,36 @@
-import { useState, useCallback } from 'react';
-import authService from '@/services/authService';
-import { STORAGE_KEYS } from '@/config/constants';
+import usePostLogin from '@/hooks/api/auth/usePostLogin';
+import usePostLogout from '@/hooks/api/auth/usePostLogout';
+import usePostRegisterJobSeeker from '@/hooks/api/auth/usePostRegisterJobSeeker';
+import usePostRegisterEmployer from '@/hooks/api/auth/usePostRegisterEmployer';
 
 /**
  * Custom hook for authentication logic
- * Wraps the authService methods and provides reactive state if needed in future
+ * Wraps the React Query auth hooks for easy access
  */
 export const useAuth = () => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const loginMutation = usePostLogin();
+    const logoutMutation = usePostLogout();
+    const registerJobSeekerMutation = usePostRegisterJobSeeker();
+    const registerEmployerMutation = usePostRegisterEmployer();
 
-    const login = useCallback(async (email, password) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await authService.login(email, password);
-            return data;
-        } catch (err) {
-            setError(err.response?.data?.message || 'Login failed');
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const getCurrentUser = () => {
+        const user = localStorage.getItem('user');
+        return user ? JSON.parse(user) : null;
+    };
 
-    const logout = useCallback(async () => {
-        setLoading(true);
-        try {
-            await authService.logout();
-        } catch (err) {
-            console.error("Logout error", err);
-        } finally {
-            setLoading(false);
-            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-        }
-    }, []);
-
-    const registerJobSeeker = useCallback(async (userData) => {
-        setLoading(true);
-        setError(null);
-        try {
-            return await authService.registerJobSeeker(userData);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const registerEmployer = useCallback(async (userData) => {
-        setLoading(true);
-        setError(null);
-        try {
-            return await authService.registerEmployer(userData);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const getCurrentUser = useCallback(() => {
-        return authService.getCurrentUser();
-    }, []);
-
-    const isAuthenticated = useCallback(() => {
-        return authService.isAuthenticated();
-    }, []);
+    const isAuthenticated = () => {
+        return !!localStorage.getItem('userToken');
+    };
 
     return {
-        login,
-        logout,
-        registerJobSeeker,
-        registerEmployer,
+        login: loginMutation.mutateAsync,
+        logout: logoutMutation.mutateAsync,
+        registerJobSeeker: registerJobSeekerMutation.mutateAsync,
+        registerEmployer: registerEmployerMutation.mutateAsync,
         getCurrentUser,
         isAuthenticated,
-        loading,
-        error
+        loading: loginMutation.isPending || logoutMutation.isPending || registerJobSeekerMutation.isPending || registerEmployerMutation.isPending,
+        error: loginMutation.error || logoutMutation.error || registerJobSeekerMutation.error || registerEmployerMutation.error
     };
 };
 

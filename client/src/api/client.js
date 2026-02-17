@@ -1,40 +1,39 @@
 import axios from 'axios';
-import { API_BASE_URL, STORAGE_KEYS } from '@/config/constants';
-import { API_ENDPOINTS } from './endpoints';
+import { API_BASE_URL } from '@/config/constants';
 
 // Create axios instance
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true,
 });
 
-// Request interceptor
+// Request Interceptor - Attach token to every request
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('userToken');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        return Promise.reject(error);
+    }
 );
 
-// Response interceptor
+// Response Interceptor - Handle 401 (token expired)
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Check if we are not already on the login page to avoid loops
-            if (!window.location.pathname.includes('/login')) {
-                localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-                localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-                // Optional: Redirect to login or dispatch an event
-                // window.location.href = '/login'; 
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('user');
+                // Optional: window.location.href = '/login'; 
             }
         }
         return Promise.reject(error);

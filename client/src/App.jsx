@@ -3,27 +3,19 @@ import { router } from '@/routes/index';
 import '@/styles/variables.css';
 import '@/styles/global.css';
 import './index.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@/context/ThemeContext';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <ThemeProvider>
-      <RouterProvider router={router} />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

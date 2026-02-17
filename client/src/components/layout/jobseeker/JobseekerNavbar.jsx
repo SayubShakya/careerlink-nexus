@@ -1,25 +1,14 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import authService from '@/services/authService';
 import { ROUTES } from '@/routes/routes';
+import { useGetMe } from '@/hooks/api/auth/useGetMe';
 import { LogOut, User, Layout, Search, FileText, Database } from 'lucide-react';
 
 const JobseekerNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [user, setUser] = React.useState(authService.getCurrentUser());
-
-    React.useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await authService.fetchCurrentUser();
-                setUser(userData);
-            } catch (err) {
-                console.error("Failed to fetch user data", err);
-            }
-        };
-        fetchUserData();
-    }, []);
+    const { data: me } = useGetMe();
+    const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleLogout = () => {
         navigate(ROUTES.LOGOUT_CONFIRMATION);

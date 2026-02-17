@@ -3,33 +3,36 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import authIllustration from '@/assets/images/auth-illustration.png';
 import logo from '@assets/images/temporary_logo.png';
 import { Eye, EyeOff } from 'lucide-react';
-import authService from '@/services/authService';
 import { ROUTES } from '@/routes/routes';
-import { toast } from 'react-toastify';
+import { useAuth } from '@/hooks/useAuth';
+import usePostLogin from '../../hooks/api/auth/usePostLogin';
 
 const Login = () => {
     const navigate = useNavigate();
-    const location = useLocation();
+    const { isAuthenticated } = useAuth();
+    const { mutate: login, isPending: loading } = usePostLogin();
+    const role = localStorage.getItem('role');
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            if (role === 'job_seeker') {
+                navigate(ROUTES.JOBSEEKER_DASHBOARD);
+            } else if (role === 'employer') {
+                navigate(ROUTES.EMPLOYER_DASHBOARD);
+            }
+        }
+    }, [isAuthenticated, role, navigate]);
+    const location = useLocation(); // Keep location for potential future use or if the hook doesn't fully replace its functionality
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
     const [errors, setErrors] = useState({});
-    const [serverError, setServerError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const toastShown = React.useRef(false);
-
-    useEffect(() => {
-        if (location.state?.message && !toastShown.current) {
-            toast.success(location.state.message);
-            toastShown.current = true;
-            // Clear location state so message doesn't persist on reload
-            window.history.replaceState({}, document.title);
-        }
-    }, [location]);
+    // The original useEffect for location.state message and toast is removed as per instruction
+    // and the toast import is removed. If the usePostLogin hook handles success/error messages
+    // via toast, this specific useEffect is no longer needed.
 
     const styles = {
         pageContainer: {
@@ -179,35 +182,12 @@ const Login = () => {
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' });
         }
-        if (serverError) setServerError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-
-        setLoading(true);
-        setServerError('');
-
-        try {
-            const data = await authService.login(formData.email, formData.password);
-
-            toast.success('Login successful!');
-            // Redirect based on role
-            if (data.data.role === 'job_seeker') {
-                navigate(ROUTES.JOBSEEKER_DASHBOARD);
-            } else if (data.data.role === 'employer') {
-                navigate(ROUTES.EMPLOYER_DASHBOARD);
-            } else {
-                navigate('/');
-            }
-        } catch (err) {
-            const message = err.response?.data?.message || 'Login failed. Please try again.';
-            setServerError(message);
-            toast.error(message);
-        } finally {
-            setLoading(false);
-        }
+        login(formData);
     };
 
     return (

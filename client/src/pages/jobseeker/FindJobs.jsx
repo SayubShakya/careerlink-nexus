@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGetJobs } from '@/hooks/api/jobs/useJobs';
+import { useAuth } from '@/hooks/useAuth';
 import {
     Search,
     Briefcase,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import bannerHuman from '@/assets/images/banner-human2.png';
+import { useState } from 'react';
 
 const FindJobs = () => {
     const navigate = useNavigate();
@@ -37,6 +39,9 @@ const FindJobs = () => {
         { name: 'Audit', logo: 'A' }, { name: 'Agro', logo: 'Ag' },
     ];
 
+    const { data: serverJobs = [], isLoading } = useGetJobs({ search: searchTerm });
+    const { isAuthenticated } = useAuth();
+    const isLoggedIn = isAuthenticated();
     // Expanded data for 20+ individual jobs
     const allIndividualJobs = [
         { id: 1, company: 'Google', role: 'Senior UX Designer', loc: 'Mountain View, CA', pay: '$180k', type: 'Full-time', logo: 'G' },
@@ -76,6 +81,21 @@ const FindJobs = () => {
         { company: 'Mountain River Films', roles: ['Social Media Manager'], logoChar: 'M' },
     ];
 
+    // // Mapping server data to display format
+    // const allIndividualJobs = serverJobs.map(job => ({
+    //     id: job._id || job.id,
+    //     company: job.Employer?.organization_name || 'Nexus Partner',
+    //     role: job.title,
+    //     loc: job.location || 'Nepal',
+    //     pay: job.salary || 'Negotiable',
+    //     type: job.job_type || 'Full-time',
+    //     logo: job.Employer?.organization_name?.[0] || 'J'
+    // }));
+
+    // const indexOfLastJob = currentPage * jobsPerPage;
+    // const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+    // const currentJobs = allIndividualJobs.slice(indexOfFirstJob, indexOfLastJob);
+    // const totalPages = Math.ceil(allIndividualJobs.length / jobsPerPage);
     // Pagination Logic for Individual Jobs
     const filteredIndividualJobs = allIndividualJobs.filter(job =>
         job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -309,7 +329,9 @@ const FindJobs = () => {
                                         </div>
                                     </div>
                                 </div>
+                                {/* <button className="apply-btn" onClick={() => navigate(`${isLoggedIn ? '/jobseeker' : ''}/jobs/${job.id}`)}>Apply Now <ChevronRight size={16} /></button> */}
                                 <button className="apply-btn">Apply Now <ChevronRight size={16} /></button>
+
                             </div>
                         ))}
 

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '@/components/common/Logo';
 import { ROUTES } from '../../routes/routes';
-import authService from '@/services/authService';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
+    const { isAuthenticated: checkAuth } = useAuth();
     const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
-    const isAuthenticated = authService.isAuthenticated();
+    const isAuthenticated = checkAuth();
     const role = localStorage.getItem('role');
 
     useEffect(() => {

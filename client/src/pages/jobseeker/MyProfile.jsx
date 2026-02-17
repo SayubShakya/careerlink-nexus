@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import jobSeekerService from '@/services/jobSeekerService';
-import authService from '@/services/authService';
-import { toast } from 'react-toastify';
+import { useGetProfile, usePutUpdateProfile } from '@/hooks/api/profile/useProfile';
 import { ROUTES } from '@/routes/routes';
 import { useTheme } from '@/hooks/useTheme';
 import {
@@ -24,6 +21,7 @@ import {
     Globe,
     Monitor
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const MyProfile = () => {
     const { theme, toggleTheme } = useTheme();
@@ -33,53 +31,37 @@ const MyProfile = () => {
         last_name: '',
         email: ''
     });
+    console.log(profile, "profile")
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [language, setLanguage] = useState('en');
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const data = await jobSeekerService.getProfile();
-                setProfile({
-                    first_name: data.first_name || '',
-                    last_name: data.last_name || '',
-                    email: data.email || ''
-                });
-            } catch (error) {
-                console.error("Failed to fetch profile", error);
-                toast.error("Could not load profile data.");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data: serverProfile, isLoading: profileLoading } = useGetProfile();
+    console.log(serverProfile, "serverProfile")
+    const { mutate: updateProfile, isPending: saving } = usePutUpdateProfile();
 
-        fetchProfile();
-    }, []);
+    useEffect(() => {
+        if (serverProfile) {
+            setProfile({
+                first_name: serverProfile?.first_name || '',
+                last_name: serverProfile?.last_name || '',
+                email: serverProfile?.email || ''
+            });
+        }
+    }, [serverProfile]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setProfile(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setSaving(true);
-        try {
-            const updatedUser = await jobSeekerService.updateProfile(profile);
-            authService.updateLocalStorageUser(updatedUser);
-            toast.success("Profile saved successfully!");
-        } catch (error) {
-            console.error("Failed to update profile", error);
-            toast.error("Failed to save changes.");
-        } finally {
-            setSaving(false);
-        }
+        updateProfile(profile);
     };
 
-    if (loading) return (
+    if (profileLoading) return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F8FAFC' }}>
             <Loader2 className="animate-spin" size={48} color="#3E61FF" />
         </div>
@@ -348,7 +330,7 @@ const MyProfile = () => {
             <div className="profile-hero">
                 <div className="hero-visual">
                     <div className="avatar-badge">
-                        {profile.first_name ? profile.first_name[0].toUpperCase() : 'S'}
+                        {profile?.first_name ? profile.first_name[0].toUpperCase() : 'S'}
                     </div>
                     <div className="hero-text">
                         <h1>{profile.first_name} {profile.last_name}</h1>
@@ -390,7 +372,7 @@ const MyProfile = () => {
                                         <input
                                             type="text"
                                             name="first_name"
-                                            value={profile.first_name}
+                                            value={profile?.first_name}
                                             onChange={handleChange}
                                             className="input-field"
                                             required

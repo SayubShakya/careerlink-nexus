@@ -5,8 +5,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Local Storage Keys
 export const STORAGE_KEYS = {
-    AUTH_TOKEN: 'nexus-auth-token',
-    USER_DATA: 'nexus-user-data',
+    AUTH_TOKEN: 'userToken',
+    USER_DATA: 'user',
     THEME: 'nexus-theme',
 };
 

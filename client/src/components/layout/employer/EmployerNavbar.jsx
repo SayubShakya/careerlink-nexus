@@ -1,24 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '@assets/images/temporary_logo.png';
-import authService from '@/services/authService';
 import { ROUTES } from '@/routes/routes';
+import { useGetMe } from '@/hooks/api/auth/useGetMe';
 
 const EmployerNavbar = () => {
     const navigate = useNavigate();
-    const [user, setUser] = React.useState(authService.getCurrentUser());
-
-    React.useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await authService.fetchCurrentUser();
-                setUser(userData);
-            } catch (err) {
-                console.error("Failed to fetch employer data", err);
-            }
-        };
-        fetchUserData();
-    }, []);
+    const { data: me } = useGetMe();
+    const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleLogout = () => {
         navigate(ROUTES.LOGOUT_CONFIRMATION);

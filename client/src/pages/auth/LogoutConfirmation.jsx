@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '@/services/authService';
+import usePostLogout from '@/hooks/api/auth/usePostLogout';
 import { ROUTES } from '@/routes/routes';
-import { LogOut, ArrowLeft, ShieldCheck } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { LogOut } from 'lucide-react';
 
 const LogoutConfirmation = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const { mutate: logout, isPending: loading } = usePostLogout();
 
-    const handleConfirmLogout = async () => {
-        setLoading(true);
-        try {
-            await authService.logout();
-            navigate(ROUTES.LOGIN, { state: { message: 'Logged out successfully.' }, replace: true });
-        } catch (error) {
-            console.error("Logout failed", error);
-            toast.error("Logout failed. Please try again.");
-            setLoading(false);
-        }
+    const handleConfirmLogout = () => {
+        logout();
     };
 
     const handleCancel = () => {

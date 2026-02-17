@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import authService from '@/services/authService';
+import { useGetMe } from '@/hooks/api/auth/useGetMe';
 import { ROUTES } from '@/routes/routes';
 import {
     Briefcase,
@@ -15,25 +15,10 @@ import {
 import heroBg from '@assets/images/job-seeker-img.jpg';
 
 const JobSeekerDashboard = () => {
-    const [user, setUser] = useState(authService.getCurrentUser());
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    // Pagination State
+    const { data: me } = useGetMe();
+    const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await authService.fetchCurrentUser();
-                setUser(userData);
-            } catch (err) {
-                console.error("Failed to fetch user data for dashboard", err);
-            }
-        };
-        fetchUserData();
-    }, []);
+    const itemsPerPage = 6;
 
     const stats = [
         { label: 'Jobs Applied', value: '24', trend: 'Total count' },

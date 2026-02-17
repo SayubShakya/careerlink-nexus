@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 import Hero from '@/components/features/Hero/Hero';
@@ -12,6 +12,17 @@ export default function Home() {
     const companies = ['Linear', 'Vercel', 'Anthropic', 'OpenAI', 'Stripe', 'Airbnb', 'Notion', 'Figma', 'Shopify', 'Coinbase']; // 'jobseeker' | 'employer'
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    const role = localStorage.getItem('role');
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            if (role === 'job_seeker') {
+                navigate('/jobseeker/overview');
+            } else if (role === 'employer') {
+                navigate('/dashboard/employer');
+            }
+        }
+    }, [isAuthenticated, role, navigate]);
 
     const handleJobClick = () => {
         navigate('/jobs');

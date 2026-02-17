@@ -1,5 +1,5 @@
-import React from 'react';
-import authService from '@/services/authService';
+import { useGetMe } from '@/hooks/api/auth/useGetMe';
+import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
 import {
     PlusCircle,
     Eye,
@@ -12,27 +12,11 @@ import {
     FileText,
     Download
 } from 'lucide-react';
-import applicationService from '@/services/applicationService';
 
 const EmployerDashboard = () => {
-    const [user, setUser] = React.useState(authService.getCurrentUser());
-    const [applications, setApplications] = React.useState([]);
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const userData = await authService.fetchCurrentUser();
-                setUser(userData);
-
-                // Fetch Applications
-                const apps = await applicationService.getAllApplications();
-                setApplications(apps || []);
-            } catch (err) {
-                console.error("Failed to fetch dashboard data", err);
-            }
-        };
-        fetchData();
-    }, []);
+    const { data: me } = useGetMe();
+    const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
+    const { data: applications = [] } = useGetEmployerApplications();
 
     // Static stats for the top section
     const stats = [

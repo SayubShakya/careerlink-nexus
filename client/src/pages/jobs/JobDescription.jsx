@@ -19,10 +19,10 @@ import {
     Loader2,
     Check
 } from 'lucide-react';
-import { toast } from 'react-toastify';
-import useAuth from '@/hooks/useAuth';
-import cvService from '@/services/cvService';
-import applicationService from '@/services/applicationService';
+import { useGetCVs, usePostUploadCV } from '@/hooks/api/cv/useCVs';
+import { useGetJobDetails } from '@/hooks/api/jobs/useJobs';
+import { usePostApplyJob } from '@/hooks/api/jobs/usePostApplyJob';
+import { useAuth } from '@/hooks/useAuth';
 
 const JobDescription = () => {
     const { id } = useParams();
@@ -32,16 +32,19 @@ const JobDescription = () => {
 
     // Application Modal State
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-    const [userCVs, setUserCVs] = useState([]);
-    const [isLoadingCVs, setIsLoadingCVs] = useState(false);
     const [selectedCvId, setSelectedCvId] = useState(null);
     const [uploadFile, setUploadFile] = useState(null);
     const [applyMethod, setApplyMethod] = useState('select'); // 'select' | 'upload'
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef(null);
 
-    // Static Data for "Montessori Teacher" based on Merojob reference
-    const jobData = {
+
+    const { data: serverJobData, isLoading: jobLoading } = useGetJobDetails(id);
+    const { data: userCVs = [], isLoading: isLoadingCVs } = useGetCVs({ enabled: isLoggedIn });
+    const { mutate: uploadCV } = usePostUploadCV();
+    const { mutate: applyJob, isPending: isSubmitting } = usePostApplyJob();
+
+    // Static Data as fallback to maintain UI design if API fails or for legacy slugs
+    const STATIC_JOB_DATA = {
         title: "Montessori Teacher",
         company: "International Pre-School",
         location: "Chandol, Kathmandu",
@@ -89,34 +92,8 @@ const JobDescription = () => {
         aboutOrg: "An International Pre-School fostering balance, connection, adventure and knowledge. Join in and Enjoy fabulous Pre-Post Natals, Babies & Toddlers Program, kids program. Play-based Learning| Creative|Engaging Kids Activities Pre-Postnatal Workshops|Fun, Fitness & Nutrition | Mom&Me fun activities Gentle & Responsive #parenting"
     };
 
-    // Fetch user CVs when modal opens
-    useEffect(() => {
-        if (isApplyModalOpen && isLoggedIn) {
-            fetchUserCVs();
-        }
-    }, [isApplyModalOpen, isLoggedIn]);
-
-    const fetchUserCVs = async () => {
-        setIsLoadingCVs(true);
-        try {
-            const cvs = await cvService.getAllCVs();
-            setUserCVs(cvs || []);
-            // Default select the first one if available
-            if (cvs && cvs.length > 0) {
-                setSelectedCvId(cvs[0].id);
-            }
-        } catch (error) {
-            console.error("Error fetching CVs:", error);
-            // Fallback mock data for demo if API fails
-            setUserCVs([
-                { id: '1', title: 'My Standard CV', type: 'platform', updated_at: new Date() },
-                { id: '2', title: 'Resume 2025.pdf', type: 'uploaded', updated_at: new Date() }
-            ]);
-            setSelectedCvId('1');
-        } finally {
-            setIsLoadingCVs(false);
-        }
-    };
+    const jobData = serverJobData || STATIC_JOB_DATA;
+    console.log(serverJobData, "serverJobData")
 
     const handleApplyClick = () => {
         if (!isLoggedIn) {
@@ -144,48 +121,32 @@ const JobDescription = () => {
             return;
         }
 
-        setIsSubmitting(true);
-
         try {
             let finalCvId = selectedCvId;
 
-            // Handle Upload First if user selected upload
             if (applyMethod === 'upload') {
                 const formData = new FormData();
-                formData.append('cv', uploadFile);
+                formData.append('file', uploadFile);
                 formData.append('title', uploadFile.name);
-                // Upload CV to get ID
-                const uploadedCv = await cvService.uploadCV(formData);
-                if (uploadedCv && uploadedCv.id) {
-                    finalCvId = uploadedCv.id;
-                } else {
-                    // Fallback if structure varies
-                    finalCvId = uploadedCv.data?.id || uploadedCv.data?.cv?.id;
-                }
+
+                uploadCV(formData, {
+                    onSuccess: (uploadedCv) => {
+                        const newCvId = uploadedCv.id || uploadedCv.data?.id;
+                        applyJob({ jobId: id, cvId: newCvId }, {
+                            onSuccess: () => setIsApplyModalOpen(false)
+                        });
+                    }
+                });
+            } else {
+                applyJob({ jobId: id, cvId: finalCvId }, {
+                    onSuccess: () => setIsApplyModalOpen(false)
+                });
             }
-
-            // Submitting to standard 'id' from params. 
-            // If ID is undefined (e.g. mock view), use a placeholder to ensure it goes through.
-            await applicationService.applyForJob(id || 'montessori-teacher', finalCvId);
-
-            toast.success("Application Submitted Successfully to Employer Portal!", {
-                position: "top-center",
-                autoClose: 3000
-            });
-            setIsApplyModalOpen(false);
-
-            // Reset upload state
-            setUploadFile(null);
-            if (applyMethod === 'upload') setApplyMethod('select');
-
         } catch (error) {
             console.error("Application Error:", error);
-            const msg = error.response?.data?.message || "Failed to submit application. Please try again.";
-            toast.error(msg);
-        } finally {
-            setIsSubmitting(false);
         }
     };
+
 
     return (
         <div className="job-description-container">
@@ -256,7 +217,7 @@ const JobDescription = () => {
                         <section className="detail-section">
                             <h3 className="section-title-sub">Key Responsibilities:</h3>
                             <ul className="custom-list">
-                                {jobData.responsibilities.map((item, i) => (
+                                {jobData?.responsibilities?.map((item, i) => (
                                     <li key={i}>{item}</li>
                                 ))}
                             </ul>
@@ -265,7 +226,7 @@ const JobDescription = () => {
                         <section className="detail-section">
                             <h3 className="section-title-sub">Required Qualifications & Skills:</h3>
                             <ul className="custom-list">
-                                {jobData.requirements.map((item, i) => (
+                                {jobData?.requirements?.map((item, i) => (
                                     <li key={i}>{item}</li>
                                 ))}
                             </ul>
@@ -292,7 +253,7 @@ const JobDescription = () => {
                         <section className="detail-section">
                             <h3 className="section-title-main">Skills Required</h3>
                             <div className="skills-cloud">
-                                {jobData.skills.map((skill, i) => (
+                                {jobData?.skills?.map((skill, i) => (
                                     <span key={i} className="skill-pill">{skill}</span>
                                 ))}
                             </div>
@@ -317,7 +278,7 @@ const JobDescription = () => {
                                 className={`sidebar-action-btn ${isLoggedIn ? 'btn-apply' : 'btn-login'}`}
                                 onClick={handleApplyClick}
                             >
-                                {isLoggedIn ? 'Apply Now' : 'Login to Apply'}
+                                Apply Now
                             </button>
 
                             <div className="deadline-text">

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import authIllustration from '@/assets/images/auth-illustration.png';
 import logo from '@assets/images/temporary_logo.png';
 import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
-import authService from '@/services/authService';
-import { toast } from 'react-toastify';
+import usePostRegisterEmployer from '@/hooks/api/auth/usePostRegisterEmployer';
 
 const styles = {
     pageContainer: {
@@ -147,6 +147,18 @@ const styles = {
 
 const EmployerSignup = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const role = localStorage.getItem('role');
+
+    useEffect(() => {
+        if (isAuthenticated()) {
+            if (role === 'job_seeker') {
+                navigate(ROUTES.JOBSEEKER_DASHBOARD);
+            } else if (role === 'employer') {
+                navigate(ROUTES.EMPLOYER_DASHBOARD);
+            }
+        }
+    }, [isAuthenticated, role, navigate]);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -158,8 +170,6 @@ const EmployerSignup = () => {
         terms: false
     });
     const [errors, setErrors] = useState({});
-    const [serverError, setServerError] = useState('');
-    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -190,27 +200,20 @@ const EmployerSignup = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-        if (serverError) setServerError('');
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
+
+    const { mutate: register, isPending: loading } = usePostRegisterEmployer();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
 
-        setLoading(true);
-        setServerError('');
-
-        try {
-            await authService.registerEmployer(formData);
-            toast.success('Registration successful! Please log in.');
-            navigate(ROUTES.LOGIN, { state: { message: 'Registration successful! Please log in.' } });
-        } catch (err) {
-            const message = err.response?.data?.message || 'Registration failed. Please try again.';
-            setServerError(message);
-            toast.error(message);
-        } finally {
-            setLoading(false);
-        }
+        register(formData, {
+            onSuccess: () => {
+                navigate(ROUTES.LOGIN, { state: { message: 'Registration successful! Please log in.' } });
+            }
+        });
     };
 
     return (
