@@ -12,6 +12,8 @@ import {
 
 import bannerHuman from '@/assets/images/banner-human2.png';
 
+import { ROUTES } from '@/routes/routes';
+
 const PublicFindJobs = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('Company'); // 'Company' or 'Individual Jobs'
@@ -90,7 +92,7 @@ const PublicFindJobs = () => {
         if (isAuthenticated()) {
             console.log("Applying...");
         } else {
-            navigate('/login');
+            navigate(ROUTES.LOGIN);
         }
     };
 

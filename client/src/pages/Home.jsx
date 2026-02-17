@@ -5,6 +5,7 @@ import Hero from '@/components/features/Hero/Hero';
 import StatsSection from '@/components/features/StatsSection/StatsSection';
 import Slider from '@/components/ui/Slider';
 import { CheckCircle, Zap, Shield, Globe, TrendingUp, Users, ArrowRight, Star } from 'lucide-react';
+import { ROUTES } from '@/routes/routes';
 
 export default function Home() {
     const [userType, setUserType] = useState('jobseeker');
@@ -17,9 +18,9 @@ export default function Home() {
     useEffect(() => {
         if (isAuthenticated()) {
             if (role === 'job_seeker') {
-                navigate('/jobseeker/overview');
+                navigate(ROUTES.JOBSEEKER_DASHBOARD);
             } else if (role === 'employer') {
-                navigate('/dashboard/employer');
+                navigate(ROUTES.EMPLOYER_DASHBOARD);
             }
         }
     }, [isAuthenticated, role, navigate]);

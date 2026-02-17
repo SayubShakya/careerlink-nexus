@@ -16,15 +16,19 @@ const usePostLogout = () => {
             } catch (error) {
                 console.error("Logout API error:", error);
             } finally {
+                // Always clear local state even if server-side logout fails
                 localStorage.removeItem("userToken");
                 localStorage.removeItem("user");
                 localStorage.removeItem("role");
                 queryClient.clear();
             }
         },
+        onSettled: () => {
+            // Use window.location.href for a full app reset on logout
+            window.location.href = '/login';
+        },
         onSuccess: () => {
             toast.success("Logged out successfully");
-            window.location.href = '/login';
         }
     });
 };
