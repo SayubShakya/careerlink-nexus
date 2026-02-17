@@ -18,7 +18,24 @@ const options = {
             },
         ],
         components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
             schemas: {
+                JobSeeker: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        first_name: { type: 'string' },
+                        last_name: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        role_id: { type: 'string', format: 'uuid' },
+                    }
+                },
                 Role: {
                     type: 'object',
                     required: ['name'],

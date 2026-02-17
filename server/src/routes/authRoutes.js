@@ -148,7 +148,33 @@ router.post('/register/employer', authController.registerEmployer);
  *         description: Incorrect email or password
  */
 router.post('/login', authController.login);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 router.post('/logout', authController.logout);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Check current session/token status
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       401:
+ *         description: Invalid or expired token
+ */
 router.get('/me', authMiddleware.protect, authController.getMe);
 
 module.exports = router;
