@@ -11,7 +11,11 @@ import JobseekerSignup from '../pages/signup/JobseekerSignup';
 import EmployerSignup from '../pages/signup/EmployerSignup';
 import JobSeekerDashboard from '../pages/dashboard/JobSeekerDashboard';
 import EmployerDashboard from '../pages/dashboard/EmployerDashboard';
+import JobManagement from '../pages/employer/job-management/JobManagement';
+import Applications from '../pages/employer/applications/Applications';
+import History from '../pages/employer/history/History';
 import CVBuilder from '../pages/cv-builder/CVBuilder';
+import CompanyProfile from '../pages/employer/company-profile/CompanyProfile';
 import MyProfile from '../pages/jobseeker/MyProfile';
 import MyCVs from '../pages/jobseeker/MyCVs';
 import FindJobs from '../pages/jobseeker/FindJobs';
@@ -120,7 +124,23 @@ export const router = createBrowserRouter([
                 path: ROUTES.EMPLOYER_DASHBOARD,
                 element: <EmployerDashboard />,
             },
-            // Future employer routes like /post-job, /applicants
+            {
+                path: ROUTES.JOB_MANAGEMENT,
+                element: <JobManagement />,
+            },
+            {
+                path: ROUTES.EMPLOYER_APPLICATIONS,
+                element: <Applications />,
+            },
+            {
+                path: ROUTES.EMPLOYER_COMPANY_PROFILE,
+                element: <CompanyProfile />,
+            },
+            {
+                path: ROUTES.EMPLOYER_HISTORY,
+                element: <History />,
+            },
+            // Future employer routes like /post-job
         ]
     },
     {

@@ -1,0 +1,43 @@
+.cv-builder-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    background-color: #f5f7f9;
+}
+
+.cv-builder-left {
+    width: 35%;
+    background-color: #1a1d23;
+    color: #ffffff;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #2d333b;
+}
+
+.cv-builder-right {
+    width: 65%;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+/* Scrollbar styling for the left sidebar */
+.cv-builder-left::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cv-builder-left::-webkit-scrollbar-track {
+    background: #1a1d23;
+}
+
+.cv-builder-left::-webkit-scrollbar-thumb {
+    background: #2d333b;
+    border-radius: 10px;
+}
+
+.cv-builder-left::-webkit-scrollbar-thumb:hover {
+    background: #3c444d;
+}

@@ -3,9 +3,8 @@
 This document explains the organization of the `client/src` folder.
 
 ## 📁 Folder Structure
-
 ```
-src/
+src/sdwa
 ├── assets/              # Static files (images, fonts, icons)
 │   ├── images/         # PNG, JPG, SVG images
 │   ├── icons/          # Icon files

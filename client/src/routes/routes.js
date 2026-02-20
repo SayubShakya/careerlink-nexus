@@ -15,7 +15,11 @@ export const ROUTES = {
     MY_CVS: '/jobseeker/my-cvs',
     APPLICATION_STATUS: '/jobseeker/status',
     JOBSEEKER_FIND_JOBS: '/jobseeker/find-jobs',
-    EMPLOYER_DASHBOARD: '/employer/dashboard',
+    EMPLOYER_DASHBOARD: '/dashboard/employer',
+    JOB_MANAGEMENT: '/dashboard/employer/job-management',
+    EMPLOYER_APPLICATIONS: '/dashboard/employer/applications',
+    EMPLOYER_COMPANY_PROFILE: '/dashboard/employer/company-profile',
+    EMPLOYER_HISTORY: '/dashboard/employer/history',
     LOGOUT_CONFIRMATION: '/logout-confirmation',
     NOT_FOUND: '*',
 };
