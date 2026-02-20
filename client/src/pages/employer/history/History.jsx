@@ -226,7 +226,6 @@ const History = () => {
             const color = colors[status] || { bg: '#f3f4f6', text: '#4b5563' };
             return {
                 padding: '4px 12px',
-                borderRadius: 'full',
                 fontSize: '0.75rem',
                 fontWeight: '600',
                 backgroundColor: color.bg,
