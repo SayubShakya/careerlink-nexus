@@ -1,326 +1,365 @@
-import { useGetMe } from '@/hooks/api/auth/useGetMe';
-import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-    PlusCircle,
-    Eye,
-    Edit,
-    Trash2,
     Briefcase,
     Users,
-    BarChart3,
     TrendingUp,
-    FileText,
-    Download
+    CheckCircle2,
+    PlusCircle,
+    Eye,
+    Target,
+    LayoutDashboard,
+    ArrowRight,
+    Clock,
+    AlertCircle,
+    XCircle,
+    MousePointer2
 } from 'lucide-react';
+import { ROUTES } from '../../routes/routes';
 
 const EmployerDashboard = () => {
-    const { data: me } = useGetMe();
-    const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
-    const { data: applications = [] } = useGetEmployerApplications();
+    const navigate = useNavigate();
 
-    // Static stats for the top section
-    const stats = [
-        { label: 'Total Jobs Posted', value: '3', icon: <Briefcase size={24} />, color: '#3E61FF' },
-        { label: 'Total Applicants', value: '24', icon: <Users size={24} />, color: '#10B981' },
-        { label: 'Avg Applications', value: '8.0', icon: <TrendingUp size={24} />, color: '#F59E0B' },
-        { label: 'Total CVs Added', value: '18', icon: <FileText size={24} />, color: '#8B5CF6' },
-    ];
+    // --- Dummy Data State ---
+    const [stats] = useState({
+        totalJobs: 12,
+        activeJobs: 5,
+        totalApplications: 48,
+        shortlisted: 18
+    });
 
-    // Static job data for 10 slots
-    const jobSlots = [
-        { id: 1, title: 'Senior Software Engineer', postedDate: '2024-10-15', status: 'Active', applications: 12 },
-        { id: 2, title: 'Product Manager', postedDate: '2024-11-02', status: 'Active', applications: 8 },
-        { id: 3, title: 'UI/UX Designer', postedDate: '2024-11-10', status: 'Draft', applications: 4 },
-        { id: 4, title: null },
-        { id: 5, title: null },
-        { id: 6, title: null },
-        { id: 7, title: null },
-        { id: 8, title: null },
-        { id: 9, title: null },
-        { id: 10, title: null },
-    ];
+    const [recentApplications] = useState([
+        { id: 1, name: 'Aayush Shrestha', job: 'Senior Software Engineer', date: '2026-02-18', status: 'Pending' },
+        { id: 2, name: 'Sita Sharma', job: 'Product Designer', date: '2026-02-17', status: 'Shortlisted' },
+        { id: 3, name: 'Rohan Thapa', job: 'Marketing Lead', date: '2026-02-16', status: 'Rejected' },
+        { id: 4, name: 'Birendra Kapali', job: 'Software Engineer', date: '2026-02-15', status: 'Shortlisted' },
+        { id: 5, name: 'Maya Tamang', job: 'Frontend Developer', date: '2026-02-14', status: 'Pending' }
+    ]);
 
     const styles = {
         container: {
-            padding: '40px',
-            maxWidth: '1200px',
+            padding: '40px 20px',
+            maxWidth: '1240px',
             margin: '0 auto',
-            backgroundColor: 'var(--bg-subtle)'
+            fontFamily: 'var(--font-body)',
+            animation: 'fadeIn 0.5s ease-out'
         },
-        header: {
-            marginBottom: '30px'
+        headerBanner: {
+            background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, #1a2a5e 100%)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '50px',
+            color: 'white',
+            marginBottom: '40px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 10px 30px rgba(5, 10, 26, 0.15)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
         },
-        title: {
-            fontSize: '1.8rem',
+        bannerContent: {
+            position: 'relative',
+            zIndex: 2
+        },
+        bannerTitle: {
+            fontSize: '2.5rem',
             fontWeight: '800',
-            color: 'var(--text-main)',
-            marginBottom: '5px'
+            marginBottom: '10px',
+            letterSpacing: '-0.02em'
+        },
+        bannerSubtitle: {
+            fontSize: '1.2rem',
+            opacity: 0.9,
+            maxWidth: '500px'
+        },
+        bannerImage: {
+            position: 'absolute',
+            right: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            opacity: 0.2,
+            zIndex: 1
         },
         statsGrid: {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '20px',
+            gap: '24px',
             marginBottom: '40px'
         },
         statCard: {
             backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '20px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.02)',
+            padding: '30px',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-premium)',
             border: '1px solid var(--border-subtle)',
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             display: 'flex',
-            alignItems: 'center',
-            gap: '20px'
+            flexDirection: 'column',
+            gap: '15px'
         },
-        iconBox: (color) => ({
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            backgroundColor: `${color}15`,
+        iconWrapper: (color) => ({
+            width: '50px',
+            height: '50px',
+            borderRadius: '12px',
+            backgroundColor: `${color}10`,
             color: color,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
         }),
-        managementHeader: {
+        statNumber: {
+            fontSize: '2rem',
+            fontWeight: '900',
+            color: 'var(--text-main)',
+            lineHeight: 1
+        },
+        statLabel: {
+            fontSize: '0.9rem',
+            color: 'var(--text-muted)',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+        },
+        sectionLayout: {
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr',
+            gap: '30px',
+            alignItems: 'start'
+        },
+        card: {
+            backgroundColor: 'white',
+            borderRadius: 'var(--radius-lg)',
+            padding: '30px',
+            boxShadow: 'var(--shadow-premium)',
+            border: '1px solid var(--border-subtle)'
+        },
+        cardHeader: {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '20px'
+            marginBottom: '25px'
         },
-        tableCard: {
-            backgroundColor: 'white',
-            borderRadius: '24px',
-            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)',
-            border: '1px solid var(--border-subtle)',
-            overflow: 'hidden'
-        },
-        table: {
-            width: '100%',
-            borderCollapse: 'collapse',
-            textAlign: 'left'
-        },
-        th: {
-            padding: '16px 24px',
-            fontSize: '0.8rem',
-            fontWeight: '700',
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            borderBottom: '1px solid var(--border-subtle)',
-            backgroundColor: '#F9FAFB'
-        },
-        td: {
-            padding: '18px 24px',
-            fontSize: '0.95rem',
-            borderBottom: '1px solid var(--border-subtle)'
-        },
-        statusBadge: (status) => ({
-            padding: '4px 12px',
-            borderRadius: '20px',
-            fontSize: '0.75rem',
-            fontWeight: '600',
-            backgroundColor: status === 'Active' ? '#ECFDF5' : '#F3F4F6',
-            color: status === 'Active' ? '#059669' : '#4B5563'
-        }),
-        actionBtn: {
-            padding: '8px',
-            borderRadius: '10px',
-            border: 'none',
-            background: '#F3F4F6',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s',
-            marginRight: '8px'
-        },
-        addBtn: {
+        cardTitle: {
+            fontSize: '1.4rem',
+            fontWeight: '800',
+            color: 'var(--text-main)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '8px 16px',
-            backgroundColor: 'var(--color-brand-accent)',
-            color: 'white',
+            gap: '12px'
+        },
+        viewAllBtn: {
+            fontSize: '0.9rem',
+            fontWeight: '700',
+            color: 'var(--color-brand-accent)',
+            background: 'none',
             border: 'none',
-            borderRadius: '12px',
-            fontWeight: '600',
-            fontSize: '0.85rem',
             cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+        },
+        statusBadge: (status) => {
+            let bg, color;
+            switch (status) {
+                case 'Shortlisted': bg = '#ECFDF5'; color = '#059669'; break;
+                case 'Rejected': bg = '#FEF2F2'; color = '#DC2626'; break;
+                default: bg = '#FFFBEB'; color = '#D97706'; // Pending
+            }
+            return (
+                <span style={{
+                    padding: '6px 14px', borderRadius: '25px', fontSize: '0.75rem', fontWeight: '800',
+                    backgroundColor: bg, color: color, display: 'inline-flex', alignItems: 'center'
+                }}>
+                    {status}
+                </span>
+            );
+        },
+        actionBtn: {
+            width: '100%',
+            padding: '16px',
+            borderRadius: '15px',
+            border: '1px solid var(--border-subtle)',
+            background: 'white',
+            color: 'var(--text-main)',
+            fontWeight: '700',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
             transition: 'all 0.2s'
         },
-        chartPlaceholder: {
-            marginTop: '40px',
-            backgroundColor: 'white',
-            borderRadius: '24px',
-            padding: '30px',
-            border: '1px solid var(--border-subtle)',
-            textAlign: 'center'
+        noJobsCard: {
+            textAlign: 'center',
+            padding: '60px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px'
         }
     };
 
+    const statsConfig = [
+        { label: 'Total Jobs Posted', value: stats.totalJobs, icon: <Briefcase size={24} />, color: '#4F46E5' },
+        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={24} />, color: '#059669' },
+        { label: 'Total Applications', value: stats.totalApplications, icon: <Users size={24} />, color: '#3B82F6' },
+        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={24} />, color: '#8B5CF6' },
+    ];
+
     return (
         <div style={styles.container}>
-            <div style={styles.header}>
-                <h1 style={styles.title}>Welcome back, {user?.organization_name || 'Employer'}</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Here's what's happening with your job postings today.</p>
-            </div>
+            {/* Header Section */}
+            <header style={styles.headerBanner}>
+                <div style={styles.bannerContent}>
+                    <h1 style={styles.bannerTitle}>Employer Suite</h1>
+                    <p style={styles.bannerSubtitle}>Monitor your hiring velocity and manage incoming talent effortlessly.</p>
+                </div>
+                <div style={styles.bannerImage}>
+                    <LayoutDashboard size={120} />
+                </div>
+                <div style={{ position: 'absolute', right: '-50px', top: '-50px', width: '250px', height: '250px', background: 'white', borderRadius: '50%', opacity: 0.05 }} />
+            </header>
 
-            {/* Stats Section */}
+            {/* Statistics Overview */}
             <div style={styles.statsGrid}>
-                {stats.map((stat, index) => (
-                    <div key={index} style={styles.statCard}>
-                        <div style={styles.iconBox(stat.color)}>
-                            {stat.icon}
+                {statsConfig.map((item, index) => (
+                    <div
+                        key={index}
+                        className="btn-scale"
+                        style={{ ...styles.statCard, animation: `fadeInUp 0.5s ease-out forwards ${index * 0.1}s`, opacity: 0 }}
+                    >
+                        <div style={styles.iconWrapper(item.color)}>
+                            {item.icon}
                         </div>
                         <div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>{stat.label}</p>
-                            <p style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1 }}>{stat.value}</p>
+                            <div style={styles.statNumber}>{item.value}</div>
+                            <div style={styles.statLabel}>{item.label}</div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Management Section */}
-            <div style={styles.managementHeader}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: '800' }}>Job Management</h2>
-                <button style={styles.addBtn}>
-                    <PlusCircle size={18} />
-                    Post New Job
-                </button>
-            </div>
+            {/* Main Content Layout */}
+            <div style={styles.sectionLayout}>
+                {/* Recent Applications Table */}
+                <div style={styles.card}>
+                    <div style={styles.cardHeader}>
+                        <h2 style={styles.cardTitle}>
+                            <Clock size={22} color="var(--color-brand-accent)" /> Recent Applications
+                        </h2>
+                        <button style={styles.viewAllBtn} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}>
+                            View All <ArrowRight size={16} />
+                        </button>
+                    </div>
 
-            <div style={styles.tableCard}>
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            <th style={styles.th}>Job Position</th>
-                            <th style={styles.th}>Date Posted</th>
-                            <th style={styles.th}>Status</th>
-                            <th style={styles.th}>Applicants</th>
-                            <th style={styles.th}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {jobSlots.filter(s => s.title).length > 0 ? (
-                            jobSlots.filter(s => s.title).map((job) => (
-                                <tr key={job.id} className="table-row">
-                                    <td style={styles.td}>
-                                        <strong>{job.title}</strong>
-                                    </td>
-                                    <td style={styles.td}>{job.postedDate}</td>
-                                    <td style={styles.td}>
-                                        <span style={styles.statusBadge(job.status)}>{job.status}</span>
-                                    </td>
-                                    <td style={styles.td}>{job.applications}</td>
-                                    <td style={styles.td}>
-                                        <div style={{ display: 'flex' }}>
-                                            <button style={{ ...styles.actionBtn, color: 'var(--color-brand-primary)' }} title="View">
-                                                <Eye size={18} />
-                                            </button>
-                                            <button style={{ ...styles.actionBtn, color: '#F59E0B' }} title="Edit">
-                                                <Edit size={18} />
-                                            </button>
-                                            <button style={{ ...styles.actionBtn, color: '#EF4444' }} title="Remove">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </td>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid #F3F4F6' }}>
+                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Candidate</th>
+                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Position</th>
+                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Applied on</th>
+                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Status</th>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" style={{ ...styles.td, textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                                    No jobs posted yet. Click "Post New Job" to get started!
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Recent Applications Section - Dynamic */}
-            <div style={{ ...styles.managementHeader, marginTop: '40px' }}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: '800' }}>Recent Applications</h2>
-            </div>
-
-            <div style={styles.tableCard}>
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            <th style={styles.th}>Candidate</th>
-                            <th style={styles.th}>Applying For</th>
-                            <th style={styles.th}>CV / Resume</th>
-                            <th style={styles.th}>Applied Date</th>
-                            <th style={styles.th}>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {applications.length > 0 ? (
-                            applications.map((app) => (
-                                <tr key={app.id} className="table-row">
-                                    <td style={styles.td}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E0E7FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3E61FF', fontWeight: 'bold' }}>
-                                                {app.JobSeeker?.first_name?.charAt(0) || 'U'}
-                                            </div>
-                                            <div>
-                                                <div style={{ fontWeight: '600' }}>{app.JobSeeker?.first_name} {app.JobSeeker?.last_name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{app.JobSeeker?.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style={styles.td}>
-                                        <span style={{ fontWeight: '500' }}>{app.job_id}</span>
-                                    </td>
-                                    <td style={styles.td}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <FileText size={16} color="var(--text-muted)" />
-                                            <span>{app.CV?.title || 'CV Document'}</span>
-                                            {/* Download link would go here */}
-                                        </div>
-                                    </td>
-                                    <td style={styles.td}>{new Date(app.applied_at).toLocaleDateString()}</td>
-                                    <td style={styles.td}>
-                                        <span style={styles.statusBadge(app.status || 'Pending')}>
-                                            {app.status || 'Pending'}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" style={{ ...styles.td, textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-                                    No applications received yet.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Optional Chart Section */}
-            <div style={styles.chartPlaceholder}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', color: 'var(--text-muted)', marginBottom: '15px' }}>
-                    <BarChart3 size={20} />
-                    <span style={{ fontWeight: '600' }}>Application Trends</span>
+                            </thead>
+                            <tbody>
+                                {recentApplications.map((app) => (
+                                    <tr key={app.id} style={{ borderBottom: '1px solid #F9FAFB' }} className="table-row">
+                                        <td style={{ padding: '18px 0', fontWeight: '700', color: 'var(--text-main)' }}>{app.name}</td>
+                                        <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{app.job}</td>
+                                        <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{app.date}</td>
+                                        <td style={{ padding: '18px 0' }}>{styles.statusBadge(app.status)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', padding: '0 40px' }}>
-                    {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
-                        <div key={i} style={{ width: '40px', height: `${h}%`, backgroundColor: i === 3 ? 'var(--color-brand-accent)' : '#E5E7EB', borderRadius: '8px 8px 0 0' }}></div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '10px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+
+                {/* Quick Actions Panel */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={styles.card}>
+                        <h2 style={{ ...styles.cardTitle, marginBottom: '20px' }}>
+                            <TrendingUp size={22} color="var(--color-brand-accent)" /> Quick Actions
+                        </h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <button
+                                style={{ ...styles.actionBtn, backgroundColor: 'var(--color-brand-primary)', color: 'white', border: 'none' }}
+                                className="action-btn-hover"
+                                onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
+                            >
+                                <PlusCircle size={20} /> Post New Job
+                            </button>
+                            <button
+                                style={styles.actionBtn}
+                                className="action-btn-hover"
+                                onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}
+                            >
+                                <Users size={20} /> View Applications
+                            </button>
+                            <button
+                                style={styles.actionBtn}
+                                className="action-btn-hover"
+                                onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
+                            >
+                                <Briefcase size={20} /> Manage Jobs
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Hiring Tip Card */}
+                    <div style={{ ...styles.card, background: '#EFF6FF', borderColor: '#DBEAFE' }}>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <AlertCircle size={24} color="#3B82F6" />
+                            <div>
+                                <h4 style={{ fontWeight: '800', color: '#1E40AF', marginBottom: '5px' }}>Pro Tip</h4>
+                                <p style={{ fontSize: '0.85rem', color: '#3B82F6', lineHeight: '1.5' }}>
+                                    Shortlisting candidates within 48 hours increases hiring success by 35%.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Empty State Example (Render conditionally where needed) */}
+            {stats.totalJobs === 0 && (
+                <div style={{ ...styles.card, ...styles.noJobsCard, marginTop: '40px' }}>
+                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                        <Briefcase size={40} color="#D1D5DB" />
+                    </div>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>No Jobs Posted Yet</h3>
+                    <p style={{ color: 'var(--text-muted)' }}>Get started by creating your first job opportunity.</p>
+                    <button
+                        style={{ padding: '12px 24px', backgroundColor: 'var(--color-brand-primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer' }}
+                        onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
+                    >
+                        Post Your First Job
+                    </button>
+                </div>
+            )}
 
             <style>{`
-                .table-row:hover {
-                    background-color: #F9FAFB;
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-                .table-row:last-child td {
-                    border-bottom: none;
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+                .table-row:hover { background-color: #FAFAFB; cursor: pointer; }
+                
+                .btn-scale:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+                
+                .action-btn-hover:hover {
+                    border-color: var(--color-brand-accent);
+                    color: var(--color-brand-accent);
+                    transform: translateX(5px);
+                }
+                
+                .action-btn-hover:active { transform: translateX(0); }
+
+                @media (max-width: 1024px) {
+                    .sectionLayout { grid-template-columns: 1fr; }
                 }
             `}</style>
         </div>
