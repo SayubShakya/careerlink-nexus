@@ -52,9 +52,9 @@
     --shadow-glow: 0 0 20px rgba(62, 97, 255, 0.2);
 
     /* Typography */
-    --font-heading: 'Poppins', sans-serif;
+    --font-heading: 'Inter', sans-serif;
     --font-editorial: 'Bodoni Moda', serif;
-    --font-body: 'Open Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
 
     /* Fixed Header */
     --header-height: 80px;

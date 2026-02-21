@@ -37,6 +37,10 @@ const JobSeeker = sequelize.define('JobSeeker', {
             model: Role,
             key: 'id'
         }
+    },
+    profile_picture: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'job_seeker_users',

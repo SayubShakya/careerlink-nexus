@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const session = require('express-session');
 const healthRoutes = require('./routes/healthRoutes');
 const roleRoutes = require('./routes/roleRoutes');
@@ -22,6 +23,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'careerlink-secret-key',

@@ -224,14 +224,23 @@ const CVBuilder = () => {
         header: {
             position: 'sticky',
             top: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
             zIndex: 100,
-            padding: '30px 0',
+            padding: '20px 0',
             borderBottom: `1px solid hsl(${tokens.border})`,
-            marginBottom: '50px',
+            marginBottom: '40px',
             display: 'flex',
             justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '24px',
+            width: '100%'
+        },
+        titleContainer: {
+            flex: 1,
+            minWidth: '200px',
+            position: 'relative',
+            display: 'flex',
             alignItems: 'center'
         },
         titleInput: {
@@ -242,7 +251,6 @@ const CVBuilder = () => {
             color: `hsl(${tokens.textMain})`,
             outline: 'none',
             width: '100%',
-            maxWidth: '350px',
             padding: '4px 0',
             letterSpacing: '-0.04em',
             transition: 'all 0.2s'
@@ -326,15 +334,15 @@ const CVBuilder = () => {
             {/* Sidebar */}
             <aside style={styles.sidebar}>
                 <div style={{ marginBottom: '40px', paddingLeft: '20px' }}>
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '-0.05em' }}>NEXUS BUILDER</h2>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '-0.02em' }}>CV BUILDER</h2>
                 </div>
                 {[
-                    { id: 'about', label: 'Personal Details', icon: <User size={20} /> },
+                    { id: 'about', label: 'About Me', icon: <User size={20} /> },
                     { id: 'education', label: 'Education', icon: <GraduationCap size={20} /> },
-                    { id: 'experience', label: 'Experience', icon: <Briefcase size={20} /> },
-                    { id: 'skills', label: 'Expertise', icon: <Wrench size={20} /> },
-                    { id: 'achievements', label: 'Achievements', icon: <Trophy size={20} /> },
-                    { id: 'trainings', label: 'Certifications', icon: <BookOpen size={20} /> },
+                    { id: 'experience', label: 'Work History', icon: <Briefcase size={20} /> },
+                    { id: 'skills', label: 'Skills', icon: <Wrench size={20} /> },
+                    { id: 'achievements', label: 'Successes', icon: <Trophy size={20} /> },
+                    { id: 'trainings', label: 'Training', icon: <BookOpen size={20} /> },
                     { id: 'awards', label: 'Awards', icon: <Award size={20} /> },
                     { id: 'languages', label: 'Languages', icon: <LangIcon size={20} /> },
                     { id: 'references', label: 'References', icon: <Users size={20} /> },
@@ -352,7 +360,7 @@ const CVBuilder = () => {
             {/* Form */}
             <main style={styles.middle} ref={middleScrollRef}>
                 <header style={styles.header}>
-                    <div style={{ position: 'relative', flex: 1 }}>
+                    <div style={styles.titleContainer}>
                         <input
                             style={styles.titleInput}
                             value={cvData.title}
@@ -364,18 +372,18 @@ const CVBuilder = () => {
                             position: 'absolute',
                             bottom: 0,
                             left: 0,
-                            height: '2px',
+                            height: '2.5px',
                             width: isTitleEditing ? '100%' : '0%',
                             backgroundColor: `hsl(${tokens.primary})`,
                             transition: 'width 0.3s'
                         }} />
                     </div>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                        <button onClick={handleSave} disabled={isSaving} style={styles.btnPrimary}>
-                            {isSaving ? 'Processing...' : <><Save size={18} /> Cloud Sync</>}
+                    <div style={{ display: 'flex', gap: '12px', flexShrink: 0, alignItems: 'center' }}>
+                        <button onClick={handleSave} disabled={isSaving} style={{ ...styles.btnPrimary, padding: '12px 20px', whiteSpace: 'nowrap' }}>
+                            {isSaving ? 'Saving...' : <><Save size={18} /> Save Now</>}
                         </button>
-                        <button style={{ ...styles.btnPrimary, backgroundColor: '#10B981', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' }}>
-                            <Download size={18} /> Export PDF
+                        <button style={{ ...styles.btnPrimary, backgroundColor: '#10B981', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)', padding: '12px 20px', whiteSpace: 'nowrap' }}>
+                            <Download size={18} /> Download PDF
                         </button>
                     </div>
                 </header>
@@ -386,7 +394,7 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <User size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Describe Yourself
+                        Tell us about yourself
                     </h3>
                     <div style={styles.card}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
@@ -400,7 +408,7 @@ const CVBuilder = () => {
                         </div>
                         <textarea
                             style={{ ...styles.input, marginTop: '24px', minHeight: '160px', lineHeight: '1.6' }}
-                            placeholder="Write a compelling summary of your career..."
+                            placeholder="Write a short summary about yourself..."
                             value={cvData.about.summary}
                             onChange={(e) => handleAboutChange('summary', e.target.value)}
                         />
@@ -413,19 +421,19 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <GraduationCap size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Educational Background
+                        Your Education
                     </h3>
                     {cvData.education.map(edu => (
                         <div key={edu.id} style={styles.card}>
-                            <button onClick={() => removeItem('education', edu.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700' }} placeholder="Degree / Qualification" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
+                            <button onClick={() => removeItem('education', edu.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Degree / Qualification" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 150px', gap: '20px' }}>
                                 <input style={styles.input} placeholder="University / Institute" value={edu.institute} onChange={(e) => updateItem('education', edu.id, 'institute', e.target.value)} />
                                 <input style={styles.input} placeholder="Grad. Year" value={edu.year} onChange={(e) => updateItem('education', edu.id, 'year', e.target.value)} />
                             </div>
                         </div>
                     ))}
-                    <button onClick={() => addItem('education', { degree: '', institute: '', year: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add Qualification</button>
+                    <button onClick={() => addItem('education', { degree: '', institute: '', year: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add School/College</button>
                 </section>
 
                 {/* Experience */}
@@ -434,12 +442,12 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Briefcase size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Professional Experience
+                        Work History
                     </h3>
                     {cvData.experience.map(exp => (
                         <div key={exp.id} style={styles.card}>
-                            <button onClick={() => removeItem('experience', exp.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700' }} placeholder="Position / Role" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
+                            <button onClick={() => removeItem('experience', exp.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Position / Role" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: '20px', marginBottom: '20px' }}>
                                 <input style={styles.input} placeholder="Company / Organization" value={exp.company} onChange={(e) => updateItem('experience', exp.id, 'company', e.target.value)} />
                                 <input style={styles.input} placeholder="Date (e.g. 2021 - Present)" value={exp.duration} onChange={(e) => updateItem('experience', exp.id, 'duration', e.target.value)} />
@@ -447,7 +455,7 @@ const CVBuilder = () => {
                             <textarea style={{ ...styles.input, minHeight: '120px', lineHeight: '1.6' }} placeholder="Key responsibilities and achievements..." value={exp.tasks} onChange={(e) => updateItem('experience', exp.id, 'tasks', e.target.value)} />
                         </div>
                     ))}
-                    <button onClick={() => addItem('experience', { role: '', company: '', duration: '', tasks: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add Experience</button>
+                    <button onClick={() => addItem('experience', { role: '', company: '', duration: '', tasks: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add a Job</button>
                 </section>
 
                 {/* Skills */}
@@ -456,7 +464,7 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Wrench size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Core Expertise
+                        Your Skills
                     </h3>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                         {cvData.skills.map((s, i) => (
@@ -482,7 +490,7 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Trophy size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Career Milestones
+                        Things you achieved
                     </h3>
                     {cvData.achievements.map((a, i) => (
                         <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
@@ -502,7 +510,7 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <BookOpen size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Certifications & Training
+                        Training & Certificates
                     </h3>
                     {cvData.trainings.map((t, i) => (
                         <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
@@ -522,7 +530,7 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <LangIcon size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Linguistic Skills
+                        Languages you speak
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                         {cvData.languages.map((l, i) => (
@@ -557,17 +565,17 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Users size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        Endorsements
+                        People who know you (References)
                     </h3>
                     {cvData.references.map((rf, i) => (
                         <div key={i} style={styles.card}>
-                            <button onClick={() => setCvData(prev => ({ ...prev, references: prev.references.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer' }}><Trash2 size={20} /></button>
+                            <button onClick={() => setCvData(prev => ({ ...prev, references: prev.references.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                                 <input style={styles.input} placeholder="Reference Name" value={rf.name} onChange={(e) => {
                                     const n = [...cvData.references]; n[i].name = e.target.value;
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />
-                                <input style={styles.input} placeholder="Position / Connection" value={rf.position} onChange={(e) => {
+                                <input style={{ ...styles.input, paddingRight: '50px' }} placeholder="Position / Connection" value={rf.position} onChange={(e) => {
                                     const n = [...cvData.references]; n[i].position = e.target.value;
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />
@@ -606,7 +614,7 @@ const CVBuilder = () => {
                             {/* Summary */}
                             {cvData.about.summary && (
                                 <div>
-                                    <h4 style={{ fontSize: '1rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Executive Summary</h4>
+                                    <h4 style={{ fontSize: '1rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>About Me</h4>
                                     <p style={{ fontSize: '0.92rem', lineHeight: '1.7', color: `hsl(${tokens.textMain})`, textAlign: 'justify' }}>{cvData.about.summary}</p>
                                 </div>
                             )}
@@ -614,7 +622,7 @@ const CVBuilder = () => {
                             {/* Experience */}
                             {cvData.experience.length > 0 && cvData.experience[0].role && (
                                 <div>
-                                    <h4 style={{ fontSize: '1rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px' }}>Professional Tenure</h4>
+                                    <h4 style={{ fontSize: '1rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px' }}>Work History</h4>
                                     {cvData.experience.map(exp => (
                                         <div key={exp.id} style={{ marginBottom: '24px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -650,7 +658,7 @@ const CVBuilder = () => {
                             {/* Skills */}
                             {cvData.skills.length > 0 && cvData.skills[0] && (
                                 <div>
-                                    <h4 style={{ fontSize: '0.9rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Core Expertise</h4>
+                                    <h4 style={{ fontSize: '0.9rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Skills</h4>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                         {cvData.skills.filter(s => s).map((s, i) => (
                                             <span key={i} style={{ backgroundColor: `hsla(${tokens.primary}, 0.06)`, color: `hsl(${tokens.primaryDark})`, padding: '6px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '800', border: `1px solid hsla(${tokens.primary}, 0.1)` }}>{s}</span>
@@ -662,7 +670,7 @@ const CVBuilder = () => {
                             {/* Milestones */}
                             {cvData.achievements.length > 0 && cvData.achievements[0] && (
                                 <div>
-                                    <h4 style={{ fontSize: '0.9rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Milestones</h4>
+                                    <h4 style={{ fontSize: '0.9rem', fontWeight: '1000', color: `hsl(${tokens.primary})`, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Key Successes</h4>
                                     <ul style={{ paddingLeft: '18px', color: `hsl(${tokens.textMain})`, fontSize: '0.82rem', lineHeight: '1.6' }}>
                                         {cvData.achievements.filter(a => a).map((a, i) => (
                                             <li key={i} style={{ marginBottom: '8px', fontWeight: '500' }}>{a}</li>

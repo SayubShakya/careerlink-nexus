@@ -110,8 +110,16 @@ const JobseekerNavbar = () => {
         <nav style={styles.nav}>
             <div style={styles.logoContainer}>
                 <Link to={ROUTES.JOBSEEKER_DASHBOARD} style={styles.brand}>
-                    <div style={styles.avatarBox}>
-                        <User size={16} color="white" strokeWidth={3} />
+                    <div style={{ ...styles.avatarBox, overflow: 'hidden' }}>
+                        {user?.profile_picture ? (
+                            <img
+                                src={`http://localhost:5000/${user.profile_picture}`}
+                                alt="Profile"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <User size={16} color="white" strokeWidth={3} />
+                        )}
                     </div>
                     <span>Welcome, {user?.first_name || 'Seeker'}</span>
                 </Link>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
     MapPin,
     Briefcase,
@@ -17,7 +17,8 @@ import {
     Upload,
     FileText,
     Loader2,
-    Check
+    Check,
+    SearchCheck
 } from 'lucide-react';
 import { useGetCVs, usePostUploadCV } from '@/hooks/api/cv/useCVs';
 import { useGetJobDetails } from '@/hooks/api/jobs/useJobs';
@@ -28,7 +29,16 @@ const JobDescription = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+
+    const handleJobClick = (jobId) => {
+        navigate(isAuthenticated() ? `/jobseeker/jobs/${jobId}` : `/jobs/${jobId}`);
+    };
     const isLoggedIn = isAuthenticated();
+    const [searchParams] = useSearchParams();
+    const statusParam = searchParams.get('status');
+
+    // The status is passed via URL if navigating from the Dashboard
+    const STATIC_APPLIED_STATUS = statusParam;
 
     // Application Modal State
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -43,56 +53,87 @@ const JobDescription = () => {
     const { mutate: uploadCV } = usePostUploadCV();
     const { mutate: applyJob, isPending: isSubmitting } = usePostApplyJob();
 
-    // Static Data as fallback to maintain UI design if API fails or for legacy slugs
-    const STATIC_JOB_DATA = {
+    const MOCK_JOBS_LIST = [
+        {
+            id: 1, company: 'Google', title: 'Senior UX Designer', location: 'Mountain View, CA', salary: '$180k', type: 'Full-time', logo: 'G', deadline: '2026-04-15', posted: 'Feb 15, 2026', views: 1240, vacancy: 2, experience: '5+ years', education: 'Bachelor in Design or HCI',
+            description: 'We are seeking a Senior UX Designer to lead the design of next-generation products. You will collaborate with cross-functional teams to define and implement innovative solutions for product direction, visuals, and experience.',
+            responsibilities: ['Lead end-to-end design for core products', 'Conduct user research and usability testing', 'Create wireframes, prototypes, and high-fidelity mockups', 'Collaborate with engineering and product teams'],
+            requirements: ['5+ years UX design experience', 'Proficiency in Figma and design systems', 'Strong portfolio demonstrating user-centered design'],
+            skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems', 'Accessibility'], aboutOrg: 'Google is a global leader in technology.'
+        },
+        {
+            id: 2, company: 'Meta', title: 'Product Manager', location: 'Menlo Park, CA', salary: '$175k', type: 'Hybrid', logo: 'M', deadline: '2026-04-10', posted: 'Feb 22, 2026', views: 2300, vacancy: 2, experience: '5+ years', education: 'MBA or equivalent experience',
+            description: 'Drive the roadmap for Apple\'s next-generation products. You will work with design, engineering, and marketing to define product vision and deliver exceptional user experiences.',
+            responsibilities: ['Define product strategy and roadmap', 'Gather and prioritize requirements', 'Coordinate cross-functional launches', 'Analyze market trends and user analytics'],
+            requirements: ['5+ years product management', 'Technical background preferred', 'Excellent stakeholder management skills'],
+            skills: ['Product Strategy', 'Agile', 'Data Analysis', 'Stakeholder Mgmt', 'Market Research'], aboutOrg: 'Meta builds technologies that help people connect.'
+        },
+        {
+            id: 3, company: 'Amazon', title: 'Staff Software Engineer', location: 'Seattle, WA', salary: '$210k', type: 'Full-time', logo: 'A', deadline: '2026-05-01', posted: 'Feb 18, 2026', views: 890, vacancy: 3, experience: '8+ years', education: 'MS/PhD in Computer Science preferred',
+            description: 'Join Amazon\'s core infrastructure team to build highly scalable distributed systems. You will architect and implement systems that handle massive throughput.',
+            responsibilities: ['Design and implement distributed backend services', 'Mentor junior engineers and lead code reviews', 'Optimize systems for performance and reliability', 'Drive technical strategy for the team'],
+            requirements: ['8+ years software engineering experience', 'Expert in C++, Python, or Java', 'Experience building large-scale distributed systems'],
+            skills: ['C++', 'Python', 'Distributed Systems', 'System Design', 'Leadership'], aboutOrg: 'Amazon is a global leader in e-commerce and cloud computing.'
+        },
+        {
+            id: 4, company: 'Microsoft', title: 'Cloud Architect', location: 'Remote', salary: '$165k', type: 'Remote', logo: 'M', deadline: '2026-04-25', posted: 'Feb 12, 2026', views: 640, vacancy: 8, experience: '3+ years', education: 'Bachelor in IT or Engineering',
+            description: 'Help enterprise customers migrate to and optimize their Azure cloud environments. Provide architectural guidance and hands-on implementation support.',
+            responsibilities: ['Assess customer cloud maturity', 'Design Azure migration strategies', 'Implement cloud solutions hands-on', 'Deliver training and enablement sessions'],
+            requirements: ['3+ years Azure cloud experience', 'Azure certifications (AZ-104, AZ-305)', 'Consulting or customer-facing experience'],
+            skills: ['Azure', 'Cloud Migration', 'PowerShell', 'ARM Templates', 'DevOps'], aboutOrg: 'Microsoft enables digital transformation for the era of an intelligent cloud.'
+        },
+        {
+            id: 5, company: 'NVIDIA', title: 'AI Researcher', location: 'Santa Clara, CA', salary: '$230k', type: 'Full-time', logo: 'N', deadline: '2026-05-15', posted: 'Feb 25, 2026', views: 1560, vacancy: 4, experience: 'PhD required', education: 'PhD in Computer Science or AI',
+            description: 'Join NVIDIA Research to push the boundaries of AI/ML. Publish at top venues and develop algorithms that power the next generation of GPU-accelerated computing.',
+            responsibilities: ['Conduct cutting-edge ML research', 'Publish at top-tier conferences', 'Develop prototype AI models', 'Collaborate with hardware and software teams'],
+            requirements: ['PhD in ML, AI, or related field', 'Strong publication record', 'Proficiency in PyTorch or TensorFlow'],
+            skills: ['PyTorch', 'Deep Learning', 'CUDA', 'Computer Vision', 'NLP'], aboutOrg: 'NVIDIA is the pioneer of GPU-accelerated computing.'
+        },
+        {
+            id: 6, company: 'Netflix', title: 'Full Stack Engineer', location: 'Los Gatos, CA', salary: '$220k', type: 'Full-time', logo: 'N', deadline: '2026-03-30', posted: 'Feb 10, 2026', views: 750, vacancy: 1, experience: '5+ years', education: 'Bachelor in CS or related field',
+            description: 'Netflix is looking for a Systems Engineer to optimize our content delivery network. You will work on systems that stream content to 250M+ subscribers worldwide.',
+            responsibilities: ['Manage and optimize CDN infrastructure', 'Automate deployment and monitoring', 'Troubleshoot complex production issues', 'Collaborate with content delivery partners'],
+            requirements: ['5+ years systems engineering', 'Deep Linux and networking knowledge', 'Experience with CDN or large-scale distributed systems'],
+            skills: ['Linux', 'Networking', 'Python', 'CDN', 'Automation'], aboutOrg: 'Netflix is the world\'s leading streaming entertainment service.'
+        },
+        {
+            id: 7, company: 'Apple', title: 'Systems Architect', location: 'Cupertino, CA', salary: '$190k', type: 'Full-time', logo: 'A', deadline: '2026-04-20', posted: 'Feb 20, 2026', views: 1100, vacancy: 5, experience: '5+ years', education: 'Bachelor in CS or Engineering',
+            description: 'As a Solutions Architect at AWS, you will help enterprise customers design and build cloud-based solutions. You will be the trusted technical advisor ensuring best practices.',
+            responsibilities: ['Design cloud architecture for enterprise clients', 'Conduct technical workshops and presentations', 'Build proof-of-concept solutions', 'Collaborate with sales and engineering teams'],
+            requirements: ['5+ years in cloud architecture', 'AWS certifications preferred', 'Strong communication and presentation skills'],
+            skills: ['AWS', 'Cloud Architecture', 'Terraform', 'Kubernetes', 'Networking'], aboutOrg: 'Apple transforms the industry with its innovative products.'
+        }
+    ];
+
+    // Fallback static data if no match found
+    const FALLBACK_JOB = {
         title: "Montessori Teacher",
         company: "International Pre-School",
         location: "Chandol, Kathmandu",
         salary: "Not Disclosed",
         type: "Full-time",
         posted: "Feb 13, 2026",
-        deadline: "Feb 27, 2026 (2 weeks from now)",
+        deadline: "Feb 27, 2026",
         views: 130,
         vacancy: 1,
         experience: "More than 2 years",
         education: "Under Graduate (Bachelor)",
         logo: "A",
-        description: `Looking a Montessori Teacher for our a well-established International Pre-school in Kathmandu. We are seeking passionate and dedicated Montessori Teachers to join our early childhood education team. The center focuses on play-based learning, creative engagement, gentle and responsive parenting approaches, and holistic child development. The ideal candidate will be enthusiastic about alternative education methods and committed to nurturing children aged 1–3 years in a safe, stimulating, and loving environment.`,
-        responsibilities: [
-            "Teach and guide toddlers (1–3 years) using Montessori principles",
-            "Observe, supervise, and assess children’s learning and development",
-            "Develop individualized lesson plans, independent learning activities, and age-appropriate curriculum",
-            "Create and maintain a safe, clean, and engaging classroom environment",
-            "Build positive relationships with children and parents based on trust and respect",
-            "Monitor and document student progress and prepare reports",
-            "Maintain classroom materials, supplies, and equipment",
-            "Update student records and handle related administrative tasks",
-            "Participate in school events and accompany children on field visits",
-            "Support recruitment and assist in training new teachers when required"
-        ],
-        requirements: [
-            "Bachelor’s degree in Early Childhood Education or related field (preferred)",
-            "Completed training from an accredited Montessori center",
-            "Additional education-related training will be an advantage",
-            "Strong communication skills in both English and Nepali",
-            "Ability to manage groups of children with varying needs and abilities",
-            "Patient, observant, and nurturing personality",
-            "Excellent planning, organizational, and multitasking abilities",
-            "Calm under pressure and respectful toward children and colleagues",
-            "Passionate about child-centered and alternative education approaches",
-            "A lifelong learner and positive role model for young children"
-        ],
-        skills: [
-            "Counseling",
-            "Teaching",
-            "Strong Communication",
-            "Patient",
-            "Nurturing Personality"
-        ],
-        aboutOrg: "An International Pre-School fostering balance, connection, adventure and knowledge. Join in and Enjoy fabulous Pre-Post Natals, Babies & Toddlers Program, kids program. Play-based Learning| Creative|Engaging Kids Activities Pre-Postnatal Workshops|Fun, Fitness & Nutrition | Mom&Me fun activities Gentle & Responsive #parenting"
+        description: `Looking a Montessori Teacher for our a well-established International Pre-school in Kathmandu.`,
+        responsibilities: ["Teach and guide toddlers using Montessori principles"],
+        requirements: ["Bachelor’s degree in Early Childhood Education"],
+        skills: ["Counseling", "Teaching"],
+        aboutOrg: "An International Pre-School fostering balance, connection, adventure and knowledge."
     };
 
-    const jobData = serverJobData || STATIC_JOB_DATA;
+    // Determine which job to show
+    const getJobData = () => {
+        if (serverJobData) return serverJobData;
+        const mockMatch = MOCK_JOBS_LIST.find(j => j.id.toString() === id);
+        return mockMatch || FALLBACK_JOB;
+    };
+
+    const jobData = getJobData();
     console.log(serverJobData, "serverJobData")
 
     const handleApplyClick = () => {
@@ -268,18 +309,18 @@ const JobDescription = () => {
                             <p className="apply-note">
                                 Click on <strong>{isLoggedIn ? 'Apply' : 'Login to Apply'}</strong> and apply to this job via your jobseeker profile with easy apply process.
                             </p>
-                            {!isLoggedIn && (
-                                <div className="login-note">
-                                    Note: You need to have a registered jobseeker profile to apply.
+                            {isLoggedIn && STATIC_APPLIED_STATUS ? (
+                                <div className={`status-badge-premium ${STATIC_APPLIED_STATUS.toLowerCase()}`}>
+                                    Status: {STATIC_APPLIED_STATUS}
                                 </div>
+                            ) : (
+                                <button
+                                    className={`sidebar-action-btn ${isLoggedIn ? 'btn-apply' : 'btn-login'}`}
+                                    onClick={handleApplyClick}
+                                >
+                                    {isLoggedIn ? 'Apply Now' : 'Login to Apply'}
+                                </button>
                             )}
-
-                            <button
-                                className={`sidebar-action-btn ${isLoggedIn ? 'btn-apply' : 'btn-login'}`}
-                                onClick={handleApplyClick}
-                            >
-                                Apply Now
-                            </button>
 
                             <div className="deadline-text">
                                 Apply Before: <span className="text-danger">{jobData.deadline}</span>
@@ -777,6 +818,23 @@ const JobDescription = () => {
                 .submit-app-btn:hover { background: #2b4bda; }
                 .submit-app-btn:disabled { opacity: 0.7; cursor: not-allowed; }
                 
+                .status-badge-premium {
+                    padding: 14px;
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    text-align: center;
+                    margin-bottom: 16px;
+                }
+                .status-badge-premium.reviewing { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+                .status-badge-premium.interview { background: rgba(62, 97, 255, 0.1); color: #3E61FF; border: 1px solid #3E61FF; }
+                .status-badge-premium.accepted { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+                .status-badge-premium.rejected { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
+                .status-badge-premium.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
+                .status-badge-premium.applied { background: #F8FAFC; color: #64748B; border: 1px solid #E2E8F0; }
+
                 .animate-spin { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 

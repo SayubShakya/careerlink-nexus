@@ -16,6 +16,7 @@ import heroBg from '@assets/images/job-seeker-img.jpg';
 
 const JobSeekerDashboard = () => {
     const { data: me } = useGetMe();
+    const navigate = useNavigate();
     const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
@@ -58,7 +59,7 @@ const JobSeekerDashboard = () => {
                     background-color: var(--bg-dashboard);
                     color: var(--text-main);
                     padding: 40px 80px;
-                    font-family: 'Inter', system-ui, sans-serif;
+                    font-family: var(--font-body);
                     transition: background-color 0.3s;
                 }
 
@@ -82,6 +83,30 @@ const JobSeekerDashboard = () => {
                     background-repeat: no-repeat;
                     background-color: var(--bg-main);
                     border-right: 1px solid var(--border-dashboard);
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .dashboard-profile-circle {
+                    width: 140px;
+                    height: 140px;
+                    border-radius: 50%;
+                    border: 6px solid var(--card-dashboard);
+                    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+                    overflow: hidden;
+                    background: white;
+                    position: absolute;
+                    bottom: 40px;
+                    left: 40px;
+                    z-index: 5;
+                }
+
+                .dashboard-profile-circle img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
                 }
 
                 .hero-stats-side {
@@ -275,7 +300,13 @@ const JobSeekerDashboard = () => {
 
             {/* HERO BOX */}
             <div className="hero-premium-box">
-                <div className="hero-visual-side"></div>
+                <div className="hero-visual-side">
+                    {user?.profile_picture && (
+                        <div className="dashboard-profile-circle">
+                            <img src={`http://localhost:5000/${user.profile_picture}`} alt="Profile" />
+                        </div>
+                    )}
+                </div>
                 <div className="hero-stats-side">
                     {stats.map((s, i) => (
                         <div key={i} className={`stat-tile ${s.highlight ? 'active-pipeline' : ''}`}>
@@ -297,7 +328,7 @@ const JobSeekerDashboard = () => {
 
                     <div className="pipeline-feed">
                         {currentItems.map((app) => (
-                            <div key={app.id} className="pipeline-item">
+                            <div key={app.id} className="pipeline-item" onClick={() => navigate(`/jobseeker/jobs/${app.id}?status=${app.status}`)} style={{ cursor: 'pointer' }}>
                                 <div className="item-info">
                                     <div className="company-badge">{app.logo}</div>
                                     <div className="text-content">

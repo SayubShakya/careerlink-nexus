@@ -34,13 +34,17 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     }
 
     // 2) Filtered out unwanted fields names that are not allowed to be updated
-    // For now, allow firstName, lastName. Email IS NOT ALLOWED.
-    const allowedFields = ['first_name', 'last_name'];
+    const allowedFields = ['first_name', 'last_name', 'profile_picture'];
 
     const filteredBody = {};
     Object.keys(req.body).forEach(el => {
         if (allowedFields.includes(el)) filteredBody[el] = req.body[el];
     });
+
+    // If a file was uploaded, add its path to filteredBody
+    if (req.file) {
+        filteredBody.profile_picture = req.file.path.replace(/\\/g, '/');
+    }
 
     // 3) Update user document
     // Using update instead of save simply because save hooks might require validation on all fields or re-hash password if not careful (though we avoided password here)

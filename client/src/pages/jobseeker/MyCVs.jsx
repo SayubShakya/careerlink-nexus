@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import {
     FileText,
     Upload,
@@ -16,7 +17,8 @@ import {
     Star,
     MoreVertical,
     Clock,
-    FileSearch
+    FileSearch,
+    Eye
 } from 'lucide-react';
 import { useGetCVs, usePostUploadCV, useDeleteCV } from '@/hooks/api/cv/useCVs';
 import { ROUTES } from '@/routes/routes';
@@ -52,8 +54,41 @@ const MyCVs = () => {
         });
     };
 
-    const handleDownload = (id) => {
-        window.open(`/api/cvs/${id}`, '_blank');
+    const handleDownload = async (id) => {
+        try {
+            const { default: api } = await import('@/api/client');
+            const response = await api.get(`/cvs/${id}`, { responseType: 'blob' });
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            // Try to get filename from response headers, fallback to cv title
+            const contentDisposition = response.headers['content-disposition'];
+            const filename = contentDisposition
+                ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+                : `cv-${id}.pdf`;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Download failed:', err);
+            toast.error('Failed to download CV');
+        }
+    };
+
+    const handleView = async (id) => {
+        try {
+            const { default: api } = await import('@/api/client');
+            const response = await api.get(`/cvs/${id}`, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch (err) {
+            console.error('View failed:', err);
+            toast.error('Failed to view CV');
+        }
     };
 
     const formatDate = (dateStr) => {
@@ -441,9 +476,14 @@ const MyCVs = () => {
                                             <Edit2 size={18} />
                                         </button>
                                     ) : (
-                                        <button className="circle-btn" title="Download" onClick={() => handleDownload(cv.id)}>
-                                            <Download size={18} />
-                                        </button>
+                                        <>
+                                            <button className="circle-btn" title="View CV" onClick={() => handleView(cv.id)}>
+                                                <Eye size={18} />
+                                            </button>
+                                            <button className="circle-btn" title="Download" onClick={() => handleDownload(cv.id)}>
+                                                <Download size={18} />
+                                            </button>
+                                        </>
                                     )}
                                     <button className="circle-btn delete" title="Delete" onClick={() => handleDelete(cv.id)}>
                                         <Trash2 size={18} />

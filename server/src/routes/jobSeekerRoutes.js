@@ -1,6 +1,7 @@
 const express = require('express');
 const jobSeekerController = require('../controllers/jobSeekerController');
 const authMiddleware = require('../middleware/authMiddleware');
+const uploadAvatar = require('../utils/avatarUpload');
 
 const router = express.Router();
 
@@ -75,6 +76,6 @@ router.use(authMiddleware.protect);
 
 // Routes specific to job seeker
 router.get('/me', jobSeekerController.getMe);
-router.patch('/me', jobSeekerController.updateMe);
+router.patch('/me', uploadAvatar.single('avatar'), jobSeekerController.updateMe);
 
 module.exports = router;

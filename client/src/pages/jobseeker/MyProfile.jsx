@@ -19,7 +19,10 @@ import {
     Sun,
     Bell,
     Globe,
-    Monitor
+    Monitor,
+    Camera,
+    Image,
+    Plus
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -29,9 +32,11 @@ const MyProfile = () => {
     const [profile, setProfile] = useState({
         first_name: '',
         last_name: '',
-        email: ''
+        email: '',
+        profile_picture: ''
     });
-    console.log(profile, "profile")
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [loading, setLoading] = useState(true);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
@@ -46,8 +51,12 @@ const MyProfile = () => {
             setProfile({
                 first_name: serverProfile?.first_name || '',
                 last_name: serverProfile?.last_name || '',
-                email: serverProfile?.email || ''
+                email: serverProfile?.email || '',
+                profile_picture: serverProfile?.profile_picture || ''
             });
+            if (serverProfile?.profile_picture) {
+                setPreviewUrl(`http://localhost:5000/${serverProfile.profile_picture}`);
+            }
         }
     }, [serverProfile]);
 
@@ -56,9 +65,25 @@ const MyProfile = () => {
         setProfile(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        updateProfile(profile);
+
+        const formData = new FormData();
+        formData.append('first_name', profile.first_name);
+        formData.append('last_name', profile.last_name);
+        if (selectedFile) {
+            formData.append('avatar', selectedFile);
+        }
+
+        updateProfile(formData);
     };
 
     if (profileLoading) return (
@@ -125,22 +150,52 @@ const MyProfile = () => {
                 }
 
                 .avatar-badge {
-                    width: 90px;
-                    height: 90px;
+                    width: 120px;
+                    height: 120px;
                     background: white;
                     color: #3E61FF;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 2.2rem;
+                    font-size: 3rem;
                     font-weight: 900;
                     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-                    border: 4px solid rgba(255,255,255,0.3);
-                    background-clip: padding-box;
-                    transition: transform 0.3s;
+                    border: 5px solid rgba(255,255,255,0.4);
+                    position: relative;
+                    cursor: pointer;
+                    overflow: visible; /* To allow the camera icon pill to show */
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    background-size: cover;
+                    background-position: center;
                 }
-                .avatar-badge:hover { transform: scale(1.05) rotate(3deg); }
+                .avatar-badge:hover { transform: translateY(-5px) scale(1.02); }
+                
+                .upload-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    background: #3E61FF;
+                    color: white;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 3px solid white;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                    transition: 0.2s;
+                    z-index: 20;
+                }
+                .avatar-badge:hover .upload-overlay { transform: scale(1.1); background: #2B4BDA; }
+
+                .avatar-img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
 
                 .hero-text h1 { 
                     font-size: 2.2rem; 
@@ -329,9 +384,23 @@ const MyProfile = () => {
             {/* PROFILE HERO */}
             <div className="profile-hero">
                 <div className="hero-visual">
-                    <div className="avatar-badge">
-                        {profile?.first_name ? profile.first_name[0].toUpperCase() : 'S'}
-                    </div>
+                    <label htmlFor="avatar-upload" className="avatar-badge">
+                        {previewUrl ? (
+                            <img src={previewUrl} alt="Profile" className="avatar-img" />
+                        ) : (
+                            profile?.first_name ? profile.first_name[0].toUpperCase() : 'S'
+                        )}
+                        <div className="upload-overlay">
+                            <Camera size={18} />
+                        </div>
+                    </label>
+                    <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                    />
                     <div className="hero-text">
                         <h1>{profile.first_name} {profile.last_name}</h1>
                         <p>Nexus Global Community Member</p>
