@@ -12,7 +12,7 @@ const Role = sequelize.define('Role', {
         type: DataTypes.STRING(50),
         allowNull: false,
         validate: {
-            isIn: [['job_seeker', 'employer']] // Ensure only valid role names
+            isIn: [['job_seeker', 'employer', 'admin']] // Ensure only valid role names
         }
     }
 }, {

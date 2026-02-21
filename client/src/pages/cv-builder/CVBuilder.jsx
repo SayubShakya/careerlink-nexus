@@ -23,6 +23,9 @@ import {
     Globe
 } from 'lucide-react';
 import { useGetCVs, usePostCreatePlatformCV, usePutUpdatePlatformCV } from '@/hooks/api/cv/useCVs';
+import toast from 'react-hot-toast';
+import api from '@/api/client';
+import { API_ENDPOINTS } from '@/api/endpoints';
 import { useSearchParams } from 'react-router-dom';
 
 const CVBuilder = () => {
@@ -175,10 +178,41 @@ const CVBuilder = () => {
                 title: cvData.title || `${cvData.about.firstName} CV`,
                 content: cvData
             }, {
-                onSuccess: (saved) => {
-                    setCvData(prev => ({ ...prev, id: saved.id || saved._id }));
+                onSuccess: (response) => {
+                    const savedCV = response?.data?.cv;
+                    if (savedCV) {
+                        setCvData(prev => ({ ...prev, id: savedCV.id }));
+                    }
                 }
             });
+        }
+    };
+
+    const handleDownload = async () => {
+        const id = cvId || cvData.id;
+        if (!id) {
+            toast.error("Please save your CV first before downloading");
+            return;
+        }
+
+        const downloadToast = toast.loading("Generating your PDF...");
+        try {
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, {
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${cvData.title.replace(/\s+/g, '_')}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success("Download started!", { id: downloadToast });
+        } catch (error) {
+            console.error("Download error:", error);
+            toast.error("Failed to download PDF. Please try again.", { id: downloadToast });
         }
     };
 
@@ -382,7 +416,7 @@ const CVBuilder = () => {
                         <button onClick={handleSave} disabled={isSaving} style={{ ...styles.btnPrimary, padding: '12px 20px', whiteSpace: 'nowrap' }}>
                             {isSaving ? 'Saving...' : <><Save size={18} /> Save Now</>}
                         </button>
-                        <button style={{ ...styles.btnPrimary, backgroundColor: '#10B981', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)', padding: '12px 20px', whiteSpace: 'nowrap' }}>
+                        <button onClick={handleDownload} style={{ ...styles.btnPrimary, backgroundColor: '#10B981', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)', padding: '12px 20px', whiteSpace: 'nowrap' }}>
                             <Download size={18} /> Download PDF
                         </button>
                     </div>

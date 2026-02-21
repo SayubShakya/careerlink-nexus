@@ -30,8 +30,8 @@ const MyProfile = () => {
     const { theme, toggleTheme } = useTheme();
     const [activeTab, setActiveTab] = useState('personal'); // 'personal', 'security', 'preferences'
     const [profile, setProfile] = useState({
-        first_name: '',
-        last_name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         profile_picture: ''
     });
@@ -49,13 +49,13 @@ const MyProfile = () => {
     useEffect(() => {
         if (serverProfile) {
             setProfile({
-                first_name: serverProfile?.first_name || '',
-                last_name: serverProfile?.last_name || '',
+                firstName: serverProfile?.firstName || '',
+                lastName: serverProfile?.lastName || '',
                 email: serverProfile?.email || '',
                 profile_picture: serverProfile?.profile_picture || ''
             });
             if (serverProfile?.profile_picture) {
-                setPreviewUrl(`http://localhost:5000/${serverProfile.profile_picture}`);
+                setPreviewUrl(`/${serverProfile.profile_picture}`);
             }
         }
     }, [serverProfile]);
@@ -77,8 +77,8 @@ const MyProfile = () => {
         e.preventDefault();
 
         const formData = new FormData();
-        formData.append('first_name', profile.first_name);
-        formData.append('last_name', profile.last_name);
+        formData.append('firstName', profile.firstName);
+        formData.append('lastName', profile.lastName);
         if (selectedFile) {
             formData.append('avatar', selectedFile);
         }
@@ -388,7 +388,7 @@ const MyProfile = () => {
                         {previewUrl ? (
                             <img src={previewUrl} alt="Profile" className="avatar-img" />
                         ) : (
-                            profile?.first_name ? profile.first_name[0].toUpperCase() : 'S'
+                            profile?.firstName ? profile.firstName[0].toUpperCase() : 'S'
                         )}
                         <div className="upload-overlay">
                             <Camera size={18} />
@@ -402,7 +402,7 @@ const MyProfile = () => {
                         onChange={handleFileChange}
                     />
                     <div className="hero-text">
-                        <h1>{profile.first_name} {profile.last_name}</h1>
+                        <h1>{profile.firstName} {profile.lastName}</h1>
                         <p>Nexus Global Community Member</p>
                     </div>
                 </div>
@@ -440,8 +440,8 @@ const MyProfile = () => {
                                         <label>First Name</label>
                                         <input
                                             type="text"
-                                            name="first_name"
-                                            value={profile?.first_name}
+                                            name="firstName"
+                                            value={profile?.firstName}
                                             onChange={handleChange}
                                             className="input-field"
                                             required
@@ -451,8 +451,8 @@ const MyProfile = () => {
                                         <label>Last Name</label>
                                         <input
                                             type="text"
-                                            name="last_name"
-                                            value={profile.last_name}
+                                            name="lastName"
+                                            value={profile.lastName}
                                             onChange={handleChange}
                                             className="input-field"
                                             required

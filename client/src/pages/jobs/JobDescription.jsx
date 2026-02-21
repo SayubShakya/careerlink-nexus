@@ -13,15 +13,17 @@ import {
     BookOpen,
     GraduationCap,
     Users,
-    X,
-    Upload,
-    FileText,
-    Loader2,
     Check,
-    SearchCheck
+    SearchCheck,
+    Heart,
+    Loader2,
+    FileText,
+    Upload,
+    X
 } from 'lucide-react';
 import { useGetCVs, usePostUploadCV } from '@/hooks/api/cv/useCVs';
-import { useGetJobDetails } from '@/hooks/api/jobs/useJobs';
+import { useGetJobDetails, useGetSavedJobs, useSaveJob, useUnsaveJob, useGetAppliedJobs } from '@/hooks/api/jobs/useJobs';
+import toast from 'react-hot-toast';
 import { usePostApplyJob } from '@/hooks/api/jobs/usePostApplyJob';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -50,90 +52,58 @@ const JobDescription = () => {
 
     const { data: serverJobData, isLoading: jobLoading } = useGetJobDetails(id);
     const { data: userCVs = [], isLoading: isLoadingCVs } = useGetCVs({ enabled: isLoggedIn });
-    const { mutate: uploadCV } = usePostUploadCV();
+    const { data: savedJobs = [] } = useGetSavedJobs();
+    const { mutate: saveJob } = useSaveJob();
+    const { mutate: unsaveJob } = useUnsaveJob();
+
+    const isJobSaved = savedJobs.some(item => (item.job_id || item.jobId) === (id?.includes('-') ? id : parseInt(id)));
+    const { data: appliedJobs = [] } = useGetAppliedJobs({ enabled: isLoggedIn });
+    const userApplication = appliedJobs.find(app => app.job_id === id);
+    const hasApplied = !!userApplication;
+    const activeStatus = userApplication?.status || STATIC_APPLIED_STATUS;
+
+    const toggleSave = () => {
+        if (!isLoggedIn) {
+            navigate('/login', { state: { message: "Please login to save this job." } });
+            return;
+        }
+        if (isJobSaved) {
+            unsaveJob(id, { onSuccess: () => toast.success('Job removed from saved list') });
+        } else {
+            saveJob(id, { onSuccess: () => toast.success('Job saved successfully') });
+        }
+    };
+
+    const { mutate: uploadCV, isPending: isUploading } = usePostUploadCV();
     const { mutate: applyJob, isPending: isSubmitting } = usePostApplyJob();
 
-    const MOCK_JOBS_LIST = [
-        {
-            id: 1, company: 'Google', title: 'Senior UX Designer', location: 'Mountain View, CA', salary: '$180k', type: 'Full-time', logo: 'G', deadline: '2026-04-15', posted: 'Feb 15, 2026', views: 1240, vacancy: 2, experience: '5+ years', education: 'Bachelor in Design or HCI',
-            description: 'We are seeking a Senior UX Designer to lead the design of next-generation products. You will collaborate with cross-functional teams to define and implement innovative solutions for product direction, visuals, and experience.',
-            responsibilities: ['Lead end-to-end design for core products', 'Conduct user research and usability testing', 'Create wireframes, prototypes, and high-fidelity mockups', 'Collaborate with engineering and product teams'],
-            requirements: ['5+ years UX design experience', 'Proficiency in Figma and design systems', 'Strong portfolio demonstrating user-centered design'],
-            skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems', 'Accessibility'], aboutOrg: 'Google is a global leader in technology.'
-        },
-        {
-            id: 2, company: 'Meta', title: 'Product Manager', location: 'Menlo Park, CA', salary: '$175k', type: 'Hybrid', logo: 'M', deadline: '2026-04-10', posted: 'Feb 22, 2026', views: 2300, vacancy: 2, experience: '5+ years', education: 'MBA or equivalent experience',
-            description: 'Drive the roadmap for Apple\'s next-generation products. You will work with design, engineering, and marketing to define product vision and deliver exceptional user experiences.',
-            responsibilities: ['Define product strategy and roadmap', 'Gather and prioritize requirements', 'Coordinate cross-functional launches', 'Analyze market trends and user analytics'],
-            requirements: ['5+ years product management', 'Technical background preferred', 'Excellent stakeholder management skills'],
-            skills: ['Product Strategy', 'Agile', 'Data Analysis', 'Stakeholder Mgmt', 'Market Research'], aboutOrg: 'Meta builds technologies that help people connect.'
-        },
-        {
-            id: 3, company: 'Amazon', title: 'Staff Software Engineer', location: 'Seattle, WA', salary: '$210k', type: 'Full-time', logo: 'A', deadline: '2026-05-01', posted: 'Feb 18, 2026', views: 890, vacancy: 3, experience: '8+ years', education: 'MS/PhD in Computer Science preferred',
-            description: 'Join Amazon\'s core infrastructure team to build highly scalable distributed systems. You will architect and implement systems that handle massive throughput.',
-            responsibilities: ['Design and implement distributed backend services', 'Mentor junior engineers and lead code reviews', 'Optimize systems for performance and reliability', 'Drive technical strategy for the team'],
-            requirements: ['8+ years software engineering experience', 'Expert in C++, Python, or Java', 'Experience building large-scale distributed systems'],
-            skills: ['C++', 'Python', 'Distributed Systems', 'System Design', 'Leadership'], aboutOrg: 'Amazon is a global leader in e-commerce and cloud computing.'
-        },
-        {
-            id: 4, company: 'Microsoft', title: 'Cloud Architect', location: 'Remote', salary: '$165k', type: 'Remote', logo: 'M', deadline: '2026-04-25', posted: 'Feb 12, 2026', views: 640, vacancy: 8, experience: '3+ years', education: 'Bachelor in IT or Engineering',
-            description: 'Help enterprise customers migrate to and optimize their Azure cloud environments. Provide architectural guidance and hands-on implementation support.',
-            responsibilities: ['Assess customer cloud maturity', 'Design Azure migration strategies', 'Implement cloud solutions hands-on', 'Deliver training and enablement sessions'],
-            requirements: ['3+ years Azure cloud experience', 'Azure certifications (AZ-104, AZ-305)', 'Consulting or customer-facing experience'],
-            skills: ['Azure', 'Cloud Migration', 'PowerShell', 'ARM Templates', 'DevOps'], aboutOrg: 'Microsoft enables digital transformation for the era of an intelligent cloud.'
-        },
-        {
-            id: 5, company: 'NVIDIA', title: 'AI Researcher', location: 'Santa Clara, CA', salary: '$230k', type: 'Full-time', logo: 'N', deadline: '2026-05-15', posted: 'Feb 25, 2026', views: 1560, vacancy: 4, experience: 'PhD required', education: 'PhD in Computer Science or AI',
-            description: 'Join NVIDIA Research to push the boundaries of AI/ML. Publish at top venues and develop algorithms that power the next generation of GPU-accelerated computing.',
-            responsibilities: ['Conduct cutting-edge ML research', 'Publish at top-tier conferences', 'Develop prototype AI models', 'Collaborate with hardware and software teams'],
-            requirements: ['PhD in ML, AI, or related field', 'Strong publication record', 'Proficiency in PyTorch or TensorFlow'],
-            skills: ['PyTorch', 'Deep Learning', 'CUDA', 'Computer Vision', 'NLP'], aboutOrg: 'NVIDIA is the pioneer of GPU-accelerated computing.'
-        },
-        {
-            id: 6, company: 'Netflix', title: 'Full Stack Engineer', location: 'Los Gatos, CA', salary: '$220k', type: 'Full-time', logo: 'N', deadline: '2026-03-30', posted: 'Feb 10, 2026', views: 750, vacancy: 1, experience: '5+ years', education: 'Bachelor in CS or related field',
-            description: 'Netflix is looking for a Systems Engineer to optimize our content delivery network. You will work on systems that stream content to 250M+ subscribers worldwide.',
-            responsibilities: ['Manage and optimize CDN infrastructure', 'Automate deployment and monitoring', 'Troubleshoot complex production issues', 'Collaborate with content delivery partners'],
-            requirements: ['5+ years systems engineering', 'Deep Linux and networking knowledge', 'Experience with CDN or large-scale distributed systems'],
-            skills: ['Linux', 'Networking', 'Python', 'CDN', 'Automation'], aboutOrg: 'Netflix is the world\'s leading streaming entertainment service.'
-        },
-        {
-            id: 7, company: 'Apple', title: 'Systems Architect', location: 'Cupertino, CA', salary: '$190k', type: 'Full-time', logo: 'A', deadline: '2026-04-20', posted: 'Feb 20, 2026', views: 1100, vacancy: 5, experience: '5+ years', education: 'Bachelor in CS or Engineering',
-            description: 'As a Solutions Architect at AWS, you will help enterprise customers design and build cloud-based solutions. You will be the trusted technical advisor ensuring best practices.',
-            responsibilities: ['Design cloud architecture for enterprise clients', 'Conduct technical workshops and presentations', 'Build proof-of-concept solutions', 'Collaborate with sales and engineering teams'],
-            requirements: ['5+ years in cloud architecture', 'AWS certifications preferred', 'Strong communication and presentation skills'],
-            skills: ['AWS', 'Cloud Architecture', 'Terraform', 'Kubernetes', 'Networking'], aboutOrg: 'Apple transforms the industry with its innovative products.'
-        }
-    ];
+    if (jobLoading) {
+        return (
+            <div className="job-description-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <Loader2 size={48} className="animate-spin" color="var(--color-brand-accent)" />
+                    <p style={{ marginTop: '16px', fontWeight: '600', color: 'var(--text-muted)' }}>Fetching job details...</p>
+                </div>
+            </div>
+        );
+    }
 
-    // Fallback static data if no match found
-    const FALLBACK_JOB = {
-        title: "Montessori Teacher",
-        company: "International Pre-School",
-        location: "Chandol, Kathmandu",
-        salary: "Not Disclosed",
-        type: "Full-time",
-        posted: "Feb 13, 2026",
-        deadline: "Feb 27, 2026",
-        views: 130,
-        vacancy: 1,
-        experience: "More than 2 years",
-        education: "Under Graduate (Bachelor)",
-        logo: "A",
-        description: `Looking a Montessori Teacher for our a well-established International Pre-school in Kathmandu.`,
-        responsibilities: ["Teach and guide toddlers using Montessori principles"],
-        requirements: ["Bachelor’s degree in Early Childhood Education"],
-        skills: ["Counseling", "Teaching"],
-        aboutOrg: "An International Pre-School fostering balance, connection, adventure and knowledge."
-    };
+    if (!serverJobData) {
+        return (
+            <div className="job-description-container">
+                <div className="job-content-wrapper" style={{ textAlign: 'center', padding: '100px 0' }}>
+                    <SearchCheck size={64} color="var(--text-muted)" style={{ margin: '0 auto 20px' }} />
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Job Not Found</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>The job you are looking for might have been removed or expired.</p>
+                    <button onClick={() => navigate(-1)} className="btn-primary" style={{ padding: '12px 24px', borderRadius: '8px' }}>
+                        Browse Other Jobs
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
-    // Determine which job to show
-    const getJobData = () => {
-        if (serverJobData) return serverJobData;
-        const mockMatch = MOCK_JOBS_LIST.find(j => j.id.toString() === id);
-        return mockMatch || FALLBACK_JOB;
-    };
-
-    const jobData = getJobData();
+    const jobData = serverJobData;
     console.log(serverJobData, "serverJobData")
 
     const handleApplyClick = () => {
@@ -172,9 +142,17 @@ const JobDescription = () => {
 
                 uploadCV(formData, {
                     onSuccess: (uploadedCv) => {
-                        const newCvId = uploadedCv.id || uploadedCv.data?.id;
+                        // Extract correctly from response: { data: { cv: { id: ... } } }
+                        const newCvId = uploadedCv.data?.cv?.id;
+                        if (!newCvId) {
+                            toast.error("Failed to associate uploaded CV.");
+                            return;
+                        }
                         applyJob({ jobId: id, cvId: newCvId }, {
-                            onSuccess: () => setIsApplyModalOpen(false)
+                            onSuccess: () => {
+                                setIsApplyModalOpen(false);
+                                setUploadFile(null);
+                            }
                         });
                     }
                 });
@@ -200,12 +178,18 @@ const JobDescription = () => {
                 {/* Header Section */}
                 <div className="job-header-card">
                     <div className="header-main">
-                        <div className="company-logo-large">{jobData.logo}</div>
+                        <div className="company-logo-large">
+                            {jobData.Employer?.logo ? (
+                                <img src={`http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                            ) : (
+                                jobData.logo || jobData.company?.charAt(0) || jobData.Employer?.name?.charAt(0) || 'J'
+                            )}
+                        </div>
                         <div className="header-info">
                             <h1 className="job-title-large">{jobData.title}</h1>
                             <div className="company-meta">
                                 <span className="company-name">
-                                    <Building2 size={16} /> {jobData.company}
+                                    <Building2 size={16} /> {jobData.company || jobData.Employer?.name || 'Nexus Partner'}
                                 </span>
                                 <span className="meta-separator">|</span>
                                 <span className="meta-detail">
@@ -213,18 +197,39 @@ const JobDescription = () => {
                                 </span>
                                 <span className="meta-separator">|</span>
                                 <span className="meta-detail">
-                                    <Users size={14} /> Vacancy: {jobData.vacancy}
+                                    <Users size={14} /> Vacancy: {jobData.vacancy || 'N/A'}
                                 </span>
                             </div>
 
                             <div className="job-stats-row">
-                                <span className="view-count">Views: {jobData.views}</span>
+                                <span className="view-count">Views: {jobData.views || 0}</span>
                                 <span className="dot-sep">•</span>
-                                <span className="publish-date">Published on: {jobData.posted}</span>
+                                <span className="publish-date">Published on: {jobData.created_at ? new Date(jobData.created_at).toLocaleDateString() : (jobData.posted || 'Recent')}</span>
                             </div>
                         </div>
 
                         <div className="header-actions">
+                            <button
+                                className={`save-btn-large ${isJobSaved ? 'saved' : ''}`}
+                                onClick={toggleSave}
+                                title={isJobSaved ? "Unsave Job" : "Save Job"}
+                                style={{
+                                    width: '44px',
+                                    height: '44px',
+                                    borderRadius: '50%',
+                                    border: '1.5px solid var(--border-dashboard)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: isJobSaved ? '#FEF2F2' : 'white',
+                                    color: isJobSaved ? '#EF4444' : 'var(--text-muted)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    marginRight: '12px'
+                                }}
+                            >
+                                <Heart size={22} fill={isJobSaved ? "#EF4444" : "none"} color={isJobSaved ? "#EF4444" : "currentColor"} />
+                            </button>
                             <button className="share-btn" title="Share">
                                 <Share2 size={20} />
                             </button>
@@ -233,10 +238,10 @@ const JobDescription = () => {
 
                     <div className="job-tags-row">
                         <div className="tag-item">
-                            <Briefcase size={16} /> {jobData.type}
+                            <Clock size={16} /> Job Type: {jobData.jobType}
                         </div>
                         <div className="tag-item">
-                            <Clock size={16} /> Experience: {jobData.experience}
+                            <Briefcase size={16} /> Experience: {jobData.specification || 'Entry Level'}
                         </div>
                         <div className="tag-item">
                             <DollarSign size={16} /> {jobData.salary}
@@ -244,6 +249,11 @@ const JobDescription = () => {
                         <div className="tag-item">
                             <GraduationCap size={16} /> {jobData.education}
                         </div>
+                        {jobData.Employer?.website && (
+                            <div className="tag-item">
+                                <SearchCheck size={16} /> Official Website
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -257,20 +267,16 @@ const JobDescription = () => {
 
                         <section className="detail-section">
                             <h3 className="section-title-sub">Key Responsibilities:</h3>
-                            <ul className="custom-list">
-                                {jobData?.responsibilities?.map((item, i) => (
-                                    <li key={i}>{item}</li>
-                                ))}
-                            </ul>
+                            <div className="description-text" style={{ whiteSpace: 'pre-line' }}>
+                                {jobData.responsibilities}
+                            </div>
                         </section>
 
                         <section className="detail-section">
-                            <h3 className="section-title-sub">Required Qualifications & Skills:</h3>
-                            <ul className="custom-list">
-                                {jobData?.requirements?.map((item, i) => (
-                                    <li key={i}>{item}</li>
-                                ))}
-                            </ul>
+                            <h3 className="section-title-sub">Qualifications & Skills:</h3>
+                            <div className="description-text" style={{ whiteSpace: 'pre-line' }}>
+                                {jobData.qualifications}
+                            </div>
                         </section>
 
                         <div className="divider-line"></div>
@@ -283,8 +289,8 @@ const JobDescription = () => {
                                     <span className="spec-value">{jobData.education}</span>
                                 </div>
                                 <div className="spec-row">
-                                    <span className="spec-label">Required Experience :</span>
-                                    <span className="spec-value">{jobData.experience}</span>
+                                    <span className="spec-label">Experience Required :</span>
+                                    <span className="spec-value">{jobData.specification || 'Entry Level'}</span>
                                 </div>
                             </div>
                         </section>
@@ -309,21 +315,32 @@ const JobDescription = () => {
                             <p className="apply-note">
                                 Click on <strong>{isLoggedIn ? 'Apply' : 'Login to Apply'}</strong> and apply to this job via your jobseeker profile with easy apply process.
                             </p>
-                            {isLoggedIn && STATIC_APPLIED_STATUS ? (
-                                <div className={`status-badge-premium ${STATIC_APPLIED_STATUS.toLowerCase()}`}>
-                                    Status: {STATIC_APPLIED_STATUS}
+                            {isLoggedIn && activeStatus ? (
+                                <div className={`status-badge-premium ${activeStatus.toLowerCase()}`}>
+                                    Status: {activeStatus}
                                 </div>
                             ) : (
                                 <button
-                                    className={`sidebar-action-btn ${isLoggedIn ? 'btn-apply' : 'btn-login'}`}
+                                    className={`sidebar-action-btn ${isLoggedIn ? (hasApplied ? 'btn-applied-disabled' : 'btn-apply') : 'btn-login'}`}
                                     onClick={handleApplyClick}
+                                    disabled={hasApplied}
                                 >
-                                    {isLoggedIn ? 'Apply Now' : 'Login to Apply'}
+                                    {isLoggedIn ? (hasApplied ? 'Already Applied' : 'Apply Now') : 'Login to Apply'}
                                 </button>
                             )}
 
                             <div className="deadline-text">
-                                Apply Before: <span className="text-danger">{jobData.deadline}</span>
+                                Apply Before: <span className="text-danger">
+                                    {jobData.deadline ? (
+                                        (() => {
+                                            const cleanDate = typeof jobData.deadline === 'string'
+                                                ? jobData.deadline.replace(/Apply Before:\s*/i, '')
+                                                : jobData.deadline;
+                                            const dateObj = new Date(cleanDate);
+                                            return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() : 'N/A';
+                                        })()
+                                    ) : 'N/A'}
+                                </span>
                             </div>
                         </div>
 
@@ -331,11 +348,17 @@ const JobDescription = () => {
                         <div className="sidebar-card">
                             <h3>About the Organization</h3>
                             <div className="org-profile-mini">
-                                <div className="org-logo-mini">{jobData.logo}</div>
-                                <div className="org-name-mini">{jobData.company}</div>
+                                <div className="org-logo-mini">
+                                    {jobData.Employer?.logo ? (
+                                        <img src={`http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                                    ) : (
+                                        jobData.logo || jobData.company?.charAt(0) || jobData.Employer?.name?.charAt(0) || 'O'
+                                    )}
+                                </div>
+                                <div className="org-name-mini">{jobData.company || jobData.Employer?.name || 'Organization'}</div>
                             </div>
                             <p className="org-desc">
-                                {jobData.aboutOrg}
+                                {jobData.aboutOrg || jobData.Employer?.description || 'This organization has not provided a description yet.'}
                             </p>
                         </div>
                     </div>
@@ -457,9 +480,9 @@ const JobDescription = () => {
                             <button
                                 className="submit-app-btn"
                                 onClick={handleSubmitApplication}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isUploading}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || isUploading ? (
                                     <>
                                         <Loader2 size={18} className="animate-spin" /> Sending...
                                     </>
@@ -692,6 +715,7 @@ const JobDescription = () => {
                 }
                 .btn-login:hover { background: #059669; }
                 .btn-apply:hover { background: #2b4bda; }
+                .btn-applied-disabled { background: #F1F5F9; color: #94A3B8; cursor: not-allowed; border: 1px solid #E2E8F0; }
                 
                 .deadline-text { font-size: 0.85rem; color: #718096; text-align: center; }
                 .text-danger { color: #E53E3E; font-weight: 600; }
@@ -828,12 +852,12 @@ const JobDescription = () => {
                     text-align: center;
                     margin-bottom: 16px;
                 }
-                .status-badge-premium.reviewing { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
-                .status-badge-premium.interview { background: rgba(62, 97, 255, 0.1); color: #3E61FF; border: 1px solid #3E61FF; }
-                .status-badge-premium.accepted { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+                .status-badge-premium.applied { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+                .status-badge-premium.reviewing, .status-badge-premium.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
+                .status-badge-premium.interview_scheduled, .status-badge-premium.interview { background: #F5F3FF; color: #8B5CF6; border: 1px solid #EDE9FE; }
+                .status-badge-premium.accepted, .status-badge-premium.hired { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
                 .status-badge-premium.rejected { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
-                .status-badge-premium.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
-                .status-badge-premium.applied { background: #F8FAFC; color: #64748B; border: 1px solid #E2E8F0; }
+                .status-badge-premium.shortlisted { background: #ECFDF5; color: #10B981; border: 1px solid #D1FAE5; }
 
                 .animate-spin { animation: spin 1s linear infinite; }
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

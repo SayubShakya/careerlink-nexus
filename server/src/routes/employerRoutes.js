@@ -59,9 +59,17 @@ router.use(authMiddleware.restrictTo('employer'));
 
 const applicationController = require('../controllers/applicationController'); // New Import
 
+const upload = require('../utils/upload');
+
 // Routes specific to employer
 router.get('/me', employerController.getMe);
-router.patch('/me', employerController.updateMe);
-router.get('/applications', applicationController.getAllApplications); // View applications for dashboard
+router.patch('/me', upload.single('profile_picture'), employerController.updateMe);
+router.get('/me/stats', employerController.getStats);
+router.get('/me/feed', employerController.getActivityFeed);
+router.get('/my-jobs', employerController.getMyJobs);
+
+// Application Management
+router.get('/applications', applicationController.getAllApplications);
+router.patch('/applications/:id/status', applicationController.updateApplicationStatus);
 
 module.exports = router;

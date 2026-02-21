@@ -75,7 +75,7 @@ const EmployerNavbar = () => {
             <div style={styles.logoContainer}>
                 <div style={{ padding: '5px 0' }}>
                     <span style={{ fontWeight: '800', color: 'var(--color-brand-accent)', fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
-                        {user?.organization_name ? user.organization_name.toUpperCase() : 'EMPLOYER HUB'}
+                        {user?.companyName ? user.companyName.toUpperCase() : 'EMPLOYER HUB'}
                     </span>
                 </div>
             </div>

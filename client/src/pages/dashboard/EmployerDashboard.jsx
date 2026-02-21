@@ -17,24 +17,27 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '../../routes/routes';
 
+import { useGetEmployerStats, useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+
 const EmployerDashboard = () => {
     const navigate = useNavigate();
 
-    // --- Dummy Data State ---
-    const [stats] = useState({
-        totalJobs: 12,
-        activeJobs: 5,
-        totalApplications: 48,
-        shortlisted: 18
-    });
+    // --- API Data ---
+    const { data: serverStats, isLoading: isStatsLoading } = useGetEmployerStats();
+    const { data: applications = [], isLoading: isAppsLoading } = useGetEmployerApplications();
 
-    const [recentApplications] = useState([
-        { id: 1, name: 'Aayush Shrestha', job: 'Senior Software Engineer', date: '2026-02-18', status: 'Pending' },
-        { id: 2, name: 'Sita Sharma', job: 'Product Designer', date: '2026-02-17', status: 'Shortlisted' },
-        { id: 3, name: 'Rohan Thapa', job: 'Marketing Lead', date: '2026-02-16', status: 'Rejected' },
-        { id: 4, name: 'Birendra Kapali', job: 'Software Engineer', date: '2026-02-15', status: 'Shortlisted' },
-        { id: 5, name: 'Maya Tamang', job: 'Frontend Developer', date: '2026-02-14', status: 'Pending' }
-    ]);
+    const stats = serverStats || {
+        totalJobs: 0,
+        activeJobs: 0,
+        totalApplications: 0,
+        shortlisted: 0
+    };
+
+    const recentApplications = [...applications]
+        .sort((a, b) => new Date(b.applied_at || 0) - new Date(a.applied_at || 0))
+        .slice(0, 5);
+
+    const isLoading = isStatsLoading || isAppsLoading;
 
     const styles = {
         container: {
@@ -263,14 +266,30 @@ const EmployerDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {recentApplications.map((app) => (
-                                    <tr key={app.id} style={{ borderBottom: '1px solid #F9FAFB' }} className="table-row">
-                                        <td style={{ padding: '18px 0', fontWeight: '700', color: 'var(--text-main)' }}>{app.name}</td>
-                                        <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{app.job}</td>
-                                        <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{app.date}</td>
-                                        <td style={{ padding: '18px 0' }}>{styles.statusBadge(app.status)}</td>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</td>
                                     </tr>
-                                ))}
+                                ) : recentApplications.length > 0 ? (
+                                    recentApplications.map((app) => (
+                                        <tr key={app.id} style={{ borderBottom: '1px solid #F9FAFB' }} className="table-row">
+                                            <td style={{ padding: '18px 0', fontWeight: '700', color: 'var(--text-main)' }}>
+                                                {app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown'}
+                                            </td>
+                                            <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                {app.jobTitle || app.JobListing?.title}
+                                            </td>
+                                            <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : (app.date || 'N/A')}
+                                            </td>
+                                            <td style={{ padding: '18px 0' }}>{styles.statusBadge(app.status)}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No recent applications</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

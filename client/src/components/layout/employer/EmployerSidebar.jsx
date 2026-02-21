@@ -188,7 +188,7 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 <div style={{ padding: isOpen ? '0' : '0 5px', textAlign: 'center' }}>
                     <span style={styles.logo}>{isOpen ? 'CAREERLINK' : 'CL'}</span>
                     <span style={styles.orgName}>
-                        {user?.organization_name || 'Employer'}
+                        {user?.companyName || 'Employer'}
                     </span>
                 </div>
             </div>

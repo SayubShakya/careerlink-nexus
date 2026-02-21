@@ -1,4 +1,6 @@
 const CV = require('../models/CV');
+const JobSeeker = require('../models/JobSeeker');
+const pdfGenerator = require('../utils/pdfGenerator');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const path = require('path');
@@ -37,6 +39,24 @@ exports.createPlatformCV = catchAsync(async (req, res, next) => {
     });
 });
 
+// Get single CV details
+exports.getCV = catchAsync(async (req, res, next) => {
+    const cv = await CV.findOne({
+        where: { id: req.params.id, user_id: req.user.id }
+    });
+
+    if (!cv) {
+        return next(new AppError('No CV found with that ID', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            cv
+        }
+    });
+});
+
 // Delete a CV
 exports.deleteCV = catchAsync(async (req, res, next) => {
     const cv = await CV.findOne({
@@ -63,7 +83,7 @@ exports.deleteCV = catchAsync(async (req, res, next) => {
     });
 });
 
-// Download/View CV (For uploaded files)
+// Download/View CV (Supports both uploaded and platform-generated)
 exports.downloadCV = catchAsync(async (req, res, next) => {
     const cv = await CV.findOne({
         where: { id: req.params.id, user_id: req.user.id }
@@ -74,7 +94,21 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
     }
 
     if (cv.type === 'platform') {
-        return next(new AppError('Platform CVs cannot be downloaded directly via this endpoint yet. Use PDF generation.', 400));
+        const user = await JobSeeker.findByPk(req.user.id);
+        const pdfBuffer = await pdfGenerator.generateCV(cv, user);
+
+        console.log(`DEBUG: Generating PDF for CV ID: ${cv.id}, Title: ${cv.title}`);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="${cv.title.replace(/\s+/g, '_')}.pdf"`,
+            'Content-Length': pdfBuffer.length,
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Surrogate-Control': 'no-store'
+        });
+        return res.send(pdfBuffer);
     }
 
     const filePath = path.join(__dirname, '../../', cv.file_path);
@@ -118,14 +152,19 @@ exports.updateCV = catchAsync(async (req, res, next) => {
 
     const { title, content, is_primary } = req.body;
 
-    if (title) cv.title = title;
-    if (content && cv.type === 'platform') cv.content = content;
+    if (title !== undefined) cv.title = title;
+    if (content !== undefined && cv.type === 'platform') {
+        cv.content = content;
+        // Ensure Sequelize detects the JSON change
+        cv.changed('content', true);
+    }
     if (is_primary !== undefined) cv.is_primary = is_primary;
 
     await cv.save();
 
     res.status(200).json({
         status: 'success',
+        message: 'CV updated successfully',
         data: {
             cv
         }

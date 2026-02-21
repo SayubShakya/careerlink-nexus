@@ -24,15 +24,15 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - first_name
- *               - last_name
+ *               - firstName
+ *               - lastName
  *               - email
  *               - password
  *             properties:
- *               first_name:
+ *               firstName:
  *                 type: string
  *                 example: John
- *               last_name:
+ *               lastName:
  *                 type: string
  *                 example: Doe
  *               email:
@@ -66,15 +66,15 @@ router.post('/register/job-seeker', authController.registerJobSeeker);
  *           schema:
  *             type: object
  *             required:
- *               - organization_name
- *               - company_website
+ *               - companyName
+ *               - companyWebsite
  *               - email
  *               - password
  *             properties:
- *               organization_name:
+ *               companyName:
  *                 type: string
  *                 example: Tech Corp
- *               company_website:
+ *               companyWebsite:
  *                 type: string
  *                 format: url
  *                 example: https://techcorp.com

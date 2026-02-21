@@ -16,74 +16,21 @@ import {
     BarChart2
 } from 'lucide-react';
 
+import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+
 const History = () => {
-    // Dummy Data
-    const [historyData, setHistoryData] = useState([
-        {
-            id: 1,
-            candidateName: 'Aarya Sharma',
-            jobTitle: 'Senior React Developer',
-            appliedDate: '2026-02-10',
-            processedDate: '2026-02-15',
-            status: 'Accepted',
-            email: 'aarya@example.com',
-            phone: '+977-9841234567',
-            location: 'Kathmandu, Nepal',
-            experience: '5+ years'
-        },
-        {
-            id: 2,
-            candidateName: 'Bibek Thapa',
-            jobTitle: 'UX/UI Designer',
-            appliedDate: '2026-02-12',
-            processedDate: '2026-02-14',
-            status: 'Rejected',
-            email: 'bibek@example.com',
-            phone: '+977-9801234567',
-            location: 'Pokhara, Nepal',
-            experience: '3 years'
-        },
-        {
-            id: 3,
-            candidateName: 'Sita Rai',
-            jobTitle: 'Backend Engineer',
-            appliedDate: '2026-02-08',
-            processedDate: '2026-02-16',
-            status: 'Shortlisted',
-            email: 'sita@example.com',
-            phone: '+977-9811234567',
-            location: 'Lalitpur, Nepal',
-            experience: '4 years'
-        },
-        {
-            id: 4,
-            candidateName: 'Rohan Gurung',
-            jobTitle: 'Project Manager',
-            appliedDate: '2026-02-05',
-            processedDate: '2026-02-10',
-            status: 'Accepted',
-            email: 'rohan@example.com',
-            phone: '+977-9861234567',
-            location: 'Butwal, Nepal',
-            experience: '7 years'
-        },
-        {
-            id: 5,
-            candidateName: 'Maya Tamang',
-            jobTitle: 'Frontend Developer',
-            appliedDate: '2026-02-14',
-            processedDate: '2026-02-18',
-            status: 'Shortlisted',
-            email: 'maya@example.com',
-            phone: '+977-9821234567',
-            location: 'Bhaktapur, Nepal',
-            experience: '2 years'
-        }
-    ]);
+    // API Hooks
+    const { data: serverApps = [], isLoading } = useGetEmployerApplications();
 
     const [filterStatus, setFilterStatus] = useState('All');
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Filter for processed candidates (non-Pending)
+    const historyData = useMemo(() => {
+        return serverApps.filter(app => app.status !== 'Pending');
+    }, [serverApps]);
 
     // Calculate Summary Stats
     const stats = useMemo(() => {
@@ -96,9 +43,19 @@ const History = () => {
     }, [historyData]);
 
     const filteredData = useMemo(() => {
-        if (filterStatus === 'All') return historyData;
-        return historyData.filter(item => item.status === filterStatus);
-    }, [filterStatus, historyData]);
+        let data = historyData;
+        if (filterStatus !== 'All') {
+            data = data.filter(item => item.status === filterStatus);
+        }
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            data = data.filter(item =>
+                (item.JobSeeker?.fullname || '').toLowerCase().includes(term) ||
+                (item.JobListing?.title || '').toLowerCase().includes(term)
+            );
+        }
+        return data;
+    }, [filterStatus, historyData, searchTerm]);
 
     const handleViewDetails = (candidate) => {
         setSelectedCandidate(candidate);
@@ -363,7 +320,12 @@ const History = () => {
             </div>
 
             <div style={styles.tableContainer}>
-                {filteredData.length > 0 ? (
+                {isLoading ? (
+                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <RefreshCw size={48} className="animate-spin" opacity={0.2} />
+                        <p style={{ fontSize: '1.1rem', fontWeight: '500', marginTop: '16px' }}>Loading history data...</p>
+                    </div>
+                ) : filteredData.length > 0 ? (
                     <table style={styles.table}>
                         <thead>
                             <tr>
@@ -379,15 +341,15 @@ const History = () => {
                             {filteredData.map(item => (
                                 <tr key={item.id} className="table-row">
                                     <td style={styles.td}>
-                                        <div style={{ fontWeight: '600' }}>{item.candidateName}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                        <div style={{ fontWeight: '600' }}>{item.JobSeeker?.fullname || 'Candidate'}</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.JobSeeker?.email}</div>
                                     </td>
-                                    <td style={styles.td}>{item.jobTitle}</td>
-                                    <td style={styles.td}>{item.appliedDate}</td>
+                                    <td style={styles.td}>{item.JobListing?.title}</td>
+                                    <td style={styles.td}>{item.applied_at ? new Date(item.applied_at).toLocaleDateString() : 'N/A'}</td>
                                     <td style={styles.td}>
                                         <span style={styles.badge(item.status)}>{item.status}</span>
                                     </td>
-                                    <td style={styles.td}>{item.processedDate}</td>
+                                    <td style={styles.td}>{item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 'N/A'}</td>
                                     <td style={styles.td}>
                                         <button
                                             style={styles.viewBtn}
@@ -455,7 +417,7 @@ const History = () => {
                     <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                             <div>
-                                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700' }}>{selectedCandidate.candidateName}</h2>
+                                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700' }}>{selectedCandidate.JobSeeker?.fullname || 'Candidate'}</h2>
                                 <span style={styles.badge(selectedCandidate.status)}>{selectedCandidate.status}</span>
                             </div>
                             <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}><XCircle size={24} /></button>
@@ -466,30 +428,32 @@ const History = () => {
                                 <Briefcase size={18} color="var(--text-light)" />
                                 <div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Applied For</div>
-                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>{selectedCandidate.jobTitle}</div>
+                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>{selectedCandidate.JobListing?.title}</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Calendar size={18} color="var(--text-light)" />
                                 <div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Application Timeline</div>
-                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>{selectedCandidate.appliedDate} (Applied) → {selectedCandidate.processedDate} (Finalized)</div>
+                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>
+                                        {selectedCandidate.applied_at ? new Date(selectedCandidate.applied_at).toLocaleDateString() : 'N/A'} (Applied) → {selectedCandidate.updated_at ? new Date(selectedCandidate.updated_at).toLocaleDateString() : 'N/A'} (Finalized)
+                                    </div>
                                 </div>
                             </div>
                             <div style={{ borderTop: '1px solid var(--border-dashboard)', paddingTop: '16px', marginTop: '8px' }}>
                                 <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '12px' }}>Contact Information</div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Mail size={14} color="var(--text-light)" /> {selectedCandidate.email}
+                                        <Mail size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.email}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Phone size={14} color="var(--text-light)" /> {selectedCandidate.phone}
+                                        <Phone size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.phone || 'N/A'}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <MapPin size={14} color="var(--text-light)" /> {selectedCandidate.location}
+                                        <MapPin size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.location || 'N/A'}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Clock size={14} color="var(--text-light)" /> {selectedCandidate.experience}
+                                        <Clock size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.experience || 'N/A'}
                                     </div>
                                 </div>
                             </div>

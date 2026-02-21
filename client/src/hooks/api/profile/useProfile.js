@@ -43,3 +43,18 @@ export const usePutUpdateProfile = () => {
         }
     });
 };
+
+/**
+ * Hook to fetch job seeker stats (applications, shortlisted, etc.)
+ */
+export const useGetJobSeekerStats = () => {
+    return useQuery({
+        queryKey: ["jobseeker", "stats"],
+        queryFn: async () => {
+            const response = await api.get(API_ENDPOINTS.PROFILE.STATS);
+            return response.data.data.stats;
+        },
+        staleTime: 0,           // Always treat as stale to ensure fresh fetch
+        refetchOnWindowFocus: true,  // Refetch when user returns to tab
+    });
+};

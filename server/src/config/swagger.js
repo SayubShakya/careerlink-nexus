@@ -30,8 +30,8 @@ const options = {
                     type: 'object',
                     properties: {
                         id: { type: 'string', format: 'uuid' },
-                        first_name: { type: 'string' },
-                        last_name: { type: 'string' },
+                        firstName: { type: 'string' },
+                        lastName: { type: 'string' },
                         email: { type: 'string', format: 'email' },
                         role_id: { type: 'string', format: 'uuid' },
                     }

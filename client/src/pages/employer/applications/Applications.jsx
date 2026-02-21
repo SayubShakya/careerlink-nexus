@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useGetEmployerApplications, useUpdateApplicationStatus } from '@/hooks/api/employer/useEmployer';
 import {
     Search,
     Filter,
@@ -325,77 +326,41 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
     );
 };
 
+
 const Applications = () => {
-    // State
+    // API Hooks
+    const { data: serverApps = [], isLoading } = useGetEmployerApplications();
+    const { mutate: updateAppStatus } = useUpdateApplicationStatus();
+
+    // UI State
     const [searchQuery, setSearchQuery] = useState('');
     const [jobFilter, setJobFilter] = useState('All Jobs');
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [selectedApp, setSelectedApp] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, onConfirm: null, title: '', message: '' });
 
-    const [applications, setApplications] = useState([
-        {
-            id: 1,
-            name: 'Aayush Shrestha',
-            email: 'aayush.shr@gmail.com',
-            phone: '+977 9841234567',
-            location: 'Lalitpur, Nepal',
-            jobTitle: 'Senior Software Engineer',
-            appliedDate: '2026-02-15',
-            status: 'Pending',
-            skills: ['React', 'Node.js', 'PostgreSQL', 'AWS'],
-            education: 'B.E. in Computer Engineering, Kathmandu University',
-            about: 'Passionate full-stack developer with 5+ years of experience in building scalable web applications. Expert in modern JavaScript frameworks and cloud infrastructure.',
-            coverLetter: 'I am highly interested in the Senior Software Engineer position at CareerLink. With my background in React and Node.js, I believe I can contribute significantly to your team...'
-        },
-        {
-            id: 2,
-            name: 'Sita Sharma',
-            email: 'sita.sharma@outlook.com',
-            phone: '+977 9801122334',
-            location: 'Kathmandu, Nepal',
-            jobTitle: 'Junior Product Designer',
-            appliedDate: '2026-02-16',
-            status: 'Shortlisted',
-            skills: ['Figma', 'UI/UX', 'Adobe XD', 'Prototyping'],
-            education: 'B.Sc. in IT, Amrit Science Campus',
-            about: 'Creative designer focused on user-centric experiences and clean aesthetics. Always looking for the intersection of functionality and beauty.',
-            coverLetter: 'I have been following CareerLink for a while now and I love the product. As a designer, I want to help make it even more intuitive for users...'
-        },
-        {
-            id: 3,
-            name: 'Rohan Thapa',
-            email: 'rohan.t@gmail.com',
-            phone: '+977 9812345678',
-            location: 'Pokhara, Nepal',
-            jobTitle: 'Marketing Specialist',
-            appliedDate: '2026-02-14',
-            status: 'Rejected',
-            skills: ['SEO', 'Content Strategy', 'Google Analytics'],
-            education: 'MBA in Marketing, Tribhuvan University',
-            about: 'Result-oriented marketing professional with a track record of successful digital campaigns across various industries.',
-            coverLetter: 'My experience in Pokhara-based startups has prepared me for high-growth environments where agility and data-driven decisions are key.'
-        }
-    ]);
-
     // Derived Job Titles for filter
-    const uniqueJobs = ['All Jobs', ...new Set(applications.map(app => app.jobTitle))];
+    const uniqueJobs = ['All Jobs', ...new Set(serverApps.map(app => app.jobTitle || app.JobListing?.title))];
 
     // Filter Logic
-    const filteredApps = applications.filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesJob = jobFilter === 'All Jobs' || app.jobTitle === jobFilter;
+    const filteredApps = serverApps.filter(app => {
+        const name = app.name || app.JobSeeker?.fullname || '';
+        const jobTitle = app.jobTitle || app.JobListing?.title || '';
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesJob = jobFilter === 'All Jobs' || jobTitle === jobFilter;
         const matchesStatus = statusFilter === 'All Status' || app.status === statusFilter;
         return matchesSearch && matchesJob && matchesStatus;
     });
 
     const triggerAction = (id, newStatus) => {
+        const app = serverApps.find(a => a.id === id);
+        const name = app.name || app.JobSeeker?.fullname || 'the candidate';
+
         if (newStatus === 'Rejected') {
-            const app = applications.find(a => a.id === id);
             setConfirmModal({
                 isOpen: true,
                 title: 'Reject Application',
-                message: `Are you sure you want to reject ${app.name}? This candidate will be notified of your decision.`,
+                message: `Are you sure you want to reject ${name}? This candidate will be notified of your decision.`,
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else {
@@ -404,7 +369,7 @@ const Applications = () => {
     };
 
     const updateStatus = (id, newStatus) => {
-        setApplications(prev => prev.map(app => app.id === id ? { ...app, status: newStatus } : app));
+        updateAppStatus({ id, status: newStatus });
     };
 
     const styles = {
@@ -603,104 +568,134 @@ const Applications = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredApps.length > 0 ? (
-                                filteredApps.map((app, index) => (
-                                    <tr
-                                        key={app.id}
-                                        style={{
-                                            borderBottom: '1px solid #f3f4f6',
-                                            transition: 'background 0.2s',
-                                            animation: `fadeInUp 0.4s ease-out forwards ${index * 0.1}s`,
-                                            opacity: 0
-                                        }}
-                                        className="table-row"
-                                    >
-                                        <td style={{ padding: '18px 30px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <div style={{
-                                                    width: '42px', height: '42px', borderRadius: '12px',
-                                                    backgroundColor: 'var(--color-brand-primary)', color: 'white',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800',
-                                                    fontSize: '1rem', boxShadow: '0 4px 12px rgba(5, 10, 26, 0.1)'
-                                                }}>
-                                                    {app.name.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.95rem' }}>{app.name}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <Mail size={12} /> {app.email}
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading applications...</td>
+                                </tr>
+                            ) : filteredApps.length > 0 ? (
+                                filteredApps.map((app, index) => {
+                                    const candidateName = app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Candidate';
+                                    const candidateEmail = app.email || app.JobSeeker?.email || '';
+                                    const jobTitle = app.jobTitle || app.JobListing?.title || 'Unknown Position';
+
+                                    return (
+                                        <tr
+                                            key={app.id}
+                                            style={{
+                                                borderBottom: '1px solid #f3f4f6',
+                                                transition: 'background 0.2s',
+                                                animation: `fadeInUp 0.4s ease-out forwards ${index * 0.1}s`,
+                                                opacity: 0
+                                            }}
+                                            className="table-row"
+                                        >
+                                            <td style={{ padding: '18px 30px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                    <div style={{
+                                                        width: '42px', height: '42px', borderRadius: '12px',
+                                                        backgroundColor: 'var(--color-brand-primary)', color: 'white',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800',
+                                                        fontSize: '1rem', boxShadow: '0 4px 12px rgba(5, 10, 26, 0.1)'
+                                                    }}>
+                                                        {candidateName.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.95rem' }}>{candidateName}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <Mail size={12} /> {candidateEmail}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '18px 30px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#4B5563', fontSize: '0.9rem' }}>
-                                                <Briefcase size={14} color="var(--color-brand-accent)" />
-                                                {app.jobTitle}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '18px 30px' }}>
-                                            <button
-                                                style={{ background: '#f3f4f6', border: 'none', color: 'var(--text-main)', padding: '8px 14px', borderRadius: '10px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', transition: 'all 0.2s' }}
-                                                className="btn-scale"
-                                            >
-                                                <Download size={14} /> Resume
-                                            </button>
-                                        </td>
-                                        <td style={{ padding: '18px 30px', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Calendar size={14} /> {app.appliedDate}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '18px 30px' }}>
-                                            {styles.statusBadge(app.status)}
-                                        </td>
-                                        <td style={{ padding: '18px 30px' }}>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                            </td>
+                                            <td style={{ padding: '18px 30px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#4B5563', fontSize: '0.9rem' }}>
+                                                    <Briefcase size={14} color="var(--color-brand-accent)" />
+                                                    {jobTitle}
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: '18px 30px' }}>
                                                 <button
-                                                    style={styles.actionBtn('details')}
+                                                    style={{ background: '#f3f4f6', border: 'none', color: 'var(--text-main)', padding: '8px 14px', borderRadius: '10px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', transition: 'all 0.2s' }}
                                                     className="btn-scale"
-                                                    onClick={() => setSelectedApp(app)}
+                                                    onClick={() => {
+                                                        const cvUrl = app.CV?.file_url || app.CV?.platform_data_url;
+                                                        if (cvUrl) window.open(cvUrl, '_blank');
+                                                        else alert('CV not found');
+                                                    }}
                                                 >
-                                                    <Eye size={14} /> Details
+                                                    <FileText size={14} /> View CV
                                                 </button>
-
-                                                {app.status !== 'Shortlisted' && (
-                                                    <button
-                                                        style={styles.actionBtn('success')}
-                                                        title="Shortlist"
-                                                        className="btn-scale"
-                                                        onClick={() => updateStatus(app.id, 'Shortlisted')}
-                                                    >
-                                                        <CheckCircle2 size={14} />
-                                                    </button>
-                                                )}
-
-                                                {app.status !== 'Rejected' && (
-                                                    <button
-                                                        style={styles.actionBtn('danger')}
-                                                        title="Reject"
-                                                        className="btn-scale"
-                                                        onClick={() => triggerAction(app.id, 'Rejected')}
-                                                    >
-                                                        <XCircle size={14} />
-                                                    </button>
-                                                )}
-
-                                                {app.status !== 'Pending' && (
+                                            </td>
+                                            <td style={{ padding: '18px 30px', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Calendar size={14} /> {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate}
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: '18px 30px' }}>
+                                                {styles.statusBadge(app.status)}
+                                            </td>
+                                            <td style={{ padding: '18px 30px' }}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
                                                     <button
                                                         style={styles.actionBtn('details')}
-                                                        title="Set to Pending"
                                                         className="btn-scale"
-                                                        onClick={() => updateStatus(app.id, 'Pending')}
+                                                        onClick={() => {
+                                                            const formattedApp = {
+                                                                ...app,
+                                                                name: candidateName,
+                                                                email: candidateEmail,
+                                                                jobTitle: jobTitle,
+                                                                appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
+                                                                skills: app.JobSeeker?.skills || app.skills || [],
+                                                                education: app.JobSeeker?.education || app.education || 'N/A',
+                                                                about: app.JobSeeker?.summary || app.about || '',
+                                                                phone: app.JobSeeker?.phone || app.phone || '',
+                                                                location: app.JobSeeker?.location || app.location || '',
+                                                                coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
+                                                            };
+                                                            setSelectedApp(formattedApp);
+                                                        }}
                                                     >
-                                                        <RefreshCw size={14} />
+                                                        <Eye size={14} /> Details
                                                     </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+
+                                                    {app.status !== 'Shortlisted' && (
+                                                        <button
+                                                            style={styles.actionBtn('success')}
+                                                            title="Shortlist"
+                                                            className="btn-scale"
+                                                            onClick={() => updateStatus(app.id, 'Shortlisted')}
+                                                        >
+                                                            <CheckCircle2 size={14} />
+                                                        </button>
+                                                    )}
+
+                                                    {app.status !== 'Rejected' && (
+                                                        <button
+                                                            style={styles.actionBtn('danger')}
+                                                            title="Reject"
+                                                            className="btn-scale"
+                                                            onClick={() => triggerAction(app.id, 'Rejected')}
+                                                        >
+                                                            <XCircle size={14} />
+                                                        </button>
+                                                    )}
+
+                                                    {app.status !== 'Pending' && (
+                                                        <button
+                                                            style={styles.actionBtn('details')}
+                                                            title="Set to Pending"
+                                                            className="btn-scale"
+                                                            onClick={() => updateStatus(app.id, 'Pending')}
+                                                        >
+                                                            <RefreshCw size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan="6">

@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
-import { Camera, MapPin, Globe, Building2, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, MapPin, Globe, Building2, Save, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { useGetCompanyProfile, useUpdateCompanyProfile } from '@/hooks/api/employer/useEmployer';
 
 const CompanyProfile = () => {
+    const { data: serverCompany, isLoading: isProfileLoading } = useGetCompanyProfile();
+    const { mutate: updateProfile, isPending: isUpdating } = useUpdateCompanyProfile();
+
     const [formData, setFormData] = useState({
         companyName: '',
         description: '',
@@ -12,8 +16,21 @@ const CompanyProfile = () => {
     const [logo, setLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [errors, setErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (serverCompany) {
+            setFormData({
+                companyName: serverCompany.companyName || '',
+                description: serverCompany.description || '',
+                location: serverCompany.location || '',
+                website: serverCompany.companyWebsite || '',
+            });
+            if (serverCompany.profile_picture) {
+                setLogoPreview(`/${serverCompany.profile_picture}`);
+            }
+        }
+    }, [serverCompany]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -21,7 +38,6 @@ const CompanyProfile = () => {
             ...prev,
             [name]: value
         }));
-        // Real-time validation clear
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
@@ -45,10 +61,6 @@ const CompanyProfile = () => {
         if (!formData.description.trim()) newErrors.description = 'Description is required';
         if (!formData.location.trim()) newErrors.location = 'Location is required';
 
-        if (formData.website && !formData.website.startsWith('http')) {
-            newErrors.website = 'Website must start with http:// or https://';
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -57,17 +69,16 @@ const CompanyProfile = () => {
         e.preventDefault();
 
         if (validateForm()) {
-            setIsSubmitting(true);
+            const data = new FormData();
+            data.append('companyName', formData.companyName);
+            data.append('description', formData.description);
+            data.append('location', formData.location);
+            data.append('companyWebsite', formData.website);
+            if (logo) {
+                data.append('logo', logo);
+            }
 
-            // Backend would be added later
-            console.log('Form Data Submitted:', { ...formData, logo });
-
-            // Simulate API call
-            setTimeout(() => {
-                setIsSubmitting(false);
-                setShowSuccess(true);
-                setTimeout(() => setShowSuccess(false), 3000);
-            }, 1000);
+            updateProfile(data);
         }
     };
 
@@ -223,138 +234,145 @@ const CompanyProfile = () => {
             </div>
 
             <div style={styles.card}>
-                <form onSubmit={handleSubmit}>
-                    <div style={{ ...styles.formGrid, gridTemplateColumns: '300px 1fr' }}>
-                        {/* Logo Upload Section */}
-                        <div style={styles.formGroup}>
-                            <label style={styles.label}>Company Logo</label>
-                            <div
-                                style={styles.logoSection}
-                                onClick={() => document.getElementById('logoInput').click()}
-                                className="logo-upload-area"
-                            >
-                                {logoPreview ? (
-                                    <img src={logoPreview} alt="Logo Preview" style={styles.logoPreview} className="logo-preview-img" />
-                                ) : (
-                                    <div style={styles.placeholderLogo}>
-                                        <Building2 size={48} />
-                                    </div>
-                                )}
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-brand-accent)', fontWeight: '600' }}>
-                                    {logoPreview ? 'Change Logo' : 'Upload Logo'}
-                                </span>
-                                <input
-                                    type="file"
-                                    id="logoInput"
-                                    hidden
-                                    accept="image/*"
-                                    onChange={handleLogoChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Basic Info Section */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {isProfileLoading ? (
+                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <Loader2 className="animate-spin" size={32} />
+                        <p>Loading profile...</p>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ ...styles.formGrid, gridTemplateColumns: '300px 1fr' }}>
+                            {/* Logo Upload Section */}
                             <div style={styles.formGroup}>
-                                <label style={styles.label}>Company Name *</label>
-                                <input
-                                    type="text"
-                                    name="companyName"
-                                    value={formData.companyName}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter your company name"
-                                    style={{
-                                        ...styles.input,
-                                        borderColor: errors.companyName ? 'var(--color-danger)' : 'var(--border-dashboard)'
-                                    }}
-                                    className="profile-input"
-                                />
-                                {errors.companyName && (
-                                    <span style={styles.errorText}><AlertCircle size={14} /> {errors.companyName}</span>
-                                )}
+                                <label style={styles.label}>Company Logo</label>
+                                <div
+                                    style={styles.logoSection}
+                                    onClick={() => document.getElementById('logoInput').click()}
+                                    className="logo-upload-area"
+                                >
+                                    {logoPreview ? (
+                                        <img src={logoPreview} alt="Logo Preview" style={styles.logoPreview} className="logo-preview-img" />
+                                    ) : (
+                                        <div style={styles.placeholderLogo}>
+                                            <Building2 size={48} />
+                                        </div>
+                                    )}
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-brand-accent)', fontWeight: '600' }}>
+                                        {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                                    </span>
+                                    <input
+                                        type="file"
+                                        id="logoInput"
+                                        hidden
+                                        accept="image/*"
+                                        onChange={handleLogoChange}
+                                    />
+                                </div>
                             </div>
 
-                            <div style={styles.formGrid}>
+                            {/* Basic Info Section */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={styles.formGroup}>
-                                    <label style={styles.label}>Location *</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <MapPin size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                                        <input
-                                            type="text"
-                                            name="location"
-                                            value={formData.location}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. Kathmandu, Nepal"
-                                            style={{
-                                                ...styles.input,
-                                                paddingLeft: '40px',
-                                                borderColor: errors.location ? 'var(--color-danger)' : 'var(--border-dashboard)',
-                                                width: '100%',
-                                                boxSizing: 'border-box'
-                                            }}
-                                            className="profile-input"
-                                        />
-                                    </div>
-                                    {errors.location && (
-                                        <span style={styles.errorText}><AlertCircle size={14} /> {errors.location}</span>
+                                    <label style={styles.label}>Company Name *</label>
+                                    <input
+                                        type="text"
+                                        name="companyName"
+                                        value={formData.companyName}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter your company name"
+                                        style={{
+                                            ...styles.input,
+                                            borderColor: errors.companyName ? 'var(--color-danger)' : 'var(--border-dashboard)'
+                                        }}
+                                        className="profile-input"
+                                    />
+                                    {errors.companyName && (
+                                        <span style={styles.errorText}><AlertCircle size={14} /> {errors.companyName}</span>
                                     )}
                                 </div>
 
-                                <div style={styles.formGroup}>
-                                    <label style={styles.label}>Website</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <Globe size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                                        <input
-                                            type="url"
-                                            name="website"
-                                            value={formData.website}
-                                            onChange={handleInputChange}
-                                            placeholder="https://example.com"
-                                            style={{
-                                                ...styles.input,
-                                                paddingLeft: '40px',
-                                                borderColor: errors.website ? 'var(--color-danger)' : 'var(--border-dashboard)',
-                                                width: '100%',
-                                                boxSizing: 'border-box'
-                                            }}
-                                            className="profile-input"
-                                        />
+                                <div style={styles.formGrid}>
+                                    <div style={styles.formGroup}>
+                                        <label style={styles.label}>Location *</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <MapPin size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                                            <input
+                                                type="text"
+                                                name="location"
+                                                value={formData.location}
+                                                onChange={handleInputChange}
+                                                placeholder="e.g. Kathmandu, Nepal"
+                                                style={{
+                                                    ...styles.input,
+                                                    paddingLeft: '40px',
+                                                    borderColor: errors.location ? 'var(--color-danger)' : 'var(--border-dashboard)',
+                                                    width: '100%',
+                                                    boxSizing: 'border-box'
+                                                }}
+                                                className="profile-input"
+                                            />
+                                        </div>
+                                        {errors.location && (
+                                            <span style={styles.errorText}><AlertCircle size={14} /> {errors.location}</span>
+                                        )}
                                     </div>
-                                    {errors.website && (
-                                        <span style={styles.errorText}><AlertCircle size={14} /> {errors.website}</span>
-                                    )}
+
+                                    <div style={styles.formGroup}>
+                                        <label style={styles.label}>Website</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Globe size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+                                            <input
+                                                type="url"
+                                                name="website"
+                                                value={formData.website}
+                                                onChange={handleInputChange}
+                                                placeholder="https://example.com"
+                                                style={{
+                                                    ...styles.input,
+                                                    paddingLeft: '40px',
+                                                    borderColor: errors.website ? 'var(--color-danger)' : 'var(--border-dashboard)',
+                                                    width: '100%',
+                                                    boxSizing: 'border-box'
+                                                }}
+                                                className="profile-input"
+                                            />
+                                        </div>
+                                        {errors.website && (
+                                            <span style={styles.errorText}><AlertCircle size={14} /> {errors.website}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div style={styles.formGroup}>
-                        <label style={styles.label}>Description *</label>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                            placeholder="Tell us about your company, its mission, and what you do..."
-                            style={{
-                                ...styles.textarea,
-                                borderColor: errors.description ? 'var(--color-danger)' : 'var(--border-dashboard)'
-                            }}
-                            className="profile-input"
-                        ></textarea>
-                        {errors.description && (
-                            <span style={styles.errorText}><AlertCircle size={14} /> {errors.description}</span>
-                        )}
-                    </div>
+                        <div style={styles.formGroup}>
+                            <label style={styles.label}>Description *</label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Tell us about your company, its mission, and what you do..."
+                                style={{
+                                    ...styles.textarea,
+                                    borderColor: errors.description ? 'var(--color-danger)' : 'var(--border-dashboard)'
+                                }}
+                                className="profile-input"
+                            ></textarea>
+                            {errors.description && (
+                                <span style={styles.errorText}><AlertCircle size={14} /> {errors.description}</span>
+                            )}
+                        </div>
 
-                    <button
-                        type="submit"
-                        style={styles.saveButton}
-                        className="save-button"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Saving...' : <><Save size={20} /> Save Changes</>}
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            style={styles.saveButton}
+                            className="save-button"
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? 'Saving...' : <><Save size={20} /> Save Changes</>}
+                        </button>
+                    </form>
+                )}
             </div>
 
             {showSuccess && (

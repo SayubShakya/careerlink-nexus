@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
+import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
 import {
     PlusCircle,
     Trash2,
@@ -136,7 +138,15 @@ const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
     );
 };
 
+
+
 const JobManagement = () => {
+    // API Hooks
+    const { data: serverJobs = [], isLoading: jobsLoading } = useGetEmployerJobs();
+    const { mutate: createJob, isLoading: isCreating } = useCreateJob();
+    const { mutate: updateJob, isLoading: isUpdating } = useUpdateJob();
+    const { mutate: deleteJobMutation } = useDeleteJob();
+
     // UI State
     const [isFormExpanded, setIsFormExpanded] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -168,23 +178,6 @@ const JobManagement = () => {
     // Skills State
     const [skillInput, setSkillInput] = useState('');
     const [skills, setSkills] = useState([]);
-
-    // Jobs List State
-    const [jobs, setJobs] = useState([
-        {
-            id: 1,
-            title: 'Senior Software Engineer',
-            location: 'Kathmandu, Hybrid',
-            salary: '120000',
-            jobType: 'Full-time',
-            deadline: '2026-05-01',
-            postedDate: new Date().toLocaleDateString(),
-            status: 'Active',
-            applicants: 12,
-            description: 'We are looking for a software engineer...',
-            skills: ['React', 'Node.js']
-        }
-    ]);
 
     // Error State
     const [errors, setErrors] = useState({});
@@ -233,75 +226,80 @@ const JobManagement = () => {
         e.preventDefault();
 
         if (validateForm()) {
-            if (isEditing) {
-                // Update Logic
-                setJobs(prev => prev.map(job =>
-                    job.id === editId
-                        ? { ...job, ...formData, skills: [...skills] }
-                        : job
-                ));
-                showModal('Job Updated!', `Successfully updated ${formData.title}`);
-                setIsEditing(false);
-                setEditId(null);
-            } else {
-                // Create Logic
-                const newJob = {
-                    ...formData,
-                    id: Date.now(),
-                    skills: [...skills],
-                    postedDate: new Date().toLocaleDateString(),
-                    status: 'Active',
-                    applicants: 0
-                };
-                setJobs(prev => [newJob, ...prev]);
-                showModal('Job Published!', `Your job "${formData.title}" is now live.`);
-            }
+            const payload = {
+                ...formData,
+                skills: [...skills]
+            };
 
-            // Reset
-            setFormData({
-                title: '',
-                location: '',
-                salary: '',
-                jobType: 'Full-time',
-                deadline: '',
-                description: '',
-                responsibilities: '',
-                qualifications: '',
-                specification: '',
-                education: ''
-            });
-            setSkills([]);
-            setIsFormExpanded(false);
+            if (isEditing) {
+                updateJob(
+                    { id: editId, jobData: payload },
+                    {
+                        onSuccess: () => {
+                            showModal('Job Updated!', `Successfully updated ${formData.title}`);
+                            resetForm();
+                        }
+                    }
+                );
+            } else {
+                createJob(payload, {
+                    onSuccess: () => {
+                        showModal('Job Published!', `Your job "${formData.title}" is now live.`);
+                        resetForm();
+                    }
+                });
+            }
         }
     };
 
+    const resetForm = () => {
+        setFormData({
+            title: '', location: '', salary: '', jobType: 'Full-time',
+            deadline: '', description: '', responsibilities: '',
+            qualifications: '', specification: '', education: ''
+        });
+        setSkills([]);
+        setIsFormExpanded(false);
+        setIsEditing(false);
+        setEditId(null);
+    };
+
     const editJob = (job) => {
-        setFormData({ ...job });
+        setFormData({
+            title: job.title || '',
+            location: job.location || '',
+            salary: job.salary || '',
+            jobType: job.jobType || 'Full-time',
+            deadline: job.deadline ? (typeof job.deadline === 'string' && job.deadline.includes('T') ? job.deadline.split('T')[0] : (typeof job.deadline === 'string' && job.deadline.match(/\d{4}-\d{2}-\d{2}/) ? job.deadline.match(/\d{4}-\d{2}-\d{2}/)[0] : '')) : '',
+            description: job.description || '',
+            responsibilities: job.responsibilities || '',
+            qualifications: job.qualifications || '',
+            specification: job.specification || '',
+            education: job.education || ''
+        });
         setSkills([...(job.skills || [])]);
         setIsEditing(true);
         setEditId(job.id);
         setIsFormExpanded(true);
-        // Scroll to form
         window.scrollTo({ top: 300, behavior: 'smooth' });
     };
 
     const deleteJob = (id) => {
-        const jobToDelete = jobs.find(j => j.id === id);
+        const jobToDelete = serverJobs.find(j => j.id === id);
         showModal(
             'Delete Job?',
             `Are you sure you want to delete "${jobToDelete.title}"? This action cannot be undone.`,
             'confirm',
-            () => setJobs(prev => prev.filter(job => job.id !== id))
+            () => deleteJobMutation(id)
         );
     };
 
     const viewApplications = (job) => {
         showModal(
             'Job Applications',
-            `Redirecting to applications for ${job.title}. Total applicants: ${job.applicants}`,
+            `Redirecting to applications for ${job.title}. Total applicants: ${job.applicants || 0}`,
             'success'
         );
-        // In a real app: navigate(`/employer/applications/${job.id}`)
     };
 
     const styles = {
@@ -597,6 +595,7 @@ const JobManagement = () => {
                                     <option>Part-time</option>
                                     <option>Contract</option>
                                     <option>Internship</option>
+                                    <option>Freelance</option>
                                 </select>
                             </div>
 
@@ -610,6 +609,7 @@ const JobManagement = () => {
                                         name="deadline"
                                         value={formData.deadline}
                                         onChange={handleInputChange}
+                                        min={new Date().toISOString().split('T')[0]} // Prevent past dates
                                     />
                                 </div>
                             </div>
@@ -711,7 +711,7 @@ const JobManagement = () => {
                 <div style={styles.tableHeader}>
                     <div>
                         <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '4px' }}>Manage Jobs</h2>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You have {jobs.length} active job postings</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You have {serverJobs.length} active job postings</p>
                     </div>
                 </div>
 
@@ -727,8 +727,12 @@ const JobManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {jobs.length > 0 ? (
-                                jobs.map(job => (
+                            {jobsLoading ? (
+                                <tr>
+                                    <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading your jobs...</td>
+                                </tr>
+                            ) : serverJobs.length > 0 ? (
+                                serverJobs.map(job => (
                                     <tr key={job.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 0.2s' }} className="table-row">
                                         <td style={{ padding: '20px 30px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -745,19 +749,19 @@ const JobManagement = () => {
                                         </td>
                                         <td style={{ padding: '20px 30px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <Clock size={14} /> {job.postedDate}
+                                                <Clock size={14} /> {job.postedDate || new Date(job.createdAt).toLocaleDateString()}
                                             </div>
                                         </td>
                                         <td style={{ padding: '20px 30px' }}>
-                                            <span style={styles.badge(job.status)}>
-                                                {job.status === 'Active' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                                                {job.status}
+                                            <span style={styles.badge(job.status || 'Active')}>
+                                                {(job.status || 'Active') === 'Active' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                                                {job.status || 'Active'}
                                             </span>
                                         </td>
                                         <td style={{ padding: '20px 30px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)', fontWeight: '600' }}>
                                                 <Users size={16} color="var(--color-brand-accent)" />
-                                                {job.applicants}
+                                                {job.applicants || 0}
                                             </div>
                                         </td>
                                         <td style={{ padding: '20px 30px' }}>

@@ -10,10 +10,10 @@ const usePostRegisterJobSeeker = () => {
     return useMutation({
         mutationFn: async (userData) => {
             try {
-                // Map frontend fields to backend fields
+                // Frontend keys now match backend model directly
                 const payload = {
-                    first_name: userData.firstName,
-                    last_name: userData.lastName,
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
                     email: userData.email,
                     password: userData.password
                 };

@@ -173,13 +173,51 @@ const EmployerSignup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Extracts the root domain (e.g. 'nexus.com') from a URL or plain domain string
+    const extractDomain = (website) => {
+        try {
+            // Prefix with protocol if missing so the URL parser works
+            const url = website.startsWith('http') ? website : `https://${website}`;
+            const hostname = new URL(url).hostname;
+            // Remove 'www.' prefix if present and return lowercase
+            return hostname.replace(/^www\./, '').toLowerCase();
+        } catch {
+            // Fallback: strip protocol/www manually
+            return website
+                .replace(/^https?:\/\//, '')
+                .replace(/^www\./, '')
+                .split('/')[0]
+                .toLowerCase();
+        }
+    };
+
     const validate = () => {
         const newErrors = {};
         if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required';
-        if (!formData.companyWebsite.trim()) newErrors.companyWebsite = 'Company website is required';
+
+        // Website validation
+        if (!formData.companyWebsite.trim()) {
+            newErrors.companyWebsite = 'Company website is required';
+        } else {
+            const websiteDomain = extractDomain(formData.companyWebsite);
+            if (!websiteDomain.includes('.')) {
+                newErrors.companyWebsite = 'Please enter a valid website (e.g. company.com)';
+            } else {
+                // Cross-validate with email domain if email is already filled
+                if (formData.email && formData.email.includes('@')) {
+                    const emailDomain = formData.email.split('@')[1]?.toLowerCase();
+                    if (emailDomain && emailDomain !== websiteDomain) {
+                        newErrors.email = `Work email domain (@${emailDomain}) must match the company website (${websiteDomain})`;
+                    }
+                }
+            }
+        }
+
+        // Email validation
         if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'Valid work email is required';
         }
+
         if (!formData.password || formData.password.length < 8) {
             newErrors.password = 'Password must be at least 8 characters';
         }
@@ -199,8 +237,12 @@ const EmployerSignup = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+        // Clear this field's error
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+        // When website or email changes, also clear the domain cross-validation error on email
+        if (name === 'companyWebsite' || name === 'email') {
+            setErrors(prev => ({ ...prev, email: '' }));
+        }
     };
 
     const { mutate: register, isPending: loading } = usePostRegisterEmployer();
@@ -266,7 +308,7 @@ const EmployerSignup = () => {
                             <input
                                 type="text"
                                 name="companyWebsite"
-                                placeholder="Enter company Website"
+                                placeholder="e.g. nexuspartner.com"
                                 style={{
                                     ...styles.input,
                                     borderColor: errors.companyWebsite ? '#E53E3E' : 'var(--border-subtle)'
@@ -276,6 +318,17 @@ const EmployerSignup = () => {
                                 className="auth-input"
                             />
                             {errors.companyWebsite && <p style={styles.errorText}>{errors.companyWebsite}</p>}
+                            {!errors.companyWebsite && formData.companyWebsite && (() => {
+                                try {
+                                    const url = formData.companyWebsite.startsWith('http') ? formData.companyWebsite : `https://${formData.companyWebsite}`;
+                                    const domain = new URL(url).hostname.replace(/^www\./, '');
+                                    if (domain.includes('.')) return (
+                                        <p style={{ color: '#718096', fontSize: '0.75rem', marginTop: '4px' }}>
+                                            ✉️ Work email must end in <strong>@{domain}</strong>
+                                        </p>
+                                    );
+                                } catch { return null; }
+                            })()}
                         </div>
 
 

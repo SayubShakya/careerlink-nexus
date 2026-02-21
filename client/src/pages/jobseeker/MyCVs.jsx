@@ -24,13 +24,15 @@ import { useGetCVs, usePostUploadCV, useDeleteCV } from '@/hooks/api/cv/useCVs';
 import { ROUTES } from '@/routes/routes';
 import cvBanner from '@/assets/images/cv-upload-banner.jpg';
 
+import api from '@/api/client';
+import { API_ENDPOINTS } from '@/api/endpoints';
+
 const MyCVs = () => {
     const { data: cvs = [], isLoading: loading } = useGetCVs();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
     const fileInputRef = useRef(null);
 
-    console.log(cvs, "cvs")
     const { mutate: uploadCV, isPending: uploading } = usePostUploadCV();
     const { mutate: deleteCV } = useDeleteCV();
 
@@ -54,23 +56,16 @@ const MyCVs = () => {
         });
     };
 
-    const handleDownload = async (id) => {
+    const handleDownload = async (id, title) => {
         try {
-            const { default: api } = await import('@/api/client');
-            const response = await api.get(`/cvs/${id}`, { responseType: 'blob' });
-            const blob = new Blob([response.data]);
-            const url = window.URL.createObjectURL(blob);
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            // Try to get filename from response headers, fallback to cv title
-            const contentDisposition = response.headers['content-disposition'];
-            const filename = contentDisposition
-                ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
-                : `cv-${id}.pdf`;
-            link.download = filename;
+            link.setAttribute('download', `${title.replace(/\s+/g, '_')}.pdf`);
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            link.remove();
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error('Download failed:', err);
@@ -79,15 +74,16 @@ const MyCVs = () => {
     };
 
     const handleView = async (id) => {
+        const viewToast = toast.loading("Opening preview...");
         try {
-            const { default: api } = await import('@/api/client');
-            const response = await api.get(`/cvs/${id}`, { responseType: 'blob' });
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, { responseType: 'blob' });
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
+            toast.dismiss(viewToast);
         } catch (err) {
             console.error('View failed:', err);
-            toast.error('Failed to view CV');
+            toast.error('Failed to view CV', { id: viewToast });
         }
     };
 
@@ -192,6 +188,8 @@ const MyCVs = () => {
                 }
                 .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(62, 97, 255, 0.1); }
                 .stat-card .lbl { font-size: 0.75rem; font-weight: 850; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.1em; }
+                .stat-card.platform .lbl { color: #6366F1; }
+                .stat-card.uploaded .lbl { color: #10B981; }
                 .stat-card .val { font-size: 2.2rem; font-weight: 950; color: var(--text-main); letter-spacing: -0.02em; }
 
                 /* FLOATING IMAGE */
@@ -318,32 +316,24 @@ const MyCVs = () => {
                     justify-content: space-between;
                     margin-bottom: 24px;
                 }
-                .type-badge {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    padding: 6px 14px;
-                    border-radius: 10px;
-                    background: var(--bg-dashboard);
-                    font-size: 0.7rem;
-                    font-weight: 900;
-                    text-transform: uppercase;
-                    color: var(--text-muted);
-                }
-                .asset-card:hover .type-badge { background: rgba(62, 97, 255, 0.1); color: var(--color-brand-accent); }
+                .type-badge.platform { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+                .type-badge.uploaded { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+                
+                .asset-card:hover .type-badge { transform: scale(1.05); }
 
                 .icon-container {
                     width: 64px;
                     height: 64px;
-                    background: var(--bg-dashboard);
                     border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin-bottom: 24px;
                     transition: 0.3s;
-                    color: var(--text-main);
                 }
+                .icon-container.platform { background: #F5F3FF; color: #6D28D9; }
+                .icon-container.uploaded { background: #F0FDF4; color: #16A34A; }
+                
                 .asset-card:hover .icon-container { background: var(--color-brand-accent); color: white; transform: rotate(5deg); }
 
                 .asset-title { font-size: 1.35rem; font-weight: 950; color: var(--text-main); margin: 0 0 10px 0; letter-spacing: -0.03em; }
@@ -404,12 +394,12 @@ const MyCVs = () => {
                         <h1 className="hero-title">My <span>CV</span> Storage</h1>
 
                         <div className="stats-tray">
-                            <div className="stat-card">
-                                <span className="lbl">Created CVs</span>
+                            <div className="stat-card platform">
+                                <span className="lbl">Platform Vault</span>
                                 <span className="val">{cvs.filter(c => c.type === 'platform').length}</span>
                             </div>
-                            <div className="stat-card">
-                                <span className="lbl">Uploaded CVs</span>
+                            <div className="stat-card uploaded">
+                                <span className="lbl">External Uploads</span>
                                 <span className="val">{cvs.filter(c => c.type === 'uploaded').length}</span>
                             </div>
                         </div>
@@ -445,22 +435,22 @@ const MyCVs = () => {
             {/* MAIN CONTENT AREA */}
             <div className="vault-main">
                 <div className="filter-tabs">
-                    <div className={`tab-item ${activeFilter === 'All' ? 'active' : ''}`} onClick={() => setActiveFilter('All')}>All Files</div>
-                    <div className={`tab-item ${activeFilter === 'platform' ? 'active' : ''}`} onClick={() => setActiveFilter('platform')}>Created</div>
-                    <div className={`tab-item ${activeFilter === 'uploaded' ? 'active' : ''}`} onClick={() => setActiveFilter('uploaded')}>Uploaded</div>
+                    <div className={`tab-item ${activeFilter === 'All' ? 'active' : ''}`} onClick={() => setActiveFilter('All')}>All Assets</div>
+                    <div className={`tab-item ${activeFilter === 'platform' ? 'active' : ''}`} onClick={() => setActiveFilter('platform')}>Vault Built</div>
+                    <div className={`tab-item ${activeFilter === 'uploaded' ? 'active' : ''}`} onClick={() => setActiveFilter('uploaded')}>External PDFs</div>
                 </div>
 
                 <div className="asset-grid">
                     {filteredCVs.map((cv) => (
                         <div key={cv.id} className="asset-card">
                             <div className="card-header">
-                                <div className="type-badge">
-                                    {cv.type === 'platform' ? <><Layout size={12} /> Design</> : <><HardDrive size={12} /> File</>}
+                                <div className={`type-badge ${cv.type}`}>
+                                    {cv.type === 'platform' ? <><Layout size={12} /> Platform Built</> : <><HardDrive size={12} /> External PDF</>}
                                 </div>
                                 <div style={{ color: '#E2E8F0', cursor: 'pointer' }}><MoreVertical size={20} /></div>
                             </div>
 
-                            <div className="icon-container">
+                            <div className={`icon-container ${cv.type}`}>
                                 {cv.type === 'platform' ? <FileCheck size={32} /> : <FileText size={32} />}
                             </div>
 
@@ -471,19 +461,16 @@ const MyCVs = () => {
 
                             <div className="card-actions">
                                 <div className="action-pill">
-                                    {cv.type === 'platform' ? (
+                                    <button className="circle-btn" title="View CV" onClick={() => handleView(cv.id)}>
+                                        <Eye size={18} />
+                                    </button>
+                                    <button className="circle-btn" title="Download" onClick={() => handleDownload(cv.id, cv.title)}>
+                                        <Download size={18} />
+                                    </button>
+                                    {cv.type === 'platform' && (
                                         <button className="circle-btn" title="Edit" onClick={() => window.location.href = `${ROUTES.CV_BUILDER}?id=${cv.id}`}>
                                             <Edit2 size={18} />
                                         </button>
-                                    ) : (
-                                        <>
-                                            <button className="circle-btn" title="View CV" onClick={() => handleView(cv.id)}>
-                                                <Eye size={18} />
-                                            </button>
-                                            <button className="circle-btn" title="Download" onClick={() => handleDownload(cv.id)}>
-                                                <Download size={18} />
-                                            </button>
-                                        </>
                                     )}
                                     <button className="circle-btn delete" title="Delete" onClick={() => handleDelete(cv.id)}>
                                         <Trash2 size={18} />

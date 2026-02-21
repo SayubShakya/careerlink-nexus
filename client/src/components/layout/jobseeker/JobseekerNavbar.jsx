@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
-import { LogOut, User, Layout, Search, FileText, Database } from 'lucide-react';
+import { LogOut, User, Layout, Search, FileText, Database, Heart } from 'lucide-react';
 
 const JobseekerNavbar = () => {
     const navigate = useNavigate();
@@ -113,7 +113,7 @@ const JobseekerNavbar = () => {
                     <div style={{ ...styles.avatarBox, overflow: 'hidden' }}>
                         {user?.profile_picture ? (
                             <img
-                                src={`http://localhost:5000/${user.profile_picture}`}
+                                src={`/${user.profile_picture}`}
                                 alt="Profile"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
@@ -121,7 +121,7 @@ const JobseekerNavbar = () => {
                             <User size={16} color="white" strokeWidth={3} />
                         )}
                     </div>
-                    <span>Welcome, {user?.first_name || 'Seeker'}</span>
+                    <span>Welcome, {user?.firstName || 'Seeker'}</span>
                 </Link>
             </div>
 
@@ -132,6 +132,9 @@ const JobseekerNavbar = () => {
                     </Link>
                     <Link to={ROUTES.JOBSEEKER_FIND_JOBS} style={styles.link} className={`nav-item ${isActive(ROUTES.JOBSEEKER_FIND_JOBS) ? 'active' : ''}`}>
                         <Search size={14} /> Find Jobs
+                    </Link>
+                    <Link to={ROUTES.SAVED_JOBS} style={styles.link} className={`nav-item ${isActive(ROUTES.SAVED_JOBS)}`}>
+                        <Heart size={14} /> Saved Jobs
                     </Link>
                     <Link to={ROUTES.CV_BUILDER} style={styles.link} className={`nav-item ${isActive(ROUTES.CV_BUILDER)}`}>
                         <FileText size={14} /> Build CV

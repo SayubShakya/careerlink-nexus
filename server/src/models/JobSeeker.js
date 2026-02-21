@@ -22,11 +22,11 @@ const JobSeeker = sequelize.define('JobSeeker', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    first_name: {
+    firstName: {
         type: DataTypes.STRING(100),
         allowNull: false
     },
-    last_name: {
+    lastName: {
         type: DataTypes.STRING(100),
         allowNull: false
     },
@@ -46,10 +46,7 @@ const JobSeeker = sequelize.define('JobSeeker', {
     tableName: 'job_seeker_users',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: false // Schema says only created_at? Checking SCHEMA.md again... actually it says created_at DEFAULT NOW. Usually good to have updated_at too, but I'll follow SCHEMA exactly if it omits it? Wait, SCHEMA.md usually implies standard timestamps. I'll check schema again.
-    // SCHEMA.md for Job Seeker Users Table: created_at DEFAULT NOW(). Doesn't mention updated_at explicitly unlike Roles table.
-    // I will include updated_at for best practice as Sequelize expects it by default, or disable it.
-    // Let's stick to default timestamps=true (adds both). The schema might just be minimal.
+    updatedAt: 'updated_at'
 });
 
 // Hooks for password hashing

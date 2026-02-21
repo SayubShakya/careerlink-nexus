@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { useGetJobs } from '@/hooks/api/jobs/useJobs';
 import { useAuth } from '@/hooks/useAuth';
 import {
     Search, Briefcase, Users, Building2, ChevronRight, SearchCheck, Star,
     MapPin, DollarSign, Zap, ChevronLeft, X, Clock, Calendar,
-    GraduationCap, CheckCircle, BookOpen, FileText
+    GraduationCap, CheckCircle, BookOpen, FileText, Heart
 } from 'lucide-react';
+import { useGetJobs, useGetSavedJobs, useSaveJob, useUnsaveJob } from '@/hooks/api/jobs/useJobs';
+import toast from 'react-hot-toast';
 import bannerHuman from '@/assets/images/banner-human2.png';
 import { useState } from 'react';
 
@@ -33,111 +34,32 @@ const FindJobs = () => {
         { name: 'Audit', logo: 'A' }, { name: 'Agro', logo: 'Ag' },
     ];
 
-    const { data: serverJobs = [], isLoading } = useGetJobs({ search: searchTerm });
+    const { data: serverJobs = [], isLoading } = useGetJobs({
+        search: searchTerm,
+        type: jobType === 'All' ? undefined : jobType
+    });
+    const { data: savedJobs = [] } = useGetSavedJobs();
+    const { mutate: saveJob } = useSaveJob();
+    const { mutate: unsaveJob } = useUnsaveJob();
+
+    const isJobSaved = (jobId) => savedJobs.some(item => item.job_id === jobId || item.jobId === jobId);
+
+    const toggleSave = (e, jobId) => {
+        e.stopPropagation();
+        if (isJobSaved(jobId)) {
+            unsaveJob(jobId, { onSuccess: () => toast.success('Job removed from saved list') });
+        } else {
+            saveJob(jobId, { onSuccess: () => toast.success('Job saved successfully') });
+        }
+    };
+
     const { isAuthenticated } = useAuth();
     const isLoggedIn = isAuthenticated();
 
-    // Enhanced job data matching employer form fields
-    const allIndividualJobs = [
-        {
-            id: 1, company: 'Google', role: 'Senior UX Designer', loc: 'Mountain View, CA', pay: '$180k', type: 'Full-time', logo: 'G', deadline: '2026-04-15',
-            description: 'We are seeking a Senior UX Designer to lead the design of next-generation products. You will collaborate with cross-functional teams to define and implement innovative solutions for product direction, visuals, and experience.',
-            responsibilities: ['Lead end-to-end design for core products', 'Conduct user research and usability testing', 'Create wireframes, prototypes, and high-fidelity mockups', 'Collaborate with engineering and product teams'],
-            qualifications: ['5+ years UX design experience', 'Proficiency in Figma and design systems', 'Strong portfolio demonstrating user-centered design'],
-            skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems', 'Accessibility'], education: 'Bachelor in Design or HCI', specification: 'Must have experience with large-scale consumer products.'
-        },
-        {
-            id: 2, company: 'Meta', role: 'Staff Software Engineer', loc: 'Remote', pay: '$210k', type: 'Remote', logo: 'M', deadline: '2026-05-01',
-            description: 'Join Meta\'s core infrastructure team to build highly scalable distributed systems powering billions of users. You will architect and implement systems that handle massive throughput.',
-            responsibilities: ['Design and implement distributed backend services', 'Mentor junior engineers and lead code reviews', 'Optimize systems for performance and reliability', 'Drive technical strategy for the team'],
-            qualifications: ['8+ years software engineering experience', 'Expert in C++, Python, or Java', 'Experience building large-scale distributed systems'],
-            skills: ['C++', 'Python', 'Distributed Systems', 'System Design', 'Leadership'], education: 'MS/PhD in Computer Science preferred', specification: 'Experience with real-time data processing pipelines required.'
-        },
-        {
-            id: 3, company: 'Amazon', role: 'Solutions Architect', loc: 'Seattle, WA', pay: '$190k', type: 'Full-time', logo: 'A', deadline: '2026-04-20',
-            description: 'As a Solutions Architect at AWS, you will help enterprise customers design and build cloud-based solutions. You will be the trusted technical advisor ensuring best practices.',
-            responsibilities: ['Design cloud architecture for enterprise clients', 'Conduct technical workshops and presentations', 'Build proof-of-concept solutions', 'Collaborate with sales and engineering teams'],
-            qualifications: ['5+ years in cloud architecture', 'AWS certifications preferred', 'Strong communication and presentation skills'],
-            skills: ['AWS', 'Cloud Architecture', 'Terraform', 'Kubernetes', 'Networking'], education: 'Bachelor in CS or Engineering', specification: 'Travel up to 25% may be required.'
-        },
-        {
-            id: 4, company: 'Netflix', role: 'Systems Engineer', loc: 'Los Gatos, CA', pay: '$220k', type: 'Full-time', logo: 'N', deadline: '2026-03-30',
-            description: 'Netflix is looking for a Systems Engineer to optimize our content delivery network. You will work on systems that stream content to 250M+ subscribers worldwide.',
-            responsibilities: ['Manage and optimize CDN infrastructure', 'Automate deployment and monitoring', 'Troubleshoot complex production issues', 'Collaborate with content delivery partners'],
-            qualifications: ['5+ years systems engineering', 'Deep Linux and networking knowledge', 'Experience with CDN or large-scale distributed systems'],
-            skills: ['Linux', 'Networking', 'Python', 'CDN', 'Automation'], education: 'Bachelor in CS or related field', specification: 'On-call rotation required.'
-        },
-        {
-            id: 5, company: 'Apple', role: 'Product Manager', loc: 'Cupertino, CA', pay: '$175k', type: 'Hybrid', logo: 'A', deadline: '2026-04-10',
-            description: 'Drive the roadmap for Apple\'s next-generation products. You will work with design, engineering, and marketing to define product vision and deliver exceptional user experiences.',
-            responsibilities: ['Define product strategy and roadmap', 'Gather and prioritize requirements', 'Coordinate cross-functional launches', 'Analyze market trends and user analytics'],
-            qualifications: ['5+ years product management', 'Technical background preferred', 'Excellent stakeholder management skills'],
-            skills: ['Product Strategy', 'Agile', 'Data Analysis', 'Stakeholder Mgmt', 'Market Research'], education: 'MBA or equivalent experience', specification: 'Consumer electronics experience preferred.'
-        },
-        {
-            id: 6, company: 'NVIDIA', role: 'AI Researcher', loc: 'Santa Clara, CA', pay: '$230k', type: 'Full-time', logo: 'N', deadline: '2026-05-15',
-            description: 'Join NVIDIA Research to push the boundaries of AI/ML. Publish at top venues and develop algorithms that power the next generation of GPU-accelerated computing.',
-            responsibilities: ['Conduct cutting-edge ML research', 'Publish at top-tier conferences', 'Develop prototype AI models', 'Collaborate with hardware and software teams'],
-            qualifications: ['PhD in ML, AI, or related field', 'Strong publication record', 'Proficiency in PyTorch or TensorFlow'],
-            skills: ['PyTorch', 'Deep Learning', 'CUDA', 'Computer Vision', 'NLP'], education: 'PhD in Computer Science or AI', specification: 'Publications at NeurIPS, ICML, or CVPR preferred.'
-        },
-        {
-            id: 7, company: 'Microsoft', role: 'Azure Consultant', loc: 'Remote', pay: '$165k', type: 'Remote', logo: 'M', deadline: '2026-04-25',
-            description: 'Help enterprise customers migrate to and optimize their Azure cloud environments. Provide architectural guidance and hands-on implementation support.',
-            responsibilities: ['Assess customer cloud maturity', 'Design Azure migration strategies', 'Implement cloud solutions hands-on', 'Deliver training and enablement sessions'],
-            qualifications: ['3+ years Azure cloud experience', 'Azure certifications (AZ-104, AZ-305)', 'Consulting or customer-facing experience'],
-            skills: ['Azure', 'Cloud Migration', 'PowerShell', 'ARM Templates', 'DevOps'], education: 'Bachelor in IT or Engineering', specification: 'Remote-first with occasional client visits.'
-        },
-        {
-            id: 8, company: 'Tesla', role: 'Mechanical Engineer', loc: 'Austin, TX', pay: '$150k', type: 'On-site', logo: 'T', deadline: '2026-03-20',
-            description: 'Design and optimize mechanical systems for Tesla\'s electric vehicles. Work on next-gen battery packs, drive units, and structural components.',
-            responsibilities: ['Design mechanical components using CAD', 'Perform FEA and thermal analysis', 'Prototype and test mechanical assemblies', 'Collaborate with manufacturing teams'],
-            qualifications: ['3+ years mechanical engineering', 'Proficiency in SolidWorks or CATIA', 'Experience with automotive or EV systems'],
-            skills: ['SolidWorks', 'FEA', 'GD&T', 'Thermal Analysis', 'Prototyping'], education: 'BS/MS in Mechanical Engineering', specification: 'On-site presence required at Gigafactory Texas.'
-        },
-        {
-            id: 9, company: 'Spotify', role: 'Backend Developer', loc: 'Stockholm', pay: '$140k', type: 'Remote', logo: 'S', deadline: '2026-04-05',
-            description: 'Build the backend services that power Spotify\'s music streaming platform. Work on microservices handling millions of requests per second.',
-            responsibilities: ['Develop and maintain backend microservices', 'Optimize API performance', 'Implement data pipelines', 'Participate in on-call rotations'],
-            qualifications: ['3+ years backend development', 'Experience with Java, Scala, or Go', 'Knowledge of event-driven architectures'],
-            skills: ['Java', 'Microservices', 'Kafka', 'GCP', 'Docker'], education: 'Bachelor in CS', specification: 'Experience with audio/media streaming is a plus.'
-        },
-        {
-            id: 10, company: 'Adobe', role: 'Creative Director', loc: 'San Jose, CA', pay: '$195k', type: 'Hybrid', logo: 'A', deadline: '2026-05-10',
-            description: 'Lead the creative vision for Adobe\'s flagship products. Oversee design teams and ensure brand consistency across all touchpoints.',
-            responsibilities: ['Set creative direction for product campaigns', 'Lead and mentor design teams', 'Present creative strategies to leadership', 'Ensure brand consistency'],
-            qualifications: ['8+ years in creative/design leadership', 'Strong portfolio of brand/product work', 'Experience managing creative teams of 5+'],
-            skills: ['Creative Strategy', 'Brand Design', 'Adobe Suite', 'Team Leadership', 'Art Direction'], education: 'Bachelor in Design or Fine Arts', specification: 'Portfolio review is part of the interview.'
-        },
-    ];
-
-    const companyData = [
-        { company: 'International Pre-School', roles: ['Montessori Teacher'], logoChar: 'A' },
-        { company: 'Build up Nepal', roles: ['Social Mobilizer / Sales Officer'], logoChar: 'B' },
-        { company: 'RAPA Advisors', roles: ['Content Writer', 'SEO Executive'], logoChar: 'R' },
-        { company: 'Valley View School', roles: ['Vice Principal'], logoChar: 'V' },
-        { company: 'Global School of Science', roles: ['Vice Principal (VP)'], logoChar: 'G' },
-        { company: 'Trust Nepal Overseas', roles: ['Compliance Officer'], logoChar: 'T' },
-        { company: 'RV Group', roles: ['Sr. Civil Project Manager', 'Sales and Marketing Officer'], logoChar: 'RV' },
-        { company: 'The Metaphor Consultancy', roles: ['Study Abroad Counselor'], logoChar: 'M' },
-        { company: 'Endeavor Nepal', roles: ['System and Network...'], logoChar: 'E' },
-        { company: 'Future Hub Asia Pacific', roles: ['Counselor'], logoChar: 'F' },
-        { company: 'Simjung', roles: ['Full Stack Developer (AI-...)'], logoChar: 'S' },
-        { company: 'Mountain River Films', roles: ['Social Media Manager'], logoChar: 'M' },
-    ];
-
-    const filteredIndividualJobs = allIndividualJobs.filter(job => {
-        const matchesSearch = job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesType = jobType === 'All' ||
-            job.type.toLowerCase().replace('-', ' ').includes(jobType.toLowerCase());
-        return matchesSearch && matchesType;
-    });
-
     const indexOfLastJob = currentPage * jobsPerPage;
     const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-    const currentJobs = filteredIndividualJobs.slice(indexOfFirstJob, indexOfLastJob);
-    const totalPages = Math.ceil(filteredIndividualJobs.length / jobsPerPage);
+    const currentJobs = serverJobs.slice(indexOfFirstJob, indexOfLastJob);
+    const totalPages = Math.ceil(serverJobs.length / jobsPerPage);
 
     const handleJobClick = (jobId) => {
         navigate(`/jobseeker/jobs/${jobId}`);
@@ -238,6 +160,42 @@ const FindJobs = () => {
                 .jd-modal-footer { padding: 16px 32px; border-top: 1px solid var(--border-dashboard); display: flex; justify-content: flex-end; background: var(--bg-dashboard, #f8f9fa); }
                 .jd-modal-apply-btn { background: var(--color-brand-accent); color: white; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; gap: 8px; align-items: center; transition: all 0.2s; box-shadow: 0 4px 14px rgba(62,97,255,0.25); }
                 .jd-modal-apply-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(62,97,255,0.35); }
+
+                .save-job-btn {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 50%;
+                    border: 1px solid var(--border-dashboard);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: var(--card-dashboard);
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    margin-right: 12px;
+                }
+                .save-job-btn:hover { transform: scale(1.1); background: rgba(239, 68, 68, 0.1); color: #EF4444; border-color: #FCA5A5; }
+                .save-job-btn.saved { 
+                    color: #EF4444 !important; 
+                    border-color: #FCA5A5 !important; 
+                    background: #FEF2F2 !important;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+                }
+                .already-saved-badge {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #FEF2F2;
+                    color: #EF4444;
+                    padding: 6px 12px;
+                    border-radius: 100px;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    border: 1px solid #FCA5A5;
+                    animation: badgeSlideIn 0.3s ease-out;
+                }
+                @keyframes badgeSlideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
             `}</style>
 
             <div className="hero-section">
@@ -279,7 +237,7 @@ const FindJobs = () => {
                         <Star size={22} fill="#EAB308" color="#EAB308" /> Available Jobs
                     </div>
                     <div className="view-toggles">
-                        {['All', 'Full Time', 'Part-Time', 'Remote', 'On-site'].map(type => (
+                        {['All', 'Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'].map(type => (
                             <button
                                 key={type}
                                 className={`filter-tab ${jobType === type ? 'active' : ''}`}
@@ -292,45 +250,109 @@ const FindJobs = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {currentJobs.map((job) => (
-                        <div key={job.id} className="job-item-card" onClick={() => handleJobClick(job.id)}>
-                            <div className="job-card-top">
-                                <div className="job-main-info">
-                                    <div className="job-badge">{job.logo}</div>
-                                    <div>
-                                        <div className="job-title">{job.role}</div>
-                                        <div className="job-meta">
-                                            <div className="meta-item"><Building2 size={13} /> {job.company}</div>
-                                            <div className="meta-item"><MapPin size={13} /> {job.loc}</div>
-                                            <div className="meta-item"><DollarSign size={13} /> {job.pay}</div>
-                                            <div className="meta-item"><Zap size={13} color="#3E61FF" /> {job.type}</div>
+                    {isLoading ? (
+                        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                            <div className="animate-pulse" style={{ fontSize: '1.2rem', fontWeight: '600' }}>Loading available jobs...</div>
+                        </div>
+                    ) : currentJobs.length > 0 ? (
+                        currentJobs.map((job) => (
+                            <div key={job.id} className="job-item-card" onClick={() => handleJobClick(job.id)}>
+                                <div className="job-card-top">
+                                    <div className="job-main-info">
+                                        <div className="job-badge">
+                                            {job.Employer?.logo ? (
+                                                <img src={`/${job.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                                            ) : (
+                                                job.Employer?.name?.charAt(0) || job.company?.charAt(0) || 'J'
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="job-title">{job.title}</div>
+                                            <div className="job-meta">
+                                                <div className="meta-item"><Building2 size={13} /> {job.Employer?.name || job.company || 'Nexus Partner'}</div>
+                                                <div className="meta-item"><MapPin size={13} /> {job.location}</div>
+                                                <div className="meta-item"><DollarSign size={13} /> {job.salary}</div>
+                                                <div className="meta-item"><Zap size={13} color="#3E61FF" /> {job.jobType || job.type}</div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {isJobSaved(job.id) && (
+                                            <span className="already-saved-badge">
+                                                <Heart size={12} fill="#EF4444" color="#EF4444" /> Already Saved
+                                            </span>
+                                        )}
+                                        <button
+                                            className={`save-job-btn ${isJobSaved(job.id) ? 'saved' : ''}`}
+                                            onClick={(e) => toggleSave(e, job.id)}
+                                            title={isJobSaved(job.id) ? "Unsave Job" : "Save Job"}
+                                        >
+                                            <Heart size={18} fill={isJobSaved(job.id) ? "#EF4444" : "none"} color={isJobSaved(job.id) ? "#EF4444" : "currentColor"} />
+                                        </button>
+                                        <button className="view-details-btn" onClick={(e) => { e.stopPropagation(); handleJobClick(job.id); }}>
+                                            View Details <ChevronRight size={14} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <button className="view-details-btn" onClick={(e) => { e.stopPropagation(); handleJobClick(job.id); }}>
-                                    View Details <ChevronRight size={14} />
-                                </button>
-                            </div>
-                            <div className="job-card-desc">{job.description}</div>
-                            <div className="job-card-bottom">
-                                <div className="job-card-skills">
-                                    {job.skills && job.skills.slice(0, 3).map((s, i) => (
-                                        <span key={i} className="job-card-skill">{s}</span>
-                                    ))}
-                                    {job.skills && job.skills.length > 3 && <span className="job-card-skill">+{job.skills.length - 3}</span>}
+                                <div className="job-card-desc">{job.description}</div>
+                                <div className="job-card-bottom">
+                                    <div className="job-card-skills">
+                                        {job.skills && Array.isArray(job.skills) && job.skills.slice(0, 3).map((s, i) => (
+                                            <span key={i} className="job-card-skill">{s}</span>
+                                        ))}
+                                        {job.skills && Array.isArray(job.skills) && job.skills.length > 3 && <span className="job-card-skill">+{job.skills.length - 3}</span>}
+                                    </div>
+                                    <div className="job-card-deadline"><Calendar size={13} /> {job.deadline ? new Date(job.deadline).toLocaleDateString() : 'N/A'}</div>
                                 </div>
-                                <div className="job-card-deadline"><Calendar size={13} /> {job.deadline}</div>
                             </div>
+                        ))
+                    ) : (
+                        <div style={{ padding: '80px', textAlign: 'center', background: 'var(--card-dashboard)', borderRadius: '16px', border: '1px dashed var(--border-dashboard)' }}>
+                            <div style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: '600' }}>No jobs found matching your criteria.</div>
+                            <button
+                                onClick={() => { setSearchTerm(''); setJobType('All'); }}
+                                style={{ marginTop: '16px', color: 'var(--color-brand-accent)', fontWeight: '700', cursor: 'pointer', background: 'transparent', border: 'none' }}
+                            >
+                                Clear all filters
+                            </button>
                         </div>
-                    ))}
+                    )}
 
-                    <div className="pagination-tray">
-                        <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><ChevronLeft size={18} /></button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button key={i + 1} className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                        ))}
-                        <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><ChevronRight size={18} /></button>
-                    </div>
+                    {serverJobs.length > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '48px', flexWrap: 'wrap', gap: '20px' }}>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                Showing <span style={{ color: 'var(--text-main)' }}>{indexOfFirstJob + 1}-{Math.min(indexOfLastJob, serverJobs.length)}</span> of <span style={{ color: 'var(--text-main)' }}>{serverJobs.length}</span> results
+                            </div>
+
+                            {totalPages > 1 && (
+                                <div className="pagination-tray" style={{ marginTop: 0 }}>
+                                    <button
+                                        className="page-btn"
+                                        disabled={currentPage === 1}
+                                        onClick={() => { setCurrentPage(currentPage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    >
+                                        <ChevronLeft size={18} />
+                                    </button>
+                                    {[...Array(totalPages)].map((_, i) => (
+                                        <button
+                                            key={i + 1}
+                                            className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+                                            onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                    <button
+                                        className="page-btn"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => { setCurrentPage(currentPage + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    >
+                                        <ChevronRight size={18} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

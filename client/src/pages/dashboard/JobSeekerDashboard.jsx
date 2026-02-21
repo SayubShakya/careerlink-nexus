@@ -9,43 +9,42 @@ import {
     Search,
     Shield,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Heart
 } from 'lucide-react';
 
 import heroBg from '@assets/images/job-seeker-img.jpg';
+
+import { useGetJobSeekerStats } from '@/hooks/api/profile/useProfile';
+import { useGetAppliedJobs } from '@/hooks/api/jobs/useJobs';
 
 const JobSeekerDashboard = () => {
     const { data: me } = useGetMe();
     const navigate = useNavigate();
     const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
+
+    // --- API Data ---
+    const { data: serverStats, isLoading: isStatsLoading } = useGetJobSeekerStats();
+    const { data: appliedJobs = [], isLoading: isJobsLoading } = useGetAppliedJobs();
+
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
 
-    const stats = [
-        { label: 'Jobs Applied', value: '24', trend: 'Total count' },
-        { label: 'My Resumes', value: '3', trend: 'In your files' },
-        { label: 'Under Review', value: '12', trend: 'Active jobs' },
-        { label: 'Interview Calls', value: '5', trend: 'Shortlisted', color: '#0F172A' },
+    const statsConfig = [
+        { label: 'Jobs Applied', value: serverStats?.appliedCount || 0, trend: 'Total count' },
+        { label: 'My Resumes', value: serverStats?.cvCount || 0, trend: 'In your files' },
+        { label: 'Under Review', value: serverStats?.reviewingCount || 0, trend: 'Active jobs' },
+        { label: 'Interview Calls', value: serverStats?.interviewCount || 0, trend: 'Shortlisted', color: '#0F172A' },
     ];
 
-    const pipelineData = [
-        { id: 1, role: 'Senior UX Designer', company: 'Google', loc: 'Mountain View, CA', status: 'Reviewing', logo: 'G' },
-        { id: 2, role: 'Product Manager', company: 'Meta', loc: 'Menlo Park, CA', status: 'Interview', logo: 'M' },
-        { id: 3, role: 'Staff Software Engineer', company: 'Amazon', loc: 'Seattle, WA', status: 'Accepted', logo: 'A' },
-        { id: 4, role: 'Cloud Architect', company: 'Microsoft', loc: 'Remote', status: 'Pending', logo: 'M' },
-        { id: 5, role: 'AI Researcher', company: 'NVIDIA', loc: 'Santa Clara, CA', status: 'Rejected', logo: 'N' },
-        { id: 6, role: 'Full Stack Engineer', company: 'Netflix', loc: 'Los Gatos, CA', status: 'Interview', logo: 'N' },
-        { id: 7, role: 'Systems Architect', company: 'Apple', loc: 'Cupertino, CA', status: 'Reviewing', logo: 'A' },
-        { id: 8, role: 'Data Scientist', company: 'Palantir', loc: 'Denver, CO', status: 'Pending', logo: 'P' },
-        { id: 9, role: 'Security Analyst', company: 'Cloudflare', loc: 'Remote', status: 'Applied', logo: 'C' },
-        { id: 10, role: 'Lead DevOps', company: 'Docker', loc: 'Remote', status: 'Reviewing', logo: 'D' },
-    ];
+    const pipelineData = appliedJobs;
+    const isLoading = isStatsLoading || isJobsLoading;
 
     // Pagination Logic
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = pipelineData.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(pipelineData.length / itemsPerPage);
+    const totalPages = Math.ceil(pipelineData.length / itemsPerPage) || 1;
 
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -221,19 +220,21 @@ const JobSeekerDashboard = () => {
                     font-weight: 850;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    background: var(--bg-dashboard);
-                    color: var(--text-muted);
-                    border: 1px solid transparent;
-                    min-width: 100px;
                     text-align: center;
+                    min-width: 110px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: 0.2s;
                 }
-
-                .status-chip.reviewing { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border-dashboard); }
-                .status-chip.interview { background: rgba(62, 97, 255, 0.1); color: var(--color-brand-accent); border: 1px solid var(--color-brand-accent); }
-                .status-chip.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
-                .status-chip.accepted { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
-                .status-chip.rejected { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
-                .status-chip.applied { background: var(--bg-dashboard); color: var(--text-muted); border: 1px solid var(--border-dashboard); }
+                
+                /* Status Colors */
+                .status-chip.applied { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+                .status-chip.reviewed, .status-chip.pending { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
+                .status-chip.shortlisted { background: #ECFDF5; color: #10B981; border: 1px solid #D1FAE5; }
+                .status-chip.interview_scheduled, .status-chip.interviewing { background: #F5F3FF; color: #8B5CF6; border: 1px solid #EDE9FE; }
+                .status-chip.rejected { background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; }
+                .status-chip.hired, .status-chip.accepted { background: #F0FDF4; color: #22C55E; border: 1px solid #DCFCE7; }
 
                 /* PAGINATION STYLES */
                 .pagination-tray {
@@ -303,12 +304,16 @@ const JobSeekerDashboard = () => {
                 <div className="hero-visual-side">
                     {user?.profile_picture && (
                         <div className="dashboard-profile-circle">
-                            <img src={`http://localhost:5000/${user.profile_picture}`} alt="Profile" />
+                            <img src={`/${user.profile_picture}`} alt="Profile" />
                         </div>
                     )}
                 </div>
                 <div className="hero-stats-side">
-                    {stats.map((s, i) => (
+                    {isLoading ? (
+                        <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
+                            Loading stats...
+                        </div>
+                    ) : statsConfig.map((s, i) => (
                         <div key={i} className={`stat-tile ${s.highlight ? 'active-pipeline' : ''}`}>
                             <span className="tile-label">{s.label}</span>
                             <span className="tile-val">{s.value}</span>
@@ -327,24 +332,46 @@ const JobSeekerDashboard = () => {
                     </div>
 
                     <div className="pipeline-feed">
-                        {currentItems.map((app) => (
-                            <div key={app.id} className="pipeline-item" onClick={() => navigate(`/jobseeker/jobs/${app.id}?status=${app.status}`)} style={{ cursor: 'pointer' }}>
-                                <div className="item-info">
-                                    <div className="company-badge">{app.logo}</div>
-                                    <div className="text-content">
-                                        <div className="role-name">{app.role}</div>
-                                        <div className="company-meta">
-                                            <span>{app.company}</span>
-                                            <span style={{ opacity: 0.3 }}>•</span>
-                                            <span>{app.loc}</span>
+                        {isLoading ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading applications...</div>
+                        ) : currentItems.length > 0 ? (
+                            currentItems.map((app) => (
+                                <div key={app.id} className="pipeline-item" onClick={() => navigate(`/jobseeker/jobs/${app.JobListing?.id}?status=${app.status}`)} style={{ cursor: 'pointer' }}>
+                                    <div className="item-info">
+                                        <div className="company-badge">
+                                            {app.JobListing?.Employer?.logo ? (
+                                                <img src={`/${app.JobListing.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                                            ) : (
+                                                app.JobListing?.Employer?.name?.charAt(0) || app.JobListing?.company?.charAt(0) || 'J'
+                                            )}
+                                        </div>
+                                        <div className="text-content">
+                                            <div className="role-name">{app.JobListing?.title}</div>
+                                            <div className="company-meta">
+                                                <span>{app.JobListing?.Employer?.name || app.JobListing?.company || 'Nexus Partner'}</span>
+                                                <span style={{ opacity: 0.3 }}>•</span>
+                                                <span>{app.JobListing?.location}</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className={`status-chip ${app.status?.toLowerCase()}`}>
+                                        {app.status}
+                                    </div>
                                 </div>
-                                <div className={`status-chip ${app.status.toLowerCase()}`}>
-                                    {app.status}
-                                </div>
+                            ))
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '40px', background: 'var(--card-dashboard)', borderRadius: '16px', border: '1px dashed var(--border-dashboard)' }}>
+                                <Briefcase size={40} style={{ marginBottom: '16px', color: 'var(--text-light)' }} />
+                                <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No applications yet</h3>
+                                <p style={{ color: 'var(--text-muted)' }}>Start your career journey by applying for some jobs!</p>
+                                <button
+                                    onClick={() => navigate(ROUTES.JOBSEEKER_FIND_JOBS)}
+                                    style={{ marginTop: '16px', padding: '10px 20px', background: 'var(--color-brand-accent)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '800', cursor: 'pointer' }}
+                                >
+                                    Browse Jobs
+                                </button>
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     {/* PAGINATION TRAY */}
@@ -383,6 +410,11 @@ const JobSeekerDashboard = () => {
 
                     <Link to={ROUTES.JOBSEEKER_FIND_JOBS} className="nav-action-item">
                         <span><Search size={22} color="#3E61FF" strokeWidth={2.5} /> Find Jobs</span>
+                        <ArrowUpRight size={18} />
+                    </Link>
+
+                    <Link to={ROUTES.SAVED_JOBS} className="nav-action-item">
+                        <span><Heart size={22} color="#3E61FF" strokeWidth={2.5} /> Saved Jobs</span>
                         <ArrowUpRight size={18} />
                     </Link>
 

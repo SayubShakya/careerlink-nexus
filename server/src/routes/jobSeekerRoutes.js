@@ -1,7 +1,8 @@
 const express = require('express');
 const jobSeekerController = require('../controllers/jobSeekerController');
+const applicationController = require('../controllers/applicationController');
 const authMiddleware = require('../middleware/authMiddleware');
-const uploadAvatar = require('../utils/avatarUpload');
+const upload = require('../utils/upload');
 
 const router = express.Router();
 
@@ -55,10 +56,10 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               first_name:
+ *               firstName:
  *                 type: string
  *                 example: John
- *               last_name:
+ *               lastName:
  *                 type: string
  *                 example: Doe
  *     responses:
@@ -73,9 +74,18 @@ const router = express.Router();
 // Get current logged-in user
 // Protect all routes after this middleware
 router.use(authMiddleware.protect);
+// Restrict to only job seekers
+router.use(authMiddleware.restrictTo('job_seeker'));
 
 // Routes specific to job seeker
 router.get('/me', jobSeekerController.getMe);
-router.patch('/me', uploadAvatar.single('avatar'), jobSeekerController.updateMe);
+router.get('/full-profile', jobSeekerController.getFullProfile);
+router.patch('/me', upload.single('profile_picture'), jobSeekerController.updateMe);
+router.get('/me/stats', jobSeekerController.getStats);
+router.get('/me/feed', jobSeekerController.getActivityFeed);
+router.get('/me/saved-jobs', jobSeekerController.getSavedJobs);
+router.post('/me/saved-jobs/:id', jobSeekerController.saveJob);
+router.delete('/me/saved-jobs/:id', jobSeekerController.unsaveJob);
+router.get('/me/applications', applicationController.getApplicationsBySeeker);
 
 module.exports = router;

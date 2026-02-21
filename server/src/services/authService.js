@@ -19,13 +19,19 @@ class AuthService {
      * Business logic for finding a user by email across both tables
      */
     async findUserByEmail(email) {
-        // Check JobSeeker first
-        const jobSeeker = await JobSeeker.findOne({ where: { email } });
-        if (jobSeeker) return { user: jobSeeker, role: 'job_seeker' };
+        // Check JobSeeker
+        const jobSeeker = await JobSeeker.findOne({
+            where: { email },
+            include: [{ model: Role, attributes: ['name'] }]
+        });
+        if (jobSeeker) return { user: jobSeeker, role: jobSeeker.Role.name };
 
         // Check Employer
-        const employer = await Employer.findOne({ where: { email } });
-        if (employer) return { user: employer, role: 'employer' };
+        const employer = await Employer.findOne({
+            where: { email },
+            include: [{ model: Role, attributes: ['name'] }]
+        });
+        if (employer) return { user: employer, role: employer.Role.name };
 
         return null;
     }

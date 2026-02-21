@@ -108,19 +108,23 @@ const router = express.Router();
  */
 
 // Protect all routes
+router.use((req, res, next) => {
+    console.log(`DEBUG: Entering CV routes - ${req.method} ${req.url}`);
+    next();
+});
 router.use(authMiddleware.protect);
 // Restrict to job seekers only
 router.use(authMiddleware.restrictTo('job_seeker'));
 
-router.route('/')
-    .get(cvController.getAllCVs)
-    .post(cvController.createPlatformCV);
+router.get('/', cvController.getAllCVs);
+router.post('/', cvController.createPlatformCV);
 
 router.post('/upload', upload.single('file'), cvController.uploadCV);
 
-router.route('/:id')
-    .delete(cvController.deleteCV)
-    .get(cvController.downloadCV)
-    .patch(cvController.updateCV);
+router.get('/:id', cvController.getCV);
+router.delete('/:id', cvController.deleteCV);
+router.patch('/:id', cvController.updateCV);
+
+router.get('/:id/download', cvController.downloadCV);
 
 module.exports = router;

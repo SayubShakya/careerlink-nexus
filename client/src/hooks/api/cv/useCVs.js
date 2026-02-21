@@ -38,6 +38,7 @@ export const usePostUploadCV = () => {
         onSuccess: () => {
             toast.success("CV uploaded successfully!");
             queryClient.invalidateQueries(["cvs"]);
+            queryClient.invalidateQueries(["jobseeker", "stats"]);
         }
     });
 };
@@ -60,6 +61,7 @@ export const useDeleteCV = () => {
         onSuccess: () => {
             toast.success("CV deleted successfully");
             queryClient.invalidateQueries(["cvs"]);
+            queryClient.invalidateQueries(["jobseeker", "stats"]);
         }
     });
 };
@@ -82,6 +84,7 @@ export const usePostCreatePlatformCV = () => {
         onSuccess: () => {
             toast.success("CV created successfully!");
             queryClient.invalidateQueries(["cvs"]);
+            queryClient.invalidateQueries(["jobseeker", "stats"]);
         }
     });
 };
@@ -94,7 +97,7 @@ export const usePutUpdatePlatformCV = () => {
     return useMutation({
         mutationFn: async ({ id, cvData }) => {
             try {
-                const response = await api.put(API_ENDPOINTS.CV.UPDATE(id), cvData);
+                const response = await api.patch(API_ENDPOINTS.CV.UPDATE(id), cvData);
                 return response.data;
             } catch (error) {
                 const errorMessage = error?.response?.data?.message || "Failed to update CV";

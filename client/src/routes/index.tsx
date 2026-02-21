@@ -23,6 +23,8 @@ import PublicFindJobs from '../pages/jobs/PublicFindJobs';
 import JobDescription from '../pages/jobs/JobDescription';
 import EmployerLayout from '../components/layout/employer/EmployerLayout';
 import JobseekerLayout from '../components/layout/jobseeker/JobseekerLayout';
+import ApplicationStatus from '../pages/jobseeker/ApplicationStatus';
+import SavedJobs from '../pages/jobseeker/SavedJobs';
 import LogoutConfirmation from '../pages/auth/LogoutConfirmation';
 import ErrorPage from '../pages/error/ErrorPage';
 
@@ -110,7 +112,11 @@ export const router = createBrowserRouter([
             },
             {
                 path: ROUTES.APPLICATION_STATUS,
-                element: <div className="p-20 text-center">View Application Status Component (Coming Soon)</div>,
+                element: <ApplicationStatus />,
+            },
+            {
+                path: ROUTES.SAVED_JOBS,
+                element: <SavedJobs />,
             },
             // Future jobseeker routes like /add-cv, /application-status
         ]

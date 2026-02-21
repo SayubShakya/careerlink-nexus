@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
 const JobSeeker = require('./JobSeeker');
 const CV = require('./CV');
+const JobListing = require('./JobListing');
 
 const Application = sequelize.define('Application', {
     id: {
@@ -11,10 +12,14 @@ const Application = sequelize.define('Application', {
         allowNull: false
     },
     job_id: {
-        type: DataTypes.STRING(255), // Storing ID from frontend (e.g. "montessori-teacher") or real UUID if available
+        type: DataTypes.UUID,
         allowNull: false,
+        references: {
+            model: JobListing,
+            key: 'id'
+        }
     },
-    seeker_id: {
+    job_seeker_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
@@ -22,17 +27,22 @@ const Application = sequelize.define('Application', {
             key: 'id'
         }
     },
+    application_method: {
+        type: DataTypes.ENUM('platform_cv', 'pdf_resume', 'both'),
+        allowNull: false,
+        defaultValue: 'platform_cv'
+    },
     cv_id: {
         type: DataTypes.UUID,
-        allowNull: true, // Can act as snapshot or reference
+        allowNull: true,
         references: {
             model: CV,
             key: 'id'
         }
     },
     status: {
-        type: DataTypes.ENUM('pending', 'reviewed', 'shortlisted', 'rejected', 'hired'),
-        defaultValue: 'pending'
+        type: DataTypes.ENUM('applied', 'reviewed', 'shortlisted', 'interview_scheduled', 'rejected', 'hired'),
+        defaultValue: 'applied'
     },
     cover_letter: {
         type: DataTypes.TEXT,
@@ -46,10 +56,13 @@ const Application = sequelize.define('Application', {
 });
 
 // Associations
-JobSeeker.hasMany(Application, { foreignKey: 'seeker_id' });
-Application.belongsTo(JobSeeker, { foreignKey: 'seeker_id' });
+JobSeeker.hasMany(Application, { foreignKey: 'job_seeker_id' });
+Application.belongsTo(JobSeeker, { foreignKey: 'job_seeker_id' });
 
 CV.hasMany(Application, { foreignKey: 'cv_id' });
 Application.belongsTo(CV, { foreignKey: 'cv_id' });
+
+JobListing.hasMany(Application, { foreignKey: 'job_id', onDelete: 'CASCADE' });
+Application.belongsTo(JobListing, { foreignKey: 'job_id' });
 
 module.exports = Application;

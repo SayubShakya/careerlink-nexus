@@ -9,7 +9,7 @@ import { API_ENDPOINTS } from "@/api/endpoints";
 export const usePostApplyJob = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ jobId, applicationData }) => {
+        mutationFn: async ({ jobId, ...applicationData }) => {
             try {
                 const response = await api.post(API_ENDPOINTS.JOBS.APPLY(jobId), applicationData);
                 return response.data;
@@ -22,6 +22,8 @@ export const usePostApplyJob = () => {
         onSuccess: () => {
             toast.success("Application submitted successfully!");
             queryClient.invalidateQueries(["jobs"]);
+            queryClient.invalidateQueries(["applied-jobs"]);
+            queryClient.invalidateQueries(["jobseeker", "stats"]);
             queryClient.invalidateQueries(["employer", "applications"]);
         }
     });

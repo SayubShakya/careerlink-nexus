@@ -22,16 +22,48 @@ const Employer = sequelize.define('Employer', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    organization_name: {
+    companyName: {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-    company_website: {
+    companyWebsite: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
         validate: {
-            isUrl: true // Basic URL validation
+            isUrl: true
         }
+    },
+    industry: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    location: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    contact_person: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    city: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    state: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    zip_code: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    country: {
+        type: DataTypes.STRING(100),
+        allowNull: true
     },
     is_verified: {
         type: DataTypes.BOOLEAN,
@@ -50,10 +82,10 @@ const Employer = sequelize.define('Employer', {
         allowNull: true
     }
 }, {
-    tableName: 'employeer_users',
+    tableName: 'employer_users',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: false // Following same pattern as JobSeeker
+    updatedAt: 'updated_at'
 });
 
 // Hooks

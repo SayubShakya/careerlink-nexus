@@ -4,6 +4,8 @@ const catchAsync = require('../utils/catchAsync');
 const JobSeeker = require('../models/JobSeeker');
 const Employer = require('../models/Employer');
 
+const Role = require('../models/Role');
+
 // Protect routes - verifies JWT token
 exports.protect = catchAsync(async (req, res, next) => {
     // 1) Get token from header
@@ -20,12 +22,14 @@ exports.protect = catchAsync(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3) Check if user still exists (check both tables)
-    let currentUser = await JobSeeker.findByPk(decoded.id);
-    let role = 'job_seeker';
+    let currentUser = await JobSeeker.findByPk(decoded.id, {
+        include: [{ model: Role, attributes: ['name'] }]
+    });
 
     if (!currentUser) {
-        currentUser = await Employer.findByPk(decoded.id);
-        role = 'employer';
+        currentUser = await Employer.findByPk(decoded.id, {
+            include: [{ model: Role, attributes: ['name'] }]
+        });
     }
 
     if (!currentUser) {
@@ -34,7 +38,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // 4) Grant access - attach user and role to request
     req.user = currentUser;
-    req.role = role;
+    req.role = currentUser.Role.name;
     next();
 });
 
