@@ -6,6 +6,9 @@ import logo from '@assets/images/temporary_logo.png';
 import { ROUTES } from '@/routes/routes';
 import { Eye, EyeOff } from 'lucide-react';
 import usePostRegisterJobSeeker from '@/hooks/api/auth/usePostRegisterJobSeeker';
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const styles = {
     pageContainer: {
@@ -149,6 +152,35 @@ const JobseekerSignup = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const role = localStorage.getItem('role');
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const res = await axios.post('http://localhost:5000/api/auth/google/verify', {
+                    token: tokenResponse.access_token,
+                    role: 'job_seeker'
+                });
+
+                if (res.status === 201) {
+                    toast.success('Registration successful! Please log in.');
+                    navigate(ROUTES.LOGIN);
+                    return;
+                }
+
+                // If user was already registered
+                const { token, data } = res.data;
+                localStorage.setItem("userToken", token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("role", data.role);
+                toast.success('Login successful!');
+                window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
+            } catch (error) {
+                toast.error(error.response?.data?.message || 'Google signup failed');
+                console.error(error);
+            }
+        },
+        onError: () => toast.error('Google signup failed'),
+    });
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -393,6 +425,35 @@ const JobseekerSignup = () => {
                             {loading ? 'Creating Account...' : 'Create Seeker Account'}
                         </button>
 
+                        <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '0.8rem', color: '#CBD5E0', position: 'relative' }}>
+                            <span style={{ backgroundColor: 'white', padding: '0 10px', position: 'relative', zIndex: 1 }}>or sign up with</span>
+                            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px solid #E2E8F0', zIndex: 0 }}></div>
+                        </div>
+
+                        <button
+                            type="button"
+                            style={{
+                                ...styles.submitBtn,
+                                backgroundColor: 'white',
+                                color: '#4A5568',
+                                border: '1px solid #E2E8F0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '12px',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                transition: 'all 0.2s ease',
+                                marginBottom: '25px'
+                            }}
+                            className="google-btn"
+                            onClick={() => handleGoogleLogin()}
+                        >
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style={{ width: '20px', height: '20px' }} />
+                            Sign up with Google
+                        </button>
+
                         <p style={styles.switchText}>
                             Already have an account?{' '}
                             <Link to={ROUTES.LOGIN} style={styles.link}>
@@ -409,6 +470,10 @@ const JobseekerSignup = () => {
                 }
                 .auth-submit-btn:hover {
                     background-color: var(--color-brand-accent) !important;
+                }
+                .google-btn:hover {
+                    background-color: #F7FAFC !important;
+                    border-color: #CBD5E0 !important;
                 }
                 @media (max-width: 768px) {
                     .auth-left-hide { display: none !important; }

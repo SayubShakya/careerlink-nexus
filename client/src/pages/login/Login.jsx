@@ -15,33 +15,29 @@ const Login = () => {
     const { isAuthenticated, login: setAuth } = useAuth();
     const { mutate: login, isPending: loading } = usePostLogin();
     const role = localStorage.getItem('role');
-    const intendedRoleRef = useRef(null);
-
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
                 const res = await axios.post('http://localhost:5000/api/auth/google/verify', {
-                    token: tokenResponse.access_token,
-                    role: intendedRoleRef.current
+                    token: tokenResponse.access_token
                 });
 
-                // Backend handles both existing login and new user creation seamlessly
-                const { token, data } = res.data;
+                // If success, they already have an account
 
-                // Keep local storage keys exactly like usePostLogin
+                const { token, data } = res.data;
                 localStorage.setItem("userToken", token);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("role", data.role);
 
                 toast.success('Login successful!');
-                // Full window redirect exactly like manual login ensures context refreshes
                 window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
             } catch (error) {
-                toast.error('Google Login failed');
+                const message = error.response?.data?.message || 'Please sign up first before trying to log in.';
+                toast.error(message, { duration: 5000 });
                 console.error(error);
             }
         },
-        onError: () => toast.error('Google Login failed'),
+        onError: () => toast.error('Please sign up first before trying to log in.', { duration: 5000 }),
     });
 
     useEffect(() => {
@@ -166,16 +162,19 @@ const Login = () => {
             width: '100%',
             padding: '12px',
             backgroundColor: 'white',
-            color: 'var(--text-muted)',
-            border: '1px solid var(--border-subtle)',
+            color: '#4A5568',
+            border: '1px solid #E2E8F0',
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.9rem',
-            fontWeight: '500',
+            fontSize: '1rem',
+            fontWeight: '600',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px'
+            gap: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            transition: 'all 0.2s ease',
+            marginBottom: '20px'
         },
         switchText: {
             marginTop: 'auto',
@@ -309,16 +308,10 @@ const Login = () => {
                             <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px solid #E2E8F0', zIndex: 0 }}></div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button type="button" style={{ ...styles.googleBtn, flex: 1 }} className="google-btn" onClick={() => { intendedRoleRef.current = 'job_seeker'; handleGoogleLogin(); }}>
-                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
-                                Job Seeker
-                            </button>
-                            <button type="button" style={{ ...styles.googleBtn, flex: 1 }} className="google-btn" onClick={() => { intendedRoleRef.current = 'employer'; handleGoogleLogin(); }}>
-                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
-                                Employer
-                            </button>
-                        </div>
+                        <button type="button" style={styles.googleBtn} className="google-btn" onClick={() => handleGoogleLogin()}>
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style={{ width: '20px', height: '20px' }} />
+                            Sign in with Google
+                        </button>
 
                         <p style={styles.switchText}>
                             Don't have an account?{' '}

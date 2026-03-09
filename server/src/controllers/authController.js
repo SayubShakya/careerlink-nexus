@@ -84,29 +84,34 @@ exports.googleVerify = catchAsync(async (req, res, next) => {
     if (result) {
         // User exists - log them in using their actual pre-existing role
         const { user, role } = result;
-
-        // Store in session
         req.session.userId = user.id;
         req.session.role = role;
-
         return createSendToken(user, 200, res, role);
     } else {
-        // User does not exist - immediately create them as their intended role
-        const payload = intendedRole === 'job_seeker'
-            ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true }
-            : { organization_name: `${name}'s Org`, company_website: 'https://example.com', email, password: googleId, is_sso: true };
+        // User does not exist - can we create them immediately?
+        if (req.body.role) {
+            const role = req.body.role;
+            const payload = role === 'job_seeker'
+                ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true }
+                : {
+                    companyName: req.body.companyName || `${name}'s Org`,
+                    companyWebsite: req.body.companyWebsite || 'https://example.com',
+                    email, password: googleId, is_sso: true
+                };
 
-        let newUser;
-        if (intendedRole === 'job_seeker') {
-            newUser = await authService.createJobSeeker(payload);
-        } else {
-            newUser = await authService.createEmployer(payload);
+            let newUser;
+            if (role === 'job_seeker') {
+                newUser = await authService.createJobSeeker(payload);
+            } else {
+                newUser = await authService.createEmployer(payload);
+            }
+            req.session.userId = newUser.id;
+            req.session.role = role;
+            return createSendToken(newUser, 201, res, role);
         }
 
-        req.session.userId = newUser.id;
-        req.session.role = intendedRole;
-
-        return createSendToken(newUser, 201, res, intendedRole);
+        // No intended role - came from login and user not found
+        return next(new AppError('No account found for this Google email. Please sign up to create an account.', 404));
     }
 });
 

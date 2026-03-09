@@ -105,15 +105,12 @@ const RoleSelection = () => {
 
             const payload = role === 'job_seeker'
                 ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true }
-                : { organization_name: `${name}'s Org`, company_website: 'https://example.com', email, password: googleId, is_sso: true };
+                : { companyName: `${name}'s Org`, companyWebsite: 'https://example.com', email, password: googleId, is_sso: true };
 
             const response = await axios.post(`http://localhost:5000${endpoint}`, payload);
 
             toast.success('Account created successfully!');
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('role', role);
-
-            navigate(role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD);
+            navigate(ROUTES.LOGIN, { state: { message: 'Registration successful! Please log in.' } });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to create account');
         } finally {

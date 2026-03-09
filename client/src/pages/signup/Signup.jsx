@@ -194,6 +194,11 @@ const Signup = () => {
                     box-shadow: 0 10px 30px rgba(62, 97, 255, 0.12) !important;
                     transform: translateY(-5px);
                 }
+                .google-btn:hover {
+                    background-color: #F7FAFC !important;
+                    border-color: #CBD5E0 !important;
+                }
+
                 @media (max-width: 768px) {
                     .auth-left-hide { display: none !important; }
                     .card { max-width: 500px !important; }
