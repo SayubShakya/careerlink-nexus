@@ -600,7 +600,7 @@ const Applications = () => {
                 </header>
 
                 {/* Glass Filter Bar */}
-                <div style={styles.filterCard} className="glass-reveal" style={{ animationDelay: '0.1s' }}>
+                <div style={{ ...styles.filterCard, animationDelay: '0.1s' }} className="glass-reveal">
                     <div style={styles.searchWrapper}>
                         <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                         <input
@@ -628,7 +628,7 @@ const Applications = () => {
                 </div>
 
                 {/* Recruitment Intelligence Matrix */}
-                <div style={styles.tableWrapper} className="glass-reveal" style={{ animationDelay: '0.2s' }}>
+                <div style={{ ...styles.tableWrapper, animationDelay: '0.2s' }} className="glass-reveal">
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
