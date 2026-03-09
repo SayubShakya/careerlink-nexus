@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
 import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
 import {
@@ -24,116 +24,119 @@ import {
     Plus,
     LayoutGrid,
     Clock,
-    AlertTriangle
+    AlertTriangle,
+    ShieldCheck,
+    ArrowUpRight,
+    Target,
+    Zap,
+    Layers
 } from 'lucide-react';
 
-// --- Custom Modal Component ---
+// Design System
+import '@/styles/ProfessionalGlass.css';
+
+// --- Custom Modal Component (Redesigned for Glass Authority) ---
 const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
     if (!isOpen) return null;
 
-    const styles = {
-        overlay: {
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(5, 10, 26, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-            animation: 'fadeIn 0.2s ease-out'
-        },
-        modal: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '40px',
-            maxWidth: '450px',
-            width: '90%',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            textAlign: 'center',
-            animation: 'slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-        },
-        iconBox: {
-            width: '70px',
-            height: '70px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 25px',
-            backgroundColor: type === 'success' ? '#ECFDF5' : (type === 'confirm' ? '#FFFBEB' : '#FEF2F2'),
-            color: type === 'success' ? '#059669' : (type === 'confirm' ? '#D97706' : '#DC2626')
-        },
-        title: {
-            fontSize: '1.5rem',
-            fontWeight: '800',
-            color: 'var(--text-main)',
-            marginBottom: '10px'
-        },
-        message: {
-            fontSize: '1rem',
-            color: 'var(--text-muted)',
-            lineHeight: '1.6',
-            marginBottom: '30px'
-        },
-        btnGroup: {
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'center'
-        },
-        primaryBtn: {
-            padding: '12px 24px',
-            borderRadius: 'var(--radius-md)',
-            border: 'none',
-            backgroundColor: type === 'success' ? '#059669' : (type === 'confirm' ? '#D97706' : '#ef4444'),
-            color: 'white',
-            fontWeight: '700',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-        },
-        secondaryBtn: {
-            padding: '12px 24px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
-            backgroundColor: 'transparent',
-            color: 'var(--text-muted)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
+    const getIcon = () => {
+        switch (type) {
+            case 'success': return <div className="icon-surface success"><ShieldCheck size={32} /></div>;
+            case 'confirm': return <div className="icon-surface warning"><AlertTriangle size={32} /></div>;
+            default: return <div className="icon-surface danger"><AlertCircle size={32} /></div>;
         }
     };
 
     return (
-        <div style={styles.overlay} onClick={onClose}>
-            <div style={styles.modal} onClick={e => e.stopPropagation()}>
-                <div style={styles.iconBox}>
-                    {type === 'success' && <CheckCircle2 size={40} />}
-                    {type === 'confirm' && <AlertTriangle size={40} />}
-                    {type === 'alert' && <AlertCircle size={40} />}
+        <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 3000,
+            animation: 'glassEntrance 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        }} onClick={onClose}>
+            <div
+                className="glass-panel"
+                style={{
+                    padding: '48px 40px',
+                    maxWidth: '520px',
+                    width: '90%',
+                    textAlign: 'center',
+                    background: 'rgba(10, 12, 16, 0.95)',
+                    border: '1px solid var(--glass-border-bright)',
+                    boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.8)'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                    {getIcon()}
                 </div>
-                <h2 style={styles.title}>{title}</h2>
-                <p style={styles.message}>{message}</p>
-                <div style={styles.btnGroup}>
+
+                <h2 style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '2rem',
+                    fontWeight: '800',
+                    color: 'white',
+                    marginBottom: '16px',
+                    letterSpacing: '-0.02em'
+                }}>
+                    {title}
+                </h2>
+                <p style={{
+                    fontSize: '1rem',
+                    color: 'var(--glass-text-secondary)',
+                    lineHeight: '1.7',
+                    marginBottom: '40px',
+                    fontWeight: '500'
+                }}>
+                    {message}
+                </p>
+
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
                     {type === 'confirm' && (
-                        <button style={styles.secondaryBtn} onClick={onClose}>Cancel</button>
+                        <button
+                            className="btn-scale"
+                            style={{
+                                padding: '14px 28px',
+                                borderRadius: '14px',
+                                background: 'transparent',
+                                border: '1px solid var(--glass-border)',
+                                color: 'white',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                fontFamily: 'var(--font-display)'
+                            }}
+                            onClick={onClose}
+                        >
+                            CANCEL ACTION
+                        </button>
                     )}
                     <button
-                        style={styles.primaryBtn}
+                        className="btn-scale"
+                        style={{
+                            padding: '14px 40px',
+                            borderRadius: '14px',
+                            background: type === 'confirm' ? '#EF4444' : 'var(--glass-accent)',
+                            color: 'white',
+                            border: 'none',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--font-display)',
+                            boxShadow: type === 'confirm' ? '0 8px 20px -4px rgba(239, 68, 68, 0.4)' : '0 8px 20px -4px rgba(63, 81, 181, 0.4)'
+                        }}
                         onClick={() => {
                             if (onConfirm) onConfirm();
                             onClose();
                         }}
                     >
-                        {type === 'confirm' ? 'Confirm' : 'Got it'}
+                        {type === 'confirm' ? 'CONFIRM DEPLOY' : 'ACKNOWLEDGE'}
                     </button>
                 </div>
             </div>
-            <style>{`
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `}</style>
         </div>
     );
 };
@@ -304,74 +307,40 @@ const JobManagement = () => {
 
     const styles = {
         container: {
-            padding: '40px 20px',
-            maxWidth: '1200px',
+            padding: '60px 32px',
+            maxWidth: '1400px',
             margin: '0 auto',
             fontFamily: 'var(--font-body)',
-            animation: 'fadeIn 0.5s ease-out'
-        },
-        headerBanner: {
-            background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, #1a2a5e 100%)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '40px',
-            color: 'white',
-            marginBottom: '40px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(5, 10, 26, 0.15)'
-        },
-        bannerContent: {
             position: 'relative',
             zIndex: 2
         },
-        bannerTitle: {
-            fontSize: '2.2rem',
-            fontWeight: '800',
-            marginBottom: '10px',
-            letterSpacing: '-0.02em'
-        },
-        bannerSubtitle: {
-            fontSize: '1.1rem',
-            opacity: 0.9,
-            maxWidth: '600px'
-        },
-        bannerDecoration: {
-            position: 'absolute',
-            right: '-50px',
-            top: '-50px',
-            width: '250px',
-            height: '250px',
-            background: 'var(--color-brand-accent)',
-            borderRadius: '50%',
-            filter: 'blur(80px)',
-            opacity: 0.3
-        },
         postTriggerCard: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '24px 30px',
+            background: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '20px',
+            padding: '24px 32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: 'var(--shadow-premium)',
-            border: isEditing ? '2px solid var(--color-brand-accent)' : '1px solid var(--border-subtle)',
+            border: isEditing ? '1px solid var(--glass-accent-light)' : '1px solid var(--glass-border)',
             cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            marginBottom: '20px'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            marginBottom: '32px'
         },
         formWrapper: {
-            maxHeight: isFormExpanded ? '2000px' : '0',
+            maxHeight: isFormExpanded ? '2500px' : '0',
             opacity: isFormExpanded ? 1 : 0,
             overflow: 'hidden',
-            transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-            marginBottom: isFormExpanded ? '40px' : '0'
+            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            marginBottom: isFormExpanded ? '48px' : '0'
         },
         section: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '35px',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)'
+            background: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '20px',
+            padding: '40px',
+            border: '1px solid var(--glass-border)',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
         },
         grid: {
             display: 'grid',
@@ -379,463 +348,697 @@ const JobManagement = () => {
             gap: '24px',
             marginBottom: '24px'
         },
+        label: {
+            display: 'block',
+            marginBottom: '10px',
+            fontWeight: '600',
+            fontSize: '0.85rem',
+            color: 'var(--glass-text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+        },
         input: {
+            width: '100%',
             padding: '14px 18px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
             fontSize: '0.95rem',
-            backgroundColor: '#F9FAFB',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            color: 'var(--glass-text-primary)',
             transition: 'all 0.2s ease',
-            outline: 'none'
+            outline: 'none',
+            fontFamily: 'var(--font-body)'
         },
         textarea: {
+            width: '100%',
             padding: '14px 18px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
             fontSize: '0.95rem',
-            backgroundColor: '#F9FAFB',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            color: 'var(--glass-text-primary)',
             minHeight: '140px',
             resize: 'vertical',
             outline: 'none',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            fontFamily: 'var(--font-body)'
         },
         submitBtn: {
             padding: '16px 32px',
-            backgroundColor: 'var(--color-brand-accent)',
+            background: 'var(--glass-accent)',
             color: 'white',
             border: 'none',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: '700',
-            fontSize: '1rem',
+            borderRadius: '14px',
+            fontWeight: '800',
+            fontSize: '0.95rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            boxShadow: '0 4px 14px rgba(62, 97, 255, 0.2)'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            fontFamily: 'var(--font-display)',
+            boxShadow: '0 8px 16px -4px rgba(63, 81, 181, 0.3)'
+        },
+        cancelBtn: {
+            padding: '16px 28px',
+            borderRadius: '14px',
+            border: '1px solid var(--glass-border)',
+            background: 'transparent',
+            color: 'var(--glass-text-secondary)',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontFamily: 'var(--font-display)'
         },
         tableCard: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)',
+            background: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
             overflow: 'hidden',
-            marginTop: '20px'
+            marginTop: '32px'
         },
         tableHeader: {
-            padding: '24px 30px',
-            borderBottom: '1px solid var(--border-subtle)',
+            padding: '32px 40px',
+            borderBottom: '1px solid var(--glass-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#fff'
+            background: 'rgba(255, 255, 255, 0.01)'
         },
-        emptyState: {
-            padding: '80px 40px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            color: 'var(--text-muted)'
-        },
-        actionBtn: {
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
+        actionBtn: (colorType) => ({
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: 'none',
+            border: '1px solid var(--glass-border)',
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: colorType === 'edit' ? '#60A5FA' : colorType === 'delete' ? '#F87171' : '#A78BFA',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            marginRight: '8px'
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            marginRight: '10px'
+        }),
+        badge: (status) => {
+            const isActive = (status || 'Active') === 'Active';
+            return {
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '0.7rem',
+                fontWeight: '800',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                color: isActive ? '#10B981' : '#F87171',
+                border: isActive ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontFamily: 'var(--font-display)'
+            }
         },
-        badge: (type) => ({
-            padding: '5px 14px',
-            borderRadius: '20px',
-            fontSize: '0.75rem',
+        skillBadge: {
+            background: 'rgba(96, 165, 250, 0.08)',
+            color: '#93C5FD',
+            padding: '8px 16px',
+            borderRadius: '14px',
+            fontSize: '0.8rem',
             fontWeight: '700',
-            textTransform: 'uppercase',
-            letterSpacing: '0.02em',
-            backgroundColor: type === 'Active' ? '#ECFDF5' : '#FEF2F2',
-            color: type === 'Active' ? '#059669' : '#DC2626',
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            gap: '5px'
-        })
+            gap: '8px',
+            border: '1px solid rgba(96, 165, 250, 0.2)',
+            transition: 'all 0.2s ease'
+        }
     };
 
     return (
-        <div style={styles.container}>
-            {/* Custom Modal */}
-            <CustomModal
-                isOpen={modal.isOpen}
-                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
-                title={modal.title}
-                message={modal.message}
-                type={modal.type}
-                onConfirm={modal.onConfirm}
-            />
+        <div className="glass-main" style={{ position: 'relative' }}>
+            <div className="glass-container glass-reveal">
+                {/* Authority Header (Operational Hero) */}
+                <header style={{
+                    marginBottom: '72px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                    padding: '0 8px'
+                }}>
+                    <div style={{ animationDelay: '0.1s' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                            <div style={{
+                                padding: '8px',
+                                background: 'rgba(96, 165, 250, 0.1)',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(96, 165, 250, 0.2)'
+                            }}>
+                                <ShieldCheck size={20} className="text-gradient-sapphire" />
+                            </div>
+                            <span style={{
+                                fontSize: '0.8rem',
+                                fontWeight: '800',
+                                color: 'var(--glass-text-muted)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.25em',
+                                fontFamily: 'var(--font-display)'
+                            }}>
+                                Recruitment Intelligence
+                            </span>
+                        </div>
+                        <h1 style={{
+                            fontSize: '4rem',
+                            fontWeight: '800',
+                            color: 'white',
+                            letterSpacing: '-0.04em',
+                            lineHeight: '0.9',
+                            fontFamily: 'var(--font-display)'
+                        }}>
+                            Job <br />
+                            <span className="text-gradient-sapphire">Authority.</span>
+                        </h1>
+                    </div>
 
-            {/* Header Banner */}
-            <div style={styles.headerBanner}>
-                <div style={styles.bannerDecoration} />
-                <div style={styles.bannerContent}>
-                    <h1 style={styles.bannerTitle}>Job Management</h1>
-                    <p style={styles.bannerSubtitle}>
-                        Streamline your hiring process. Create, manage, and track your job applications with ease from one central hub.
-                    </p>
-                </div>
-            </div>
+                    <div className="glass-panel" style={{
+                        padding: '20px 28px',
+                        textAlign: 'right',
+                        animationDelay: '0.2s',
+                        background: 'rgba(255,255,255,0.02)'
+                    }}>
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--glass-text-secondary)',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em',
+                            marginBottom: '4px'
+                        }}>
+                            Global Inventory
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'flex-end' }}>
+                            <div style={{
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                background: '#3B82F6',
+                                boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)',
+                                animation: 'pulse 2s infinite'
+                            }} />
+                            <span style={{
+                                fontSize: '1.25rem',
+                                fontWeight: '900',
+                                color: 'white',
+                                fontFamily: 'var(--font-display)'
+                            }}>
+                                {serverJobs.length} <span style={{ fontSize: '0.85rem', color: 'var(--glass-text-muted)', fontWeight: '600' }}>Active Nodes</span>
+                            </span>
+                        </div>
+                    </div>
+                </header>
 
-            {/* Collapsible Trigger */}
-            <div
-                style={{
-                    ...styles.postTriggerCard,
-                    transform: isFormExpanded ? 'translateY(5px)' : 'translateY(0)'
-                }}
-                className="hover-card"
-                onClick={() => {
-                    if (!isFormExpanded) {
-                        setIsFormExpanded(true);
-                    } else if (!isEditing) {
-                        setIsFormExpanded(false);
-                    }
-                }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                {/* Custom Modal */}
+                <CustomModal
+                    isOpen={modal.isOpen}
+                    onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                    title={modal.title}
+                    message={modal.message}
+                    type={modal.type}
+                    onConfirm={modal.onConfirm}
+                />
+
+                {/* Collapsible Trigger (Industrial Glass Panel) */}
+                <div
+                    className="glass-panel"
+                    style={styles.postTriggerCard}
+                    onClick={() => {
+                        if (!isFormExpanded) {
+                            setIsFormExpanded(true);
+                        } else if (!isEditing) {
+                            setIsFormExpanded(false);
+                        }
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '18px',
+                            background: isEditing ? 'rgba(96, 165, 250, 0.15)' : 'rgba(255,255,255,0.03)',
+                            border: isEditing ? '1px solid rgba(96, 165, 250, 0.3)' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: isEditing ? 'var(--glass-accent-light)' : 'white',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            {isEditing ? <Settings size={28} className="spin-slow" /> : <Plus size={28} />}
+                        </div>
+                        <div>
+                            <h3 style={{
+                                fontSize: '1.4rem',
+                                fontWeight: '800',
+                                color: 'white',
+                                fontFamily: 'var(--font-display)',
+                                marginBottom: '4px'
+                            }}>
+                                {isEditing ? `Reconfiguring: ${formData.title}` : 'Initialize Recruitment Protocol'}
+                            </h3>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>
+                                {isEditing ? 'Adjusting operational parameters and technical requirements.' : 'Deploy high-performance roles to the global network.'}
+                            </p>
+                        </div>
+                    </div>
                     <div style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '15px',
-                        backgroundColor: isEditing ? 'rgba(62, 97, 255, 0.2)' : 'rgba(62, 97, 255, 0.1)',
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '14px',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid var(--glass-border)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'var(--color-brand-accent)'
+                        color: 'var(--glass-text-muted)',
+                        transition: 'all 0.3s ease'
                     }}>
-                        {isEditing ? <Edit size={28} /> : <PlusCircle size={28} />}
-                    </div>
-                    <div>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                            {isEditing ? `Editing: ${formData.title}` : 'Post New Job Opening'}
-                        </h3>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                            {isEditing ? 'Modify the details and save changes' : 'Fill in the details to find your next great hire'}
-                        </p>
+                        {isFormExpanded ? <ChevronUp size={22} /> : <ChevronDown size={22} />}
                     </div>
                 </div>
-                <div style={{ color: 'var(--text-muted)' }}>
-                    {isFormExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                </div>
-            </div>
 
-            {/* Collapsible Form */}
-            <div style={styles.formWrapper}>
-                <section style={styles.section}>
-                    <form onSubmit={handleSubmit}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px', color: 'var(--text-muted)' }}>
-                            <Info size={18} />
-                            <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Complete all required fields marked with *</span>
-                        </div>
+                {/* Collapsible Form (Frosted Form) */}
+                <div style={styles.formWrapper}>
+                    <section style={styles.section} className="glass-panel">
+                        <form onSubmit={handleSubmit}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'var(--glass-text-muted)',
+                                    border: '1px solid var(--glass-border)'
+                                }}>
+                                    <Info size={16} />
+                                </div>
+                                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)', letterSpacing: '0.02em' }}>
+                                    Complete all protocol fields marked with asterisk (*)
+                                </span>
+                            </div>
 
-                        <div style={styles.grid}>
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Job Title *</label>
-                                <input
-                                    style={{ ...styles.input, width: '100%', borderColor: errors.title ? '#ef4444' : 'var(--border-subtle)' }}
-                                    name="title"
-                                    value={formData.title}
+                            <div style={styles.grid}>
+                                <div className="form-group">
+                                    <label style={styles.label}>Position Title *</label>
+                                    <input
+                                        style={{ ...styles.input, borderColor: errors.title ? '#ef4444' : 'var(--glass-border)' }}
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Lead Systems Architect…"
+                                    />
+                                    {errors.title && <p style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '6px', fontWeight: '600' }}>{errors.title}</p>}
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={styles.label}>Deployment Location *</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <MapPin size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                        <input
+                                            style={{ ...styles.input, paddingRight: '48px', borderColor: errors.location ? '#ef4444' : 'var(--glass-border)' }}
+                                            name="location"
+                                            value={formData.location}
+                                            onChange={handleInputChange}
+                                            placeholder="e.g. Remote / Sector 7…"
+                                        />
+                                    </div>
+                                    {errors.location && <p style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '6px', fontWeight: '600' }}>{errors.location}</p>}
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={styles.label}>Compensation Buffer *</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <DollarSign size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                        <input
+                                            type="number"
+                                            style={{ ...styles.input, paddingRight: '48px', borderColor: errors.salary ? '#ef4444' : 'var(--glass-border)' }}
+                                            name="salary"
+                                            value={formData.salary}
+                                            onChange={handleInputChange}
+                                            placeholder="e.g. 120000"
+                                        />
+                                    </div>
+                                    {errors.salary && <p style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '6px', fontWeight: '600' }}>{errors.salary}</p>}
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={styles.label}>Classification</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Layers size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)', pointerEvents: 'none' }} />
+                                        <select
+                                            style={{ ...styles.input, paddingRight: '48px', appearance: 'none' }}
+                                            name="jobType"
+                                            value={formData.jobType}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option style={{ background: '#0F1217' }}>Full-time</option>
+                                            <option style={{ background: '#0F1217' }}>Part-time</option>
+                                            <option style={{ background: '#0F1217' }}>Contract</option>
+                                            <option style={{ background: '#0F1217' }}>Internship</option>
+                                            <option style={{ background: '#0F1217' }}>Freelance</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={styles.label}>Operation Deadline *</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Calendar size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                        <input
+                                            type="date"
+                                            style={{ ...styles.input, paddingRight: '48px', borderColor: errors.deadline ? '#ef4444' : 'var(--glass-border)' }}
+                                            name="deadline"
+                                            value={formData.deadline}
+                                            onChange={handleInputChange}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '32px' }}>
+                                <label style={styles.label}>Scope Description *</label>
+                                <textarea
+                                    style={{ ...styles.textarea, borderColor: errors.description ? '#ef4444' : 'var(--glass-border)' }}
+                                    name="description"
+                                    value={formData.description}
                                     onChange={handleInputChange}
-                                    placeholder="e.g. Senior Product Designer"
+                                    placeholder="Outline the core mission and architectural impact…"
                                 />
-                                {errors.title && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '5px' }}>{errors.title}</p>}
                             </div>
 
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Location *</label>
-                                <div style={{ position: 'relative' }}>
-                                    <MapPin size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                                    <input
-                                        style={{ ...styles.input, width: '100%', paddingRight: '45px', borderColor: errors.location ? '#ef4444' : 'var(--border-subtle)' }}
-                                        name="location"
-                                        value={formData.location}
+                            <div style={styles.grid}>
+                                <div className="form-group">
+                                    <label style={styles.label}>Core Responsibilities</label>
+                                    <textarea
+                                        style={{ ...styles.textarea, minHeight: '120px' }}
+                                        name="responsibilities"
+                                        value={formData.responsibilities}
                                         onChange={handleInputChange}
-                                        placeholder="e.g. Remote / Kathmandu"
+                                        placeholder="Key operational deliverables…"
                                     />
                                 </div>
-                                {errors.location && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '5px' }}>{errors.location}</p>}
-                            </div>
-
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Salary (Annual/Monthly) *</label>
-                                <div style={{ position: 'relative' }}>
-                                    <DollarSign size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                                    <input
-                                        type="number"
-                                        style={{ ...styles.input, width: '100%', paddingRight: '45px', borderColor: errors.salary ? '#ef4444' : 'var(--border-subtle)' }}
-                                        name="salary"
-                                        value={formData.salary}
+                                <div className="form-group">
+                                    <label style={styles.label}>Technical Requirements</label>
+                                    <textarea
+                                        style={{ ...styles.textarea, minHeight: '120px' }}
+                                        name="qualifications"
+                                        value={formData.qualifications}
                                         onChange={handleInputChange}
-                                        placeholder="e.g. 50000"
+                                        placeholder="Required stack and experience…"
                                     />
                                 </div>
                             </div>
 
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Job Type</label>
-                                <select
-                                    style={{ ...styles.input, width: '100%' }}
-                                    name="jobType"
-                                    value={formData.jobType}
-                                    onChange={handleInputChange}
+                            {/* Skills Tag Input (Industrial Style) */}
+                            <div style={{ marginBottom: '40px' }}>
+                                <label style={styles.label}>Required Skill Matrix (Enter to Add)</label>
+                                <div style={{ position: 'relative' }}>
+                                    <Zap size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                    <input
+                                        style={{ ...styles.input, paddingRight: '48px' }}
+                                        value={skillInput}
+                                        onChange={(e) => setSkillInput(e.target.value)}
+                                        onKeyDown={handleAddSkill}
+                                        placeholder="e.g. React, Node.js, Distributed Systems…"
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '16px' }}>
+                                    {skills.map((skill, index) => (
+                                        <span key={index} style={styles.skillBadge}>
+                                            <Target size={14} />
+                                            {skill}
+                                            <X
+                                                size={14}
+                                                style={{ cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.2s' }}
+                                                onClick={() => removeSkill(skill)}
+                                                onMouseOver={(e) => e.target.style.opacity = 1}
+                                                onMouseOut={(e) => e.target.style.opacity = 0.5}
+                                            />
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                                <button type="submit" style={styles.submitBtn} className="btn-scale">
+                                    {isEditing ? <ShieldCheck size={20} /> : <Zap size={20} />}
+                                    {isEditing ? 'COMMIT CHANGES' : 'DEPLOY POSITION'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    style={styles.cancelBtn}
+                                    className="btn-scale"
                                 >
-                                    <option>Full-time</option>
-                                    <option>Part-time</option>
-                                    <option>Contract</option>
-                                    <option>Internship</option>
-                                    <option>Freelance</option>
-                                </select>
+                                    ABORT PROTOCOL
+                                </button>
                             </div>
-
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Application Deadline *</label>
-                                <div style={{ position: 'relative' }}>
-                                    <Calendar size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                                    <input
-                                        type="date"
-                                        style={{ ...styles.input, width: '100%', paddingRight: '45px', borderColor: errors.deadline ? '#ef4444' : 'var(--border-subtle)' }}
-                                        name="deadline"
-                                        value={formData.deadline}
-                                        onChange={handleInputChange}
-                                        min={new Date().toISOString().split('T')[0]} // Prevent past dates
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Job Description *</label>
-                            <textarea
-                                style={{ ...styles.textarea, width: '100%', borderColor: errors.description ? '#ef4444' : 'var(--border-subtle)' }}
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder="Describe the role, team, and company culture..."
-                            />
-                        </div>
-
-                        <div style={styles.grid}>
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Key Responsibilities</label>
-                                <textarea
-                                    style={{ ...styles.textarea, width: '100%', minHeight: '100px' }}
-                                    name="responsibilities"
-                                    value={formData.responsibilities}
-                                    onChange={handleInputChange}
-                                    placeholder="List the main tasks..."
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Required Qualifications</label>
-                                <textarea
-                                    style={{ ...styles.textarea, width: '100%', minHeight: '100px' }}
-                                    name="qualifications"
-                                    value={formData.qualifications}
-                                    onChange={handleInputChange}
-                                    placeholder="Skills, experience, certificates..."
-                                />
-                            </div>
-                        </div>
-
-                        {/* Skills Tag Input */}
-                        <div style={{ marginBottom: '30px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>Skills Required (Press Enter)</label>
-                            <input
-                                style={{ ...styles.input, width: '100%' }}
-                                value={skillInput}
-                                onChange={(e) => setSkillInput(e.target.value)}
-                                onKeyDown={handleAddSkill}
-                                placeholder="e.g. React, Node.js, Photoshop..."
-                            />
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-                                {skills.map((skill, index) => (
-                                    <span key={index} style={{
-                                        backgroundColor: '#EEF2FF',
-                                        color: '#4F46E5',
-                                        padding: '6px 14px',
-                                        borderRadius: '12px',
-                                        fontSize: '0.85rem',
-                                        fontWeight: '600',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                    }}>
-                                        {skill}
-                                        <X size={14} style={{ cursor: 'pointer', opacity: 0.7 }} onClick={() => removeSkill(skill)} />
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '15px' }}>
-                            <button type="submit" style={styles.submitBtn} className="btn-scale">
-                                <CheckCircle2 size={20} />
-                                {isEditing ? 'Save Changes' : 'Publish Job Opening'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsFormExpanded(false);
-                                    setIsEditing(false);
-                                    setEditId(null);
-                                    setFormData({
-                                        title: '', location: '', salary: '', jobType: 'Full-time',
-                                        deadline: '', description: '', responsibilities: '',
-                                        qualifications: '', specification: '', education: ''
-                                    });
-                                    setSkills([]);
-                                }}
-                                style={{ padding: '16px 24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', background: 'transparent', fontWeight: '600', cursor: 'pointer' }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </section>
-            </div>
-
-            {/* Manage Jobs Section */}
-            <div style={styles.tableCard}>
-                <div style={styles.tableHeader}>
-                    <div>
-                        <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '4px' }}>Manage Jobs</h2>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>You have {serverJobs.length} active job postings</p>
-                    </div>
+                        </form>
+                    </section>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead>
-                            <tr style={{ backgroundColor: '#F9FAFB' }}>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '700' }}>Job Information</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '700' }}>Post Date</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '700' }}>Status</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '700' }}>Applicants</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '700' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {jobsLoading ? (
+                {/* Manage Jobs Section (The Job Matrix) */}
+                <div style={styles.tableCard} className="glass-panel">
+                    <div style={styles.tableHeader}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <LayoutGrid size={16} className="text-gradient-sapphire" />
+                                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)' }}>Job Matrix</h2>
+                            </div>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>
+                                Managing <span style={{ color: 'white', fontWeight: '700' }}>{serverJobs.length}</span> active operational nodes
+                            </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button style={{
+                                padding: '10px 16px',
+                                borderRadius: '10px',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid var(--glass-border)',
+                                color: 'white',
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                cursor: 'pointer'
+                            }}>
+                                <Filter size={14} /> Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }} className="glass-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading your jobs...</td>
+                                    <th style={{ width: '40%' }}>Node Information</th>
+                                    <th>Deployment Date</th>
+                                    <th>Link Status</th>
+                                    <th>Engagement</th>
+                                    <th style={{ textAlign: 'center' }}>Directives</th>
                                 </tr>
-                            ) : serverJobs.length > 0 ? (
-                                serverJobs.map(job => (
-                                    <tr key={job.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 0.2s' }} className="table-row">
-                                        <td style={{ padding: '20px 30px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                                    <Briefcase size={20} />
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '1rem' }}>{job.title}</div>
-                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <MapPin size={12} /> {job.location}
+                            </thead>
+                            <tbody>
+                                {jobsLoading ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ padding: '64px', textAlign: 'center' }}>
+                                            <div className="spin-slow" style={{ color: 'var(--glass-accent)', marginBottom: '16px' }}>
+                                                <Layers size={32} />
+                                            </div>
+                                            <p style={{ color: 'var(--glass-text-muted)', fontWeight: '600' }}>Synchronizing with database…</p>
+                                        </td>
+                                    </tr>
+                                ) : serverJobs.length > 0 ? (
+                                    serverJobs.map(job => (
+                                        <tr key={job.id} className="glass-row">
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                    <div style={{
+                                                        width: '48px',
+                                                        height: '48px',
+                                                        borderRadius: '14px',
+                                                        background: 'rgba(255,255,255,0.03)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        color: 'var(--glass-text-secondary)',
+                                                        border: '1px solid var(--glass-border)'
+                                                    }}>
+                                                        <Briefcase size={22} />
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: '800', color: 'white', fontSize: '1rem', letterSpacing: '-0.01em', marginBottom: '4px' }}>{job.title}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--glass-text-muted)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
+                                                            <MapPin size={12} /> {job.location}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '20px 30px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <Clock size={14} /> {job.postedDate || new Date(job.createdAt).toLocaleDateString()}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '20px 30px' }}>
-                                            <span style={styles.badge(job.status || 'Active')}>
-                                                {(job.status || 'Active') === 'Active' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                                                {job.status || 'Active'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '20px 30px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)', fontWeight: '600' }}>
-                                                <Users size={16} color="var(--color-brand-accent)" />
-                                                {job.applicants || 0}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '20px 30px' }}>
-                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600', fontSize: '0.85rem' }}>
+                                                    <Clock size={14} style={{ opacity: 0.6 }} /> {job.postedDate || new Date(job.createdAt).toLocaleDateString()}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span style={styles.badge(job.status || 'Active')}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', boxShadow: '0 0 8px currentColor' }} />
+                                                    {job.status || 'Active'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <div style={{
+                                                        padding: '4px 10px',
+                                                        borderRadius: '8px',
+                                                        background: 'rgba(96, 165, 250, 0.1)',
+                                                        color: '#60A5FA',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '800',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px'
+                                                    }}>
+                                                        <Users size={14} />
+                                                        {job.applicants || 0}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
+                                                    <button
+                                                        style={styles.actionBtn('edit')}
+                                                        className="btn-scale"
+                                                        title="Modify Parameters"
+                                                        onClick={() => editJob(job)}
+                                                    >
+                                                        <Settings size={18} />
+                                                    </button>
+                                                    <button
+                                                        style={styles.actionBtn('applicants')}
+                                                        className="btn-scale"
+                                                        title="Scan Applicants"
+                                                        onClick={() => viewApplications(job)}
+                                                    >
+                                                        <ArrowUpRight size={18} />
+                                                    </button>
+                                                    <button
+                                                        style={styles.actionBtn('delete')}
+                                                        className="btn-scale"
+                                                        title="Purge Record"
+                                                        onClick={() => deleteJob(job.id)}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5">
+                                            <div style={{ padding: '100px 40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{
+                                                    width: '120px',
+                                                    height: '120px',
+                                                    borderRadius: '30px',
+                                                    background: 'rgba(255,255,255,0.02)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginBottom: '32px',
+                                                    border: '1px solid var(--glass-border)'
+                                                }}>
+                                                    <Search size={48} color="var(--glass-text-muted)" opacity={0.3} />
+                                                </div>
+                                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Inventory Empty</h3>
+                                                <p style={{ maxWidth: '400px', margin: '0 auto 32px', color: 'var(--glass-text-muted)', lineHeight: '1.6', fontWeight: '500' }}>
+                                                    No operational nodes identified in the current sector. Initialize a new recruitment protocol to begin.
+                                                </p>
                                                 <button
-                                                    style={{ ...styles.actionBtn, backgroundColor: '#EFF6FF', color: '#3B82F6' }}
-                                                    title="Edit"
-                                                    onClick={() => editJob(job)}
+                                                    onClick={() => setIsFormExpanded(true)}
+                                                    style={styles.submitBtn}
+                                                    className="btn-scale"
                                                 >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
-                                                    style={{ ...styles.actionBtn, backgroundColor: '#FEF2F2', color: '#EF4444' }}
-                                                    title="Delete"
-                                                    onClick={() => deleteJob(job.id)}
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                                <button
-                                                    style={{ ...styles.actionBtn, backgroundColor: '#F5F3FF', color: '#8B5CF6' }}
-                                                    title="View Applicants"
-                                                    onClick={() => viewApplications(job)}
-                                                >
-                                                    <Eye size={18} />
+                                                    <Plus size={20} /> INITIALIZE PROTOCOL
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5">
-                                        <div style={styles.emptyState}>
-                                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-                                                <Search size={48} color="#D1D5DB" />
-                                            </div>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>No jobs posted yet</h3>
-                                            <p style={{ maxWidth: '300px', margin: '0 auto' }}>Your job vacancies will appear here. Start by creating a new job opening to find your perfect candidate.</p>
-                                            <button
-                                                onClick={() => setIsFormExpanded(true)}
-                                                style={{ marginTop: '10px', padding: '10px 20px', backgroundColor: 'var(--color-brand-accent)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}
-                                            >
-                                                Create Your First Job
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
+                <style>{`
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    50% { transform: scale(1.2); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.8; }
                 }
-                .hover-card:hover {
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
-                    border-color: var(--color-brand-accent) !important;
+
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
                 }
-                .table-row:hover {
-                    background-color: #F9FAFB !important;
+
+                .spin-slow {
+                    animation: spin-slow 8s linear infinite;
                 }
+
+                .icon-surface {
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 20px;
+                    display: flex;
+                    alignItems: center;
+                    justifyContent: center;
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid var(--glass-border);
+                    margin: 0 auto;
+                }
+
+                .icon-surface.success { color: #10B981; border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05); }
+                .icon-surface.warning { color: #F59E0B; border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); }
+                .icon-surface.danger { color: #EF4444; border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); }
+
                 .btn-scale:active {
-                    transform: scale(0.95);
+                    transform: scale(0.96);
                 }
+
+                .btn-scale:hover {
+                    filter: brightness(1.1);
+                    transform: translateY(-1px);
+                }
+
                 input:focus, textarea:focus, select:focus {
-                    background-color: white !important;
-                    border-color: var(--color-brand-accent) !important;
-                    box-shadow: 0 0 0 4px rgba(62, 97, 255, 0.1) !important;
+                    background-color: rgba(255, 255, 255, 0.04) !important;
+                    border-color: var(--glass-accent-light) !important;
+                    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1) !important;
+                }
+
+                ::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    cursor: pointer;
+                    opacity: 0.5;
+                }
+
+                ::-webkit-calendar-picker-indicator:hover {
+                    opacity: 1;
                 }
             `}</style>
+            </div>
         </div>
     );
 };
