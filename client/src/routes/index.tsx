@@ -27,6 +27,7 @@ import ApplicationStatus from '../pages/jobseeker/ApplicationStatus';
 import SavedJobs from '../pages/jobseeker/SavedJobs';
 import LogoutConfirmation from '../pages/auth/LogoutConfirmation';
 import ErrorPage from '../pages/error/ErrorPage';
+import RoleSelection from '../pages/login/RoleSelection';
 
 export const router = createBrowserRouter([
     {
@@ -77,6 +78,10 @@ export const router = createBrowserRouter([
             {
                 path: ROUTES.LOGOUT_CONFIRMATION,
                 element: <LogoutConfirmation />,
+            },
+            {
+                path: ROUTES.SSO_ONBOARDING,
+                element: <RoleSelection />,
             },
             // Common routes removed from here if they belong to role-specific layouts
         ],

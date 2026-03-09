@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import authIllustration from '@/assets/images/auth-illustration.png';
 import logo from '@assets/images/temporary_logo.png';
@@ -6,12 +6,43 @@ import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useAuth } from '@/hooks/useAuth';
 import usePostLogin from '../../hooks/api/auth/usePostLogin';
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, login: setAuth } = useAuth();
     const { mutate: login, isPending: loading } = usePostLogin();
     const role = localStorage.getItem('role');
+    const intendedRoleRef = useRef(null);
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const res = await axios.post('http://localhost:5000/api/auth/google/verify', {
+                    token: tokenResponse.access_token,
+                    role: intendedRoleRef.current
+                });
+
+                // Backend handles both existing login and new user creation seamlessly
+                const { token, data } = res.data;
+
+                // Keep local storage keys exactly like usePostLogin
+                localStorage.setItem("userToken", token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("role", data.role);
+
+                toast.success('Login successful!');
+                // Full window redirect exactly like manual login ensures context refreshes
+                window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
+            } catch (error) {
+                toast.error('Google Login failed');
+                console.error(error);
+            }
+        },
+        onError: () => toast.error('Google Login failed'),
+    });
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -278,10 +309,16 @@ const Login = () => {
                             <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px solid #E2E8F0', zIndex: 0 }}></div>
                         </div>
 
-                        <button type="button" style={styles.googleBtn} className="google-btn">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
-                            Google Account
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button type="button" style={{ ...styles.googleBtn, flex: 1 }} className="google-btn" onClick={() => { intendedRoleRef.current = 'job_seeker'; handleGoogleLogin(); }}>
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
+                                Job Seeker
+                            </button>
+                            <button type="button" style={{ ...styles.googleBtn, flex: 1 }} className="google-btn" onClick={() => { intendedRoleRef.current = 'employer'; handleGoogleLogin(); }}>
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
+                                Employer
+                            </button>
+                        </div>
 
                         <p style={styles.switchText}>
                             Don't have an account?{' '}
