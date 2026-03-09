@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import '@/styles/ProfessionalGlass.css';
 import {
     Users,
     CheckCircle,
@@ -13,7 +14,11 @@ import {
     Mail,
     Phone,
     MapPin,
-    BarChart2
+    BarChart2,
+    RefreshCw,
+    TrendingUp,
+    ChevronRight,
+    Search as SearchIcon
 } from 'lucide-react';
 
 import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
@@ -34,8 +39,9 @@ const History = () => {
 
     // Calculate Summary Stats
     const stats = useMemo(() => {
+        const total = historyData.length;
         return {
-            total: historyData.length,
+            total,
             accepted: historyData.filter(d => d.status === 'Accepted').length,
             rejected: historyData.filter(d => d.status === 'Rejected').length,
             shortlisted: historyData.filter(d => d.status === 'Shortlisted').length
@@ -64,410 +70,460 @@ const History = () => {
 
     const styles = {
         container: {
-            padding: 'var(--space-md)',
-            animation: 'fadeIn 0.5s ease-out'
+            padding: '40px 32px',
+            maxWidth: '1300px',
+            margin: '0 auto',
+            fontFamily: 'var(--font-body)',
         },
-        header: {
-            marginBottom: 'var(--space-md)'
+        headerHero: {
+            marginBottom: '40px',
+            position: 'relative',
         },
         title: {
-            fontSize: '1.8rem',
-            fontWeight: '700',
-            color: 'var(--text-main)',
-            fontFamily: 'var(--font-heading)',
-            marginBottom: '4px'
+            fontSize: '3.5rem',
+            fontWeight: '800',
+            color: 'white',
+            fontFamily: 'var(--font-display)',
+            marginBottom: '12px',
+            letterSpacing: '-0.03em',
+            lineHeight: '1.1'
         },
         subtitle: {
-            color: 'var(--text-muted)',
-            fontSize: '1rem'
+            color: 'var(--glass-text-secondary)',
+            fontSize: '1.1rem',
+            maxWidth: '600px',
+            lineHeight: '1.6'
         },
         statsGrid: {
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 'var(--space-sm)',
-            marginBottom: 'var(--space-md)'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '24px',
+            marginBottom: '40px'
         },
-        statCard: {
-            background: 'var(--card-dashboard)',
-            padding: '24px',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-dashboard)',
+        statCard: (isActive) => ({
+            background: 'var(--glass-surface)',
+            padding: '28px',
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            transition: 'transform 0.3s'
-        },
+            gap: '20px',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            cursor: 'default',
+            position: 'relative',
+            overflow: 'hidden'
+        }),
         statIcon: (color) => ({
-            padding: '12px',
-            borderRadius: 'var(--radius-md)',
-            background: `${color}15`,
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid var(--glass-border)',
             color: color,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            boxShadow: `0 0 20px ${color}10`
         }),
-        statInfo: {
-            display: 'flex',
-            flexDirection: 'column'
-        },
         statValue: {
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            color: 'var(--text-main)'
+            fontSize: '2rem',
+            fontWeight: '800',
+            color: 'white',
+            lineHeight: '1',
+            marginBottom: '4px',
+            fontFamily: 'var(--font-display)',
+            textShadow: '0 0 15px rgba(255,255,255,0.1)'
         },
         statLabel: {
             fontSize: '0.85rem',
-            color: 'var(--text-muted)',
-            fontWeight: '500'
+            color: 'var(--glass-text-secondary)',
+            fontWeight: '700',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
         },
-        controls: {
+        controlBar: {
+            background: 'var(--glass-surface)',
+            padding: '12px',
+            borderRadius: '20px',
+            border: '1px solid var(--glass-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 'var(--space-sm)',
-            flexWrap: 'wrap',
-            gap: '16px'
+            marginBottom: '32px',
+            backdropFilter: 'blur(10px)',
+            gap: '20px',
+            flexWrap: 'wrap'
         },
-        filterTabs: {
+        tabs: {
             display: 'flex',
-            background: 'var(--bg-subtle)',
-            padding: '4px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-dashboard)'
+            gap: '8px'
         },
         tab: (isActive) => ({
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '12px',
+            border: '1px solid',
+            borderColor: isActive ? 'var(--glass-border-bright)' : 'transparent',
+            background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
+            color: isActive ? 'white' : 'var(--glass-text-muted)',
             fontSize: '0.9rem',
-            fontWeight: '600',
+            fontWeight: '700',
             cursor: 'pointer',
-            background: isActive ? 'white' : 'transparent',
-            color: isActive ? 'var(--color-brand-accent)' : 'var(--text-muted)',
-            boxShadow: isActive ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
         }),
-        tableContainer: {
-            background: 'var(--card-dashboard)',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-dashboard)',
-            overflow: 'hidden'
+        searchWrapper: {
+            position: 'relative',
+            flex: 1,
+            maxWidth: '400px'
+        },
+        searchInput: {
+            width: '100%',
+            padding: '12px 16px 12px 48px',
+            borderRadius: '12px',
+            background: 'rgba(0,0,0,0.2)',
+            border: '1px solid var(--glass-border)',
+            color: 'white',
+            fontSize: '0.9rem',
+            outline: 'none',
+            transition: 'all 0.3s ease',
+            fontFamily: 'var(--font-body)'
+        },
+        tableWrapper: {
+            background: 'var(--glass-surface)',
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
+            overflow: 'hidden',
+            backdropFilter: 'blur(16px)',
+            marginBottom: '40px'
         },
         table: {
             width: '100%',
-            borderCollapse: 'collapse',
+            borderCollapse: 'separate',
+            borderSpacing: '0',
             textAlign: 'left'
         },
         th: {
-            padding: '16px',
-            borderBottom: '1px solid var(--border-dashboard)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            color: 'var(--text-muted)',
-            backgroundColor: 'var(--bg-subtle)'
+            padding: '20px 24px',
+            fontSize: '0.75rem',
+            fontWeight: '800',
+            color: 'var(--glass-text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            borderBottom: '1px solid var(--glass-border)',
+            background: 'rgba(255,255,255,0.01)'
         },
         td: {
-            padding: '16px',
-            borderBottom: '1px solid var(--border-dashboard)',
+            padding: '20px 24px',
             fontSize: '0.95rem',
-            color: 'var(--text-main)'
+            color: 'white',
+            borderBottom: '1px solid var(--glass-border)',
+            transition: 'all 0.2s ease'
         },
         badge: (status) => {
-            const colors = {
-                Accepted: { bg: '#dcfce7', text: '#166534' },
-                Rejected: { bg: '#fee2e2', text: '#991b1b' },
-                Shortlisted: { bg: '#e0e7ff', text: '#3730a3' }
+            const configs = {
+                Accepted: { color: '#10B981', label: 'ACCEPTED' },
+                Rejected: { color: '#EF4444', label: 'REJECTED' },
+                Shortlisted: { color: '#3B82F6', label: 'SHORTLISTED' }
             };
-            const color = colors[status] || { bg: '#f3f4f6', text: '#4b5563' };
+            const config = configs[status] || { color: 'var(--glass-text-muted)', label: status.toUpperCase() };
             return {
-                padding: '4px 12px',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                backgroundColor: color.bg,
-                color: color.text,
-                borderRadius: '20px',
-                display: 'inline-block'
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.7rem',
+                fontWeight: '900',
+                background: `${config.color}15`,
+                color: config.color,
+                border: `1px solid ${config.color}30`,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                letterSpacing: '0.05em'
             };
         },
-        viewBtn: {
+        viewAction: {
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            color: 'var(--color-brand-accent)',
-            background: 'none',
-            border: 'none',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid var(--glass-border)',
+            color: 'white',
+            fontSize: '0.85rem',
+            fontWeight: '700',
             cursor: 'pointer',
-            fontSize: '0.9rem',
-            fontWeight: '600'
+            transition: 'all 0.2s ease'
         },
-        modalOverlay: {
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-            backdropFilter: 'blur(4px)',
-            animation: 'fadeIn 0.2s ease-out'
-        },
-        modalContent: {
-            background: 'white',
-            width: '90%',
-            maxWidth: '500px',
-            borderRadius: 'var(--radius-lg)',
+        analyticsPanel: {
+            background: 'var(--glass-surface)',
             padding: '32px',
-            position: 'relative',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            animation: 'slideUp 0.3s ease-out'
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
+            backdropFilter: 'blur(16px)'
         },
-        analysisSection: {
-            marginTop: 'var(--space-md)',
-            background: 'var(--card-dashboard)',
-            padding: '24px',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-dashboard)',
-            boxShadow: 'var(--shadow-premium)'
-        },
-        progressBar: {
-            height: '10px',
-            background: 'var(--bg-subtle)',
-            borderRadius: '5px',
+        progressTrack: {
+            height: '12px',
+            background: 'rgba(255,255,255,0.03)',
+            borderRadius: '100px',
             overflow: 'hidden',
             display: 'flex',
-            marginTop: '20px'
+            margin: '24px 0 16px'
+        },
+        percentValue: {
+            fontSize: '1.5rem',
+            fontWeight: '800',
+            color: 'white',
+            fontFamily: 'var(--font-display)'
         }
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.header}>
-                <h1 style={styles.title}>Hiring History</h1>
-                <p style={styles.subtitle}>Track and review processed candidate applications</p>
-            </div>
+        <div className="glass-main">
+            <div style={styles.container}>
+                <div className="glass-reveal">
+                    {/* Operational Hero Section */}
+                    <div style={styles.headerHero}>
+                        <h1 style={styles.title}>Hiring <span className="text-gradient-sapphire">History.</span></h1>
+                        <p style={styles.subtitle}>
+                            Track and review processed candidate applications with industrial precision.
+                            Your organization's complete recruitment legacy in one command center.
+                        </p>
+                    </div>
 
-            {/* Summary Stats */}
-            <div style={styles.statsGrid}>
-                <div style={styles.statCard}>
-                    <div style={styles.statIcon('#6366f1')}>
-                        <Users size={24} />
+                    {/* Summary Intelligence Stats */}
+                    <div style={styles.statsGrid}>
+                        {[
+                            { label: 'Total Processed', value: stats.total, icon: Users, color: 'var(--glass-accent-light)' },
+                            { label: 'Accepted', value: stats.accepted, icon: CheckCircle, color: '#10B981' },
+                            { label: 'Shortlisted', value: stats.shortlisted, icon: Clock, color: '#3B82F6' },
+                            { label: 'Rejected', value: stats.rejected, icon: XCircle, color: '#EF4444' }
+                        ].map((item, idx) => (
+                            <div key={idx} style={{ ...styles.statCard(), animationDelay: `${idx * 0.1}s` }} className="glass-stat-card glass-reveal">
+                                <div style={styles.statIcon(item.color)}>
+                                    <item.icon size={28} />
+                                </div>
+                                <div>
+                                    <div style={styles.statValue}>{item.value}</div>
+                                    <div style={styles.statLabel}>{item.label}</div>
+                                </div>
+                                <div className="stat-sweep" />
+                            </div>
+                        ))}
                     </div>
-                    <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{stats.total}</span>
-                        <span style={styles.statLabel}>Total Processed</span>
-                    </div>
-                </div>
-                <div style={styles.statCard}>
-                    <div style={styles.statIcon('var(--color-success)')}>
-                        <CheckCircle size={24} />
-                    </div>
-                    <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{stats.accepted}</span>
-                        <span style={styles.statLabel}>Accepted</span>
-                    </div>
-                </div>
-                <div style={styles.statCard}>
-                    <div style={styles.statIcon('var(--color-danger)')}>
-                        <XCircle size={24} />
-                    </div>
-                    <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{stats.rejected}</span>
-                        <span style={styles.statLabel}>Rejected</span>
-                    </div>
-                </div>
-                <div style={styles.statCard}>
-                    <div style={styles.statIcon('#3E61FF')}>
-                        <Clock size={24} />
-                    </div>
-                    <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{stats.shortlisted}</span>
-                        <span style={styles.statLabel}>Shortlisted</span>
-                    </div>
-                </div>
-            </div>
 
-            <div style={styles.controls}>
-                <div style={styles.filterTabs}>
-                    {['All', 'Accepted', 'Rejected', 'Shortlisted'].map(tab => (
-                        <button
-                            key={tab}
-                            style={styles.tab(filterStatus === tab)}
-                            onClick={() => setFilterStatus(tab)}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-                <div style={{ position: 'relative' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                    <input
-                        type="text"
-                        placeholder="Search candidates..."
-                        style={{
-                            padding: '10px 12px 10px 40px',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border-dashboard)',
-                            background: 'white',
-                            fontSize: '0.9rem'
-                        }}
-                    />
-                </div>
-            </div>
-
-            <div style={styles.tableContainer}>
-                {isLoading ? (
-                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <RefreshCw size={48} className="animate-spin" opacity={0.2} />
-                        <p style={{ fontSize: '1.1rem', fontWeight: '500', marginTop: '16px' }}>Loading history data...</p>
-                    </div>
-                ) : filteredData.length > 0 ? (
-                    <table style={styles.table}>
-                        <thead>
-                            <tr>
-                                <th style={styles.th}>Candidate</th>
-                                <th style={styles.th}>Job Title</th>
-                                <th style={styles.th}>Applied Date</th>
-                                <th style={styles.th}>Final Status</th>
-                                <th style={styles.th}>Processed Date</th>
-                                <th style={styles.th}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData.map(item => (
-                                <tr key={item.id} className="table-row">
-                                    <td style={styles.td}>
-                                        <div style={{ fontWeight: '600' }}>{item.JobSeeker?.fullname || 'Candidate'}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.JobSeeker?.email}</div>
-                                    </td>
-                                    <td style={styles.td}>{item.JobListing?.title}</td>
-                                    <td style={styles.td}>{item.applied_at ? new Date(item.applied_at).toLocaleDateString() : 'N/A'}</td>
-                                    <td style={styles.td}>
-                                        <span style={styles.badge(item.status)}>{item.status}</span>
-                                    </td>
-                                    <td style={styles.td}>{item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 'N/A'}</td>
-                                    <td style={styles.td}>
-                                        <button
-                                            style={styles.viewBtn}
-                                            onClick={() => handleViewDetails(item)}
-                                            className="action-btn"
-                                        >
-                                            <Eye size={16} /> View
-                                        </button>
-                                    </td>
-                                </tr>
+                    {/* Glass Control Bar */}
+                    <div style={{ ...styles.controlBar, animationDelay: '0.4s' }} className="glass-reveal">
+                        <div style={styles.tabs}>
+                            {['All', 'Accepted', 'Shortlisted', 'Rejected'].map(tab => (
+                                <button
+                                    key={tab}
+                                    style={styles.tab(filterStatus === tab)}
+                                    onClick={() => setFilterStatus(tab)}
+                                    className="tab-hover"
+                                >
+                                    {tab}
+                                </button>
                             ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ marginBottom: '16px' }}><Clock size={48} opacity={0.2} /></div>
-                        <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>No hiring history available yet.</p>
-                        <p style={{ fontSize: '0.9rem' }}>Try changing your filters or process some applications.</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Simple Visual Analysis */}
-            <div style={styles.analysisSection}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                    <BarChart2 size={20} color="var(--color-brand-accent)" />
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>Hiring Overview</h3>
-                </div>
-                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                            <span>Success Rate</span>
-                            <span style={{ fontWeight: '700' }}>{Math.round((stats.accepted / stats.total) * 100)}%</span>
                         </div>
-                        <div style={{ height: '8px', background: 'var(--bg-subtle)', borderRadius: '4px' }}>
-                            <div style={{ height: '100%', background: 'var(--color-success)', borderRadius: '4px', width: `${(stats.accepted / stats.total) * 100}%` }}></div>
+                        <div style={styles.searchWrapper}>
+                            <SearchIcon size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
+                            <input
+                                type="text"
+                                placeholder="Search hiring protocols…"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={styles.searchInput}
+                                className="glass-input-focus"
+                            />
                         </div>
                     </div>
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                            <span>Shortlist Ratio</span>
-                            <span style={{ fontWeight: '700' }}>{Math.round((stats.shortlisted / stats.total) * 100)}%</span>
-                        </div>
-                        <div style={{ height: '8px', background: 'var(--bg-subtle)', borderRadius: '4px' }}>
-                            <div style={{ height: '100%', background: 'var(--color-brand-accent)', borderRadius: '4px', width: `${(stats.shortlisted / stats.total) * 100}%` }}></div>
-                        </div>
+
+                    {/* Hiring History Matrix */}
+                    <div style={{ ...styles.tableWrapper, animationDelay: '0.5s' }} className="glass-reveal">
+                        {isLoading ? (
+                            <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
+                                <RefreshCw size={48} className="animate-spin" opacity={0.3} style={{ margin: '0 auto 20px' }} />
+                                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>Synchronizing History Matrix…</p>
+                            </div>
+                        ) : filteredData.length > 0 ? (
+                            <table style={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th style={styles.th}>Candidate Intelligence</th>
+                                        <th style={styles.th}>Job Allocation</th>
+                                        <th style={styles.th}>Status Protocol</th>
+                                        <th style={styles.th}>Processed Date</th>
+                                        <th style={styles.th}>Control</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredData.map(item => (
+                                        <tr key={item.id} className="history-row">
+                                            <td style={styles.td}>
+                                                <div style={{ fontWeight: '800', fontSize: '1.05rem', color: 'white' }}>{item.JobSeeker?.fullname || 'Candidate'}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>{item.JobSeeker?.email}</div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <div style={{ color: 'var(--glass-accent-light)', fontWeight: '700' }}>{item.JobListing?.title}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--glass-text-muted)' }}>ID: {item.id.slice(0, 8)}</div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <span style={styles.badge(item.status)}>
+                                                    <div className="status-dot" style={{ background: 'currentColor' }} />
+                                                    {item.status}
+                                                </span>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <div style={{ fontWeight: '600' }}>{item.updated_at ? new Date(item.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <button
+                                                    style={styles.viewAction}
+                                                    onClick={() => handleViewDetails(item)}
+                                                    className="btn-scale"
+                                                >
+                                                    <Eye size={16} className="text-gradient-sapphire" />
+                                                    DETAILS
+                                                    <ChevronRight size={14} className="arrow-move" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
+                                <Clock size={60} opacity={0.1} style={{ margin: '0 auto 24px' }} />
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '8px' }}>Void History</h3>
+                                <p style={{ maxWidth: '300px', margin: '0 auto' }}>No hiring protocols match your current parameters. Attempt a system reset.</p>
+                            </div>
+                        )}
                     </div>
-                </div>
 
-                <div style={styles.progressBar}>
-                    <div style={{ width: `${(stats.accepted / stats.total) * 100}%`, backgroundColor: 'var(--color-success)' }} title="Accepted"></div>
-                    <div style={{ width: `${(stats.shortlisted / stats.total) * 100}%`, backgroundColor: '#3E61FF' }} title="Shortlisted"></div>
-                    <div style={{ width: `${(stats.rejected / stats.total) * 100}%`, backgroundColor: 'var(--color-danger)' }} title="Rejected"></div>
-                </div>
-                <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '0.75rem', fontWeight: '500' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }}></div> Accepted</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3E61FF' }}></div> Shortlisted</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-danger)' }}></div> Rejected</div>
-                </div>
-            </div>
+                    {/* Hiring Overview Analytics */}
+                    <div style={{ ...styles.analyticsPanel, animationDelay: '0.6s' }} className="glass-reveal">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+                            <div className="icon-surface" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                                <BarChart2 size={20} />
+                            </div>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', letterSpacing: '0.02em' }}>Hiring Overview</h3>
+                        </div>
 
-            {/* Modal */}
-            {isModalOpen && selectedCandidate && (
-                <div style={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
-                    <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
                             <div>
-                                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700' }}>{selectedCandidate.JobSeeker?.fullname || 'Candidate'}</h2>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                                    <span style={styles.statLabel}>Success Rate</span>
+                                    <span style={styles.percentValue}>{stats.total ? Math.round((stats.accepted / stats.total) * 100) : 0}%</span>
+                                </div>
+                                <div style={{ height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
+                                    <div
+                                        className="progress-fill"
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #10B981, #34D399)', width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, borderRadius: '100px' }}
+                                    ></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                                    <span style={styles.statLabel}>Shortlist Ratio</span>
+                                    <span style={styles.percentValue}>{stats.total ? Math.round((stats.shortlisted / stats.total) * 100) : 0}%</span>
+                                </div>
+                                <div style={{ height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
+                                    <div
+                                        className="progress-fill"
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, borderRadius: '100px' }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={styles.progressTrack}>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, backgroundColor: '#10B981' }}></div>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, backgroundColor: '#3B82F6' }}></div>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.rejected / stats.total) * 100 : 0}%`, backgroundColor: '#EF4444' }}></div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                            {[
+                                { color: '#10B981', label: 'Accepted' },
+                                { color: '#3B82F6', label: 'Shortlisted' },
+                                { color: '#EF4444', label: 'Rejected' }
+                            ].map((item, idx) => (
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '700', color: 'var(--glass-text-secondary)' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, boxShadow: `0 0 8px ${item.color}80` }} />
+                                    {item.label}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal - Reusing Detail Protocol from Applications hub for consistency */}
+            {isModalOpen && selectedCandidate && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 2000, animation: 'fadeIn 0.3s ease'
+                }} onClick={() => setIsModalOpen(false)}>
+                    <div style={{
+                        background: 'var(--glass-bg)', width: '90%', maxWidth: '600px',
+                        borderRadius: '24px', border: '1px solid var(--glass-border)',
+                        padding: '40px', position: 'relative', overflow: 'hidden',
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                        animation: 'reveal 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, transparent, var(--glass-accent-light), transparent)' }} />
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+                            <div>
+                                <h2 style={{ margin: '0 0 8px', fontSize: '2rem', fontWeight: '800', color: 'white' }}>{selectedCandidate.JobSeeker?.fullname}</h2>
                                 <span style={styles.badge(selectedCandidate.status)}>{selectedCandidate.status}</span>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}><XCircle size={24} /></button>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Briefcase size={18} color="var(--text-light)" />
-                                <div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Applied For</div>
-                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>{selectedCandidate.JobListing?.title}</div>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Calendar size={18} color="var(--text-light)" />
-                                <div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Application Timeline</div>
-                                    <div style={{ fontSize: '0.95rem', fontWeight: '500' }}>
-                                        {selectedCandidate.applied_at ? new Date(selectedCandidate.applied_at).toLocaleDateString() : 'N/A'} (Applied) → {selectedCandidate.updated_at ? new Date(selectedCandidate.updated_at).toLocaleDateString() : 'N/A'} (Finalized)
-                                    </div>
-                                </div>
-                            </div>
-                            <div style={{ borderTop: '1px solid var(--border-dashboard)', paddingTop: '16px', marginTop: '8px' }}>
-                                <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '12px' }}>Contact Information</div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Mail size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.email}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Phone size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.phone || 'N/A'}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <MapPin size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.location || 'N/A'}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
-                                        <Clock size={14} color="var(--text-light)" /> {selectedCandidate.JobSeeker?.experience || 'N/A'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ marginTop: '32px', display: 'flex', gap: '12px' }}>
-                            <button style={{ flex: 1, padding: '12px', borderRadius: 'var(--radius-md)', background: 'var(--color-brand-accent)', color: 'white', border: 'none', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <ExternalLink size={16} /> View Profile
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '10px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
+                                <XCircle size={20} />
                             </button>
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                style={{ flex: 1, padding: '12px', borderRadius: 'var(--radius-md)', background: 'var(--bg-subtle)', color: 'var(--text-main)', border: '1px solid var(--border-dashboard)', fontWeight: '600', cursor: 'pointer' }}
-                            >
-                                Close
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div className="icon-surface" style={{ padding: '20px', borderRadius: '16px', display: 'flex', gap: '16px' }}>
+                                <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--glass-accent-light)' }}>
+                                    <Briefcase size={22} />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Application Protocol</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '700', color: 'white' }}>{selectedCandidate.JobListing?.title}</div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><Mail size={14} /></div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.email}</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><Phone size={14} /></div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.phone || 'N/A'}</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><MapPin size={14} /></div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.location || 'N/A'}</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><TrendingUp size={14} /></div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.experience || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '40px', display: 'flex', gap: '16px' }}>
+                            <button style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'var(--glass-accent)', color: 'white', border: '1px solid var(--glass-border-bright)', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} className="btn-scale">
+                                <ExternalLink size={18} /> FULL PROFILE
+                            </button>
+                            <button onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--glass-border)', fontWeight: '800', cursor: 'pointer' }}>
+                                CLOSE
                             </button>
                         </div>
                     </div>
@@ -475,34 +531,51 @@ const History = () => {
             )}
 
             <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
+                .glass-stat-card:hover {
+                    transform: translateY(-4px);
+                    border-color: var(--glass-border-bright);
+                    background: rgba(255, 255, 255, 0.05);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
                 }
-                @keyframes slideUp {
-                    from { transform: translateY(20px); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
+
+                .stat-sweep {
+                    position: absolute;
+                    top: 0; left: -100%; width: 100%; height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+                    transition: 0.5s;
                 }
-                .table-row {
-                    transition: all 0.2s;
+
+                .glass-stat-card:hover .stat-sweep { left: 100%; }
+
+                .tab-hover:hover { color: white; background: rgba(255,255,255,0.03); }
+
+                .glass-input-focus:focus {
+                    background: rgba(255,255,255,0.05);
+                    border-color: var(--glass-accent-light);
+                    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
                 }
-                .table-row:hover {
-                    background-color: rgba(62, 97, 255, 0.02);
-                }
-                .action-btn {
-                    transition: transform 0.2s;
-                }
-                .action-btn:hover {
-                    transform: scale(1.05);
-                    opacity: 0.8;
-                }
-                @media (max-width: 768px) {
-                    .container {
-                        padding: var(--space-sm);
-                    }
-                    th:nth-child(3), td:nth-child(3), th:nth-child(5), td:nth-child(5) {
-                        display: none;
-                    }
+
+                .history-row { transition: all 0.2s; cursor: default; }
+                .history-row:hover { background: rgba(255,255,255,0.02); }
+                .history-row:hover .td { border-bottom-color: rgba(255,255,255,0.15); }
+
+                .btn-scale { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+                .btn-scale:hover { transform: scale(1.05) translateY(-2px); border-color: var(--glass-border-bright); filter: brightness(1.1); }
+                .btn-scale:active { transform: scale(0.95); }
+
+                .arrow-move { transition: transform 0.2s; }
+                .btn-scale:hover .arrow-move { transform: translateX(3px); }
+
+                .progress-fill { border-radius: 100px; transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+                .status-dot { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+
+                @keyframes reveal { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+                @media (max-width: 900px) {
+                    th:nth-child(2), td:nth-child(2), th:nth-child(4), td:nth-child(4) { display: none; }
+                    .controlBar { flex-direction: column; align-items: stretch; }
+                    .searchWrapper { max-width: 100%; }
                 }
             `}</style>
         </div>

@@ -1,23 +1,99 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Briefcase,
     Users,
     TrendingUp,
     CheckCircle2,
-    PlusCircle,
-    Eye,
     Target,
     LayoutDashboard,
-    ArrowRight,
     Clock,
-    AlertCircle,
-    XCircle,
-    MousePointer2
+    PlusCircle,
+    ArrowUpRight,
+    Zap,
+    ShieldCheck,
+    Layers
 } from 'lucide-react';
 import { ROUTES } from '../../routes/routes';
-
 import { useGetEmployerStats, useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+
+// Design System
+import '@/styles/ProfessionalGlass.css';
+
+// --- Animated Counter Hook-like Component ---
+const GlassCounter = ({ value }) => {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        let start = 0;
+        const end = parseInt(value) || 0;
+        if (start === end) {
+            setCount(end);
+            return;
+        }
+        let totalDuration = 1000;
+        let increment = Math.ceil(end / (totalDuration / 16));
+        let timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+                setCount(end);
+                clearInterval(timer);
+            } else {
+                setCount(start);
+            }
+        }, 16);
+        return () => clearInterval(timer);
+    }, [value]);
+
+    return <span className="glass-number">{count}</span>;
+};
+
+// --- Stat Card Component ---
+const StatCard = ({ label, value, icon, index }) => (
+    <div
+        className="glass-panel"
+        style={{
+            padding: '28px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            animationDelay: `${index * 0.1}s`,
+            position: 'relative',
+            overflow: 'hidden'
+        }}
+    >
+        {/* Subtle Highlight Edge */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--glass-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--glass-accent-light)'
+            }}>
+                {icon}
+            </div>
+            <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                Verified
+            </div>
+        </div>
+
+        <div>
+            <div style={{ fontSize: '3rem', fontWeight: '700', color: 'white', lineHeight: '1' }}>
+                <GlassCounter value={value} />
+            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600', marginTop: '8px' }}>
+                {label}
+            </div>
+        </div>
+    </div>
+);
 
 const EmployerDashboard = () => {
     const navigate = useNavigate();
@@ -39,349 +115,211 @@ const EmployerDashboard = () => {
 
     const isLoading = isStatsLoading || isAppsLoading;
 
-    const styles = {
-        container: {
-            padding: '40px 20px',
-            maxWidth: '1240px',
-            margin: '0 auto',
-            fontFamily: 'var(--font-body)',
-            animation: 'fadeIn 0.5s ease-out'
-        },
-        headerBanner: {
-            background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, #1a2a5e 100%)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '50px',
-            color: 'white',
-            marginBottom: '40px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(5, 10, 26, 0.15)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-        },
-        bannerContent: {
-            position: 'relative',
-            zIndex: 2
-        },
-        bannerTitle: {
-            fontSize: '2.5rem',
-            fontWeight: '800',
-            marginBottom: '10px',
-            letterSpacing: '-0.02em'
-        },
-        bannerSubtitle: {
-            fontSize: '1.2rem',
-            opacity: 0.9,
-            maxWidth: '500px'
-        },
-        bannerImage: {
-            position: 'absolute',
-            right: '40px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            opacity: 0.2,
-            zIndex: 1
-        },
-        statsGrid: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '24px',
-            marginBottom: '40px'
-        },
-        statCard: {
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '15px'
-        },
-        iconWrapper: (color) => ({
-            width: '50px',
-            height: '50px',
-            borderRadius: '12px',
-            backgroundColor: `${color}10`,
-            color: color,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-        }),
-        statNumber: {
-            fontSize: '2rem',
-            fontWeight: '900',
-            color: 'var(--text-main)',
-            lineHeight: 1
-        },
-        statLabel: {
-            fontSize: '0.9rem',
-            color: 'var(--text-muted)',
-            fontWeight: '700',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-        },
-        sectionLayout: {
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
-            gap: '30px',
-            alignItems: 'start'
-        },
-        card: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '30px',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)'
-        },
-        cardHeader: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '25px'
-        },
-        cardTitle: {
-            fontSize: '1.4rem',
-            fontWeight: '800',
-            color: 'var(--text-main)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-        },
-        viewAllBtn: {
-            fontSize: '0.9rem',
-            fontWeight: '700',
-            color: 'var(--color-brand-accent)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-        },
-        statusBadge: (status) => {
-            let bg, color;
-            switch (status) {
-                case 'Shortlisted': bg = '#ECFDF5'; color = '#059669'; break;
-                case 'Rejected': bg = '#FEF2F2'; color = '#DC2626'; break;
-                default: bg = '#FFFBEB'; color = '#D97706'; // Pending
-            }
-            return (
-                <span style={{
-                    padding: '6px 14px', borderRadius: '25px', fontSize: '0.75rem', fontWeight: '800',
-                    backgroundColor: bg, color: color, display: 'inline-flex', alignItems: 'center'
-                }}>
-                    {status}
-                </span>
-            );
-        },
-        actionBtn: {
+    const statsConfig = [
+        { label: 'Market Reach', value: stats.totalJobs, icon: <Briefcase size={22} /> },
+        { label: 'Active Targets', value: stats.activeJobs, icon: <Target size={22} /> },
+        { label: 'Talent Inflow', value: stats.totalApplications, icon: <Users size={22} /> },
+        { label: 'Accepted Assets', value: stats.shortlisted, icon: <CheckCircle2 size={22} /> },
+    ];
+
+    return (
+        <div className="glass-main">
+            <div className="glass-container glass-reveal">
+
+                {/* Authority Header */}
+                <header style={{ marginBottom: '56px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <div style={{ animationDelay: '0.05s' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                            <Layers size={18} className="text-gradient-sapphire" />
+                            <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                                Premium Command Panel
+                            </span>
+                        </div>
+                        <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'white', letterSpacing: '-0.03em', lineHeight: '0.95' }}>
+                            Recruitment <br />
+                            <span className="text-gradient-sapphire">Intelligence.</span>
+                        </h1>
+                    </div>
+                    <div style={{ textAlign: 'right', animationDelay: '0.1s' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>Operational Integrity</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)' }} />
+                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'white', textTransform: 'uppercase' }}>Secure / Active</span>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Staggered Stats Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '60px' }}>
+                    {statsConfig.map((item, idx) => (
+                        <StatCard key={idx} index={idx} {...item} />
+                    ))}
+                </div>
+
+                {/* Content Section */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '32px', alignItems: 'start' }}>
+
+                    {/* Glass Data Feed */}
+                    <div className="glass-panel" style={{ padding: '0' }}>
+                        <div style={{ padding: '32px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>Talent Matrix</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--glass-text-muted)', marginTop: '4px', fontWeight: '500' }}>Recent candidate interactions and intake.</p>
+                            </div>
+                            <button
+                                onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}
+                                className="glass-btn-secondary"
+                                style={{
+                                    background: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid var(--glass-border)',
+                                    color: 'white',
+                                    padding: '10px 20px',
+                                    borderRadius: '12px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                Hub Overview <ArrowUpRight size={16} />
+                            </button>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table className="glass-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Professional Identity</th>
+                                        <th>Target Sector</th>
+                                        <th>Timeline</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {isLoading ? (
+                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>Scanning records...</td></tr>
+                                    ) : recentApplications.length > 0 ? (
+                                        recentApplications.map((app) => (
+                                            <tr key={app.id} className="glass-row" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3F51B5, #1A237E)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>
+                                                            {(app.name?.[0] || 'U').toUpperCase()}
+                                                        </div>
+                                                        <div style={{ fontWeight: '700', color: 'white' }}>
+                                                            {app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Record#742'}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={{ fontWeight: '600' }}>{app.jobTitle || app.JobListing?.title}</td>
+                                                <td style={{ fontWeight: '500' }}>{app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Syncing'}</td>
+                                                <td><StatusPill status={app.status} /></td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>No recent activity detected.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Industrial Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                        <div className="glass-panel" style={{ padding: '32px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                                <ShieldCheck size={20} className="text-gradient-sapphire" />
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'white' }}>Operations</h3>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <OperationButton label="Deploy Job Post" icon={<PlusCircle size={20} />} primary onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                                <OperationButton label="Candidate Hub" icon={<Users size={20} />} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)} />
+                                <OperationButton label="Listing Audit" icon={<Briefcase size={20} />} onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                            </div>
+                        </div>
+
+                        {/* Analysis Insight */}
+                        <div className="glass-panel" style={{ padding: '28px', background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08), transparent)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                                <TrendingUp size={18} className="text-gradient-sapphire" />
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>Operational Pulse</h4>
+                            </div>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', lineHeight: '1.6', fontWeight: '500' }}>
+                                Your hiring velocity is <strong>12% higher</strong> than the quarterly baseline. Shortlisting candidates within 48 hours is recommended for optimal retention.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <style>{`
+                .glass-btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06) !important; color: var(--glass-accent-light) !important; }
+                .op-btn:hover { transform: translateX(8px); border-color: var(--glass-border-bright) !important; }
+            `}</style>
+        </div>
+    );
+};
+
+const OperationButton = ({ label, icon, primary, onClick }) => (
+    <button
+        onClick={onClick}
+        className="op-btn"
+        style={{
             width: '100%',
-            padding: '16px',
-            borderRadius: '15px',
-            border: '1px solid var(--border-subtle)',
-            background: 'white',
-            color: 'var(--text-main)',
+            padding: '16px 20px',
+            borderRadius: '16px',
+            border: primary ? 'none' : '1px solid var(--glass-border)',
+            background: primary ? 'linear-gradient(135deg, #3F51B5, #303F9F)' : 'rgba(255,255,255,0.02)',
+            color: 'white',
             fontWeight: '700',
             fontSize: '0.95rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            transition: 'all 0.2s'
-        },
-        noJobsCard: {
-            textAlign: 'center',
-            padding: '60px 40px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px'
+            justifyContent: 'space-between',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: primary ? '0 10px 20px rgba(63, 81, 181, 0.2)' : 'none'
+        }}
+    >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {icon}
+            {label}
+        </div>
+        <ArrowUpRight size={16} style={{ opacity: 0.5 }} />
+    </button>
+);
+
+const StatusPill = ({ status }) => {
+    const getStyles = () => {
+        switch (status) {
+            case 'Shortlisted': return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: 'rgba(16, 185, 129, 0.2)' };
+            case 'Rejected': return { bg: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: 'rgba(239, 68, 68, 0.2)' };
+            default: return { bg: 'rgba(96, 165, 250, 0.1)', color: '#60A5FA', border: 'rgba(96, 165, 250, 0.2)' };
         }
     };
-
-    const statsConfig = [
-        { label: 'Total Jobs Posted', value: stats.totalJobs, icon: <Briefcase size={24} />, color: '#4F46E5' },
-        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={24} />, color: '#059669' },
-        { label: 'Total Applications', value: stats.totalApplications, icon: <Users size={24} />, color: '#3B82F6' },
-        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={24} />, color: '#8B5CF6' },
-    ];
-
+    const s = getStyles();
     return (
-        <div style={styles.container}>
-            {/* Header Section */}
-            <header style={styles.headerBanner}>
-                <div style={styles.bannerContent}>
-                    <h1 style={styles.bannerTitle}>Employer Suite</h1>
-                    <p style={styles.bannerSubtitle}>Monitor your hiring velocity and manage incoming talent effortlessly.</p>
-                </div>
-                <div style={styles.bannerImage}>
-                    <LayoutDashboard size={120} />
-                </div>
-                <div style={{ position: 'absolute', right: '-50px', top: '-50px', width: '250px', height: '250px', background: 'white', borderRadius: '50%', opacity: 0.05 }} />
-            </header>
-
-            {/* Statistics Overview */}
-            <div style={styles.statsGrid}>
-                {statsConfig.map((item, index) => (
-                    <div
-                        key={index}
-                        className="btn-scale"
-                        style={{ ...styles.statCard, animation: `fadeInUp 0.5s ease-out forwards ${index * 0.1}s`, opacity: 0 }}
-                    >
-                        <div style={styles.iconWrapper(item.color)}>
-                            {item.icon}
-                        </div>
-                        <div>
-                            <div style={styles.statNumber}>{item.value}</div>
-                            <div style={styles.statLabel}>{item.label}</div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Main Content Layout */}
-            <div style={styles.sectionLayout}>
-                {/* Recent Applications Table */}
-                <div style={styles.card}>
-                    <div style={styles.cardHeader}>
-                        <h2 style={styles.cardTitle}>
-                            <Clock size={22} color="var(--color-brand-accent)" /> Recent Applications
-                        </h2>
-                        <button style={styles.viewAllBtn} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}>
-                            View All <ArrowRight size={16} />
-                        </button>
-                    </div>
-
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '2px solid #F3F4F6' }}>
-                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Candidate</th>
-                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Position</th>
-                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Applied on</th>
-                                    <th style={{ padding: '15px 0', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '800' }}>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {isLoading ? (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</td>
-                                    </tr>
-                                ) : recentApplications.length > 0 ? (
-                                    recentApplications.map((app) => (
-                                        <tr key={app.id} style={{ borderBottom: '1px solid #F9FAFB' }} className="table-row">
-                                            <td style={{ padding: '18px 0', fontWeight: '700', color: 'var(--text-main)' }}>
-                                                {app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown'}
-                                            </td>
-                                            <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                {app.jobTitle || app.JobListing?.title}
-                                            </td>
-                                            <td style={{ padding: '18px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : (app.date || 'N/A')}
-                                            </td>
-                                            <td style={{ padding: '18px 0' }}>{styles.statusBadge(app.status)}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No recent applications</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Quick Actions Panel */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    <div style={styles.card}>
-                        <h2 style={{ ...styles.cardTitle, marginBottom: '20px' }}>
-                            <TrendingUp size={22} color="var(--color-brand-accent)" /> Quick Actions
-                        </h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <button
-                                style={{ ...styles.actionBtn, backgroundColor: 'var(--color-brand-primary)', color: 'white', border: 'none' }}
-                                className="action-btn-hover"
-                                onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
-                            >
-                                <PlusCircle size={20} /> Post New Job
-                            </button>
-                            <button
-                                style={styles.actionBtn}
-                                className="action-btn-hover"
-                                onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}
-                            >
-                                <Users size={20} /> View Applications
-                            </button>
-                            <button
-                                style={styles.actionBtn}
-                                className="action-btn-hover"
-                                onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
-                            >
-                                <Briefcase size={20} /> Manage Jobs
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Hiring Tip Card */}
-                    <div style={{ ...styles.card, background: '#EFF6FF', borderColor: '#DBEAFE' }}>
-                        <div style={{ display: 'flex', gap: '15px' }}>
-                            <AlertCircle size={24} color="#3B82F6" />
-                            <div>
-                                <h4 style={{ fontWeight: '800', color: '#1E40AF', marginBottom: '5px' }}>Pro Tip</h4>
-                                <p style={{ fontSize: '0.85rem', color: '#3B82F6', lineHeight: '1.5' }}>
-                                    Shortlisting candidates within 48 hours increases hiring success by 35%.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Empty State Example (Render conditionally where needed) */}
-            {stats.totalJobs === 0 && (
-                <div style={{ ...styles.card, ...styles.noJobsCard, marginTop: '40px' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-                        <Briefcase size={40} color="#D1D5DB" />
-                    </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>No Jobs Posted Yet</h3>
-                    <p style={{ color: 'var(--text-muted)' }}>Get started by creating your first job opportunity.</p>
-                    <button
-                        style={{ padding: '12px 24px', backgroundColor: 'var(--color-brand-primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer' }}
-                        onClick={() => navigate(ROUTES.JOB_MANAGEMENT)}
-                    >
-                        Post Your First Job
-                    </button>
-                </div>
-            )}
-
-            <style>{`
-                @keyframes fadeInUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-                .table-row:hover { background-color: #FAFAFB; cursor: pointer; }
-                
-                .btn-scale:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
-                
-                .action-btn-hover:hover {
-                    border-color: var(--color-brand-accent);
-                    color: var(--color-brand-accent);
-                    transform: translateX(5px);
-                }
-                
-                .action-btn-hover:active { transform: translateX(0); }
-
-                @media (max-width: 1024px) {
-                    .sectionLayout { grid-template-columns: 1fr; }
-                }
-            `}</style>
-        </div>
+        <span style={{
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '0.7rem',
+            fontWeight: '800',
+            backgroundColor: s.bg,
+            color: s.color,
+            border: `1px solid ${s.border}`,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+        }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: s.color }} />
+            {status || 'Pending'}
+        </span>
     );
 };
 

@@ -21,60 +21,109 @@ import {
     ChevronRight,
     AlertTriangle,
     Inbox,
-    RefreshCw
+    RefreshCw,
+    ShieldCheck,
+    Zap,
+    Layers,
+    Target
 } from 'lucide-react';
 
-// --- Custom Confirmation Modal ---
+// Design System
+import '@/styles/ProfessionalGlass.css';
+
+// --- Custom Confirmation Modal (Obsidian Authority Style) ---
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 'warning' }) => {
     if (!isOpen) return null;
 
-    const styles = {
-        overlay: {
+    return (
+        <div style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(5, 10, 26, 0.7)',
-            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 3000,
-            animation: 'fadeIn 0.2s ease-out'
-        },
-        modal: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '30px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            textAlign: 'center',
-            animation: 'slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-        }
-    };
-
-    return (
-        <div style={styles.overlay} onClick={onClose}>
-            <div style={styles.modal} onClick={e => e.stopPropagation()}>
-                <div style={{
-                    width: '60px', height: '60px', borderRadius: '50%', backgroundColor: type === 'warning' ? '#FEF3C7' : '#FEE2E2',
-                    color: type === 'warning' ? '#D97706' : '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
-                }}>
-                    <AlertTriangle size={30} />
+            animation: 'glassEntrance 0.2s ease-out'
+        }} onClick={onClose}>
+            <div
+                className="glass-panel"
+                style={{
+                    backgroundColor: 'rgba(10, 12, 16, 0.95)',
+                    borderRadius: '24px',
+                    padding: '48px 40px',
+                    width: '90%',
+                    maxWidth: '520px',
+                    border: '1px solid var(--glass-border-bright)',
+                    boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.8)',
+                    position: 'relative',
+                    zIndex: 3001,
+                    textAlign: 'center',
+                    animation: 'glassEntrance 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                    <div className={`flex-center`} style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '20px',
+                        backgroundColor: type === 'warning' ? 'rgba(239, 172, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        color: type === 'warning' ? '#F59E0B' : '#EF4444',
+                        border: `1px solid ${type === 'warning' ? 'rgba(239, 172, 68, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
+                    }}>
+                        <AlertTriangle size={36} />
+                    </div>
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '10px' }}>{title}</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '25px', lineHeight: '1.6' }}>{message}</p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <h3 style={{
+                    fontSize: '2rem',
+                    fontWeight: '800',
+                    color: 'white',
+                    marginBottom: '16px',
+                    fontFamily: 'var(--font-display)',
+                    letterSpacing: '-0.02em'
+                }}>{title}</h3>
+                <p style={{
+                    color: 'var(--glass-text-secondary)',
+                    marginBottom: '40px',
+                    lineHeight: '1.7',
+                    fontSize: '1.05rem',
+                    fontWeight: '500'
+                }}>{message}</p>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
                     <button
                         onClick={onClose}
-                        style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid var(--border-subtle)', background: 'transparent', fontWeight: '600', cursor: 'pointer' }}
+                        className="btn-scale"
+                        style={{
+                            padding: '14px 28px',
+                            borderRadius: '14px',
+                            border: '1px solid var(--glass-border)',
+                            background: 'transparent',
+                            color: 'white',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--font-display)'
+                        }}
                     >
-                        Cancel
+                        CANCEL PROTOCOL
                     </button>
                     <button
                         onClick={() => { onConfirm(); onClose(); }}
-                        style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: type === 'warning' ? '#D97706' : '#DC2626', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                        className="btn-scale"
+                        style={{
+                            padding: '14px 40px',
+                            borderRadius: '14px',
+                            border: 'none',
+                            background: type === 'warning' ? 'var(--glass-accent)' : '#DC2626',
+                            color: 'white',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            fontFamily: 'var(--font-display)',
+                            boxShadow: `0 8px 20px -4px ${type === 'warning' ? 'rgba(63, 81, 181, 0.4)' : 'rgba(220, 38, 38, 0.4)'}`
+                        }}
                     >
-                        Confirm
+                        CONFIRM ACTION
                     </button>
                 </div>
             </div>
@@ -82,7 +131,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
     );
 };
 
-// --- Candidate Details Modal ---
+// --- Candidate Intelligence Modal (Frosted Experience) ---
 const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) => {
     if (!isOpen || !candidate) return null;
 
@@ -90,242 +139,182 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
         overlay: {
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(5, 10, 26, 0.7)',
-            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(16px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 2000,
-            animation: 'fadeIn 0.3s ease-out'
+            zIndex: 3000,
+            animation: 'glassEntrance 0.3s ease-out'
         },
         modal: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
+            backgroundColor: 'var(--glass-bg)',
+            borderRadius: '28px',
             width: '95%',
-            maxWidth: '900px',
+            maxWidth: '1000px',
             maxHeight: '90vh',
             overflowY: 'auto',
-            boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.3)',
+            border: '1px solid var(--glass-border-bright)',
+            boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.6)',
             position: 'relative',
-            animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            scrollbarWidth: 'none', // Firefox
-            msOverflowStyle: 'none' // IE/Edge
-        },
-        closeBtn: {
-            position: 'absolute',
-            top: '24px',
-            right: '24px',
-            background: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            animation: 'glassEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
         },
         header: {
-            padding: '60px 50px 40px',
-            background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, #1a2a5e 100%)',
-            color: 'white',
+            padding: '60px 50px',
+            background: 'linear-gradient(135deg, rgba(10, 12, 16, 0.8) 0%, rgba(63, 81, 181, 0.1) 100%)',
+            borderBottom: '1px solid var(--glass-border)',
             display: 'flex',
-            gap: '30px',
+            gap: '40px',
             alignItems: 'center',
             position: 'relative',
             overflow: 'hidden'
         },
-        avatar: {
-            width: '120px',
-            height: '120px',
-            borderRadius: '30px',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '3rem',
-            fontWeight: '800',
-            position: 'relative',
-            zIndex: 2
-        },
-        bannerDecoration: {
-            position: 'absolute',
-            right: '-10%',
-            top: '-20%',
-            width: '300px',
-            height: '300px',
-            background: 'var(--color-brand-accent)',
-            borderRadius: '50%',
-            filter: 'blur(100px)',
-            opacity: 0.2
-        },
         content: {
-            padding: '40px 50px'
+            padding: '50px'
         },
-        group: {
-            marginBottom: '40px'
+        section: {
+            background: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '20px',
+            padding: '32px',
+            border: '1px solid var(--glass-border)',
+            marginBottom: '32px'
         },
-        sectionTitle: {
-            fontSize: '1.25rem',
+        label: {
+            fontSize: '0.75rem',
             fontWeight: '800',
-            color: 'var(--text-main)',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            borderBottom: '2px solid #f3f4f6',
-            paddingBottom: '10px'
+            color: 'var(--glass-text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            marginBottom: '8px',
+            display: 'block'
         },
-        detailCard: {
-            backgroundColor: '#F9FAFB',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-            border: '1px solid var(--border-subtle)',
-            lineHeight: '1.7',
-            color: 'var(--text-muted)'
-        },
-        footer: {
-            padding: '24px 50px',
-            borderTop: '1px solid var(--border-subtle)',
-            backgroundColor: '#fff',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '16px',
-            position: 'sticky',
-            bottom: 0,
-            zIndex: 5
+        value: {
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: 'white'
         }
     };
 
     return (
         <div style={styles.overlay} onClick={onClose}>
             <div style={styles.modal} onClick={e => e.stopPropagation()} className="hide-scrollbar">
-                <button style={styles.closeBtn} onClick={onClose} className="btn-scale"><X size={24} /></button>
+                {/* Decoration */}
+                <div style={{
+                    position: 'absolute', top: '-100px', right: '-100px', width: '300px', height: '300px',
+                    background: 'radial-gradient(circle, var(--glass-accent) 0%, transparent 70%)',
+                    opacity: 0.15, filter: 'blur(60px)', pointerEvents: 'none'
+                }} />
+
+                <button
+                    onClick={onClose}
+                    className="glass-action-circle"
+                    style={{ position: 'absolute', top: '32px', right: '32px', zIndex: 10 }}
+                >
+                    <X size={20} />
+                </button>
 
                 <div style={styles.header}>
-                    <div style={styles.bannerDecoration} />
-                    <div style={styles.avatar}>{candidate.name.charAt(0)}</div>
-                    <div style={{ position: 'relative', zIndex: 2 }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '8px', letterSpacing: '-0.02em' }}>{candidate.name}</h2>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}>
-                                <Briefcase size={18} /> {candidate.jobTitle}
+                    <div className="glass-avatar-tile" style={{ width: '120px', height: '120px', borderRadius: '32px', fontSize: '3.5rem' }}>
+                        {candidate.name.charAt(0)}
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '3rem', fontWeight: '800', color: 'white', marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: 'var(--font-display)' }}>
+                            {candidate.name}
+                        </h2>
+                        <div style={{ display: 'flex', gap: '24px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>
+                                <Briefcase size={18} className="text-gradient-sapphire" /> {candidate.jobTitle}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}>
-                                <MapPin size={18} /> {candidate.location}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>
+                                <MapPin size={18} className="text-gradient-sapphire" /> {candidate.location}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div style={styles.content}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '50px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: '#EEF2FF', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Mail size={20} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Email Address</div>
-                                <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{candidate.email}</div>
-                            </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
+                        <div className="glass-panel" style={{ padding: '24px' }}>
+                            <span style={styles.label}>Email Address</span>
+                            <div style={styles.value}>{candidate.email}</div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Phone size={20} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Phone Number</div>
-                                <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{candidate.phone}</div>
-                            </div>
+                        <div className="glass-panel" style={{ padding: '24px' }}>
+                            <span style={styles.label}>Phone Protocol</span>
+                            <div style={styles.value}>{candidate.phone || 'System Not Set'}</div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: '#FFF7ED', color: '#C2410C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Calendar size={20} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>Applied Date</div>
-                                <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{candidate.appliedDate}</div>
-                            </div>
+                        <div className="glass-panel" style={{ padding: '24px' }}>
+                            <span style={styles.label}>Applied On</span>
+                            <div style={styles.value}>{candidate.appliedDate}</div>
                         </div>
                     </div>
 
-                    <div style={styles.group}>
-                        <h3 style={styles.sectionTitle}><User size={22} color="var(--color-brand-accent)" /> Professional Summary</h3>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', fontSize: '1.05rem' }}>{candidate.about || "No summary provided."}</p>
+                    <div style={styles.section}>
+                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Candidate Intelligence Summary</h3>
+                        <p style={{ color: 'var(--glass-text-secondary)', lineHeight: '1.8', fontSize: '1.1rem', fontWeight: '500', margin: 0 }}>
+                            {candidate.about || "No profile summary provided in the data matrix."}
+                        </p>
                     </div>
 
-                    <div style={styles.group}>
-                        <h3 style={styles.sectionTitle}><CheckCircle2 size={22} color="#059669" /> Top Skills</h3>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={styles.section}>
+                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Technical Skill Matrix</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                             {candidate.skills.map((skill, i) => (
-                                <span key={i} style={{ padding: '8px 18px', backgroundColor: '#F3F4F6', color: '#374151', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '700', border: '1px solid #e5e7eb' }}>
-                                    {skill}
+                                <span key={i} className="glass-badge-pulse" style={{ background: 'rgba(96, 165, 250, 0.1)', color: '#93C5FD', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
+                                    <Target size={14} /> {skill}
                                 </span>
                             ))}
                         </div>
                     </div>
 
-                    <div style={styles.group}>
-                        <h3 style={styles.sectionTitle}><FileText size={22} color="var(--color-brand-accent)" /> Education Path</h3>
-                        <div style={styles.detailCard}>{candidate.education}</div>
-                    </div>
-
-                    <div style={styles.group}>
-                        <h3 style={styles.sectionTitle}><RefreshCw size={22} color="#8B5CF6" /> Cover Letter</h3>
-                        <div style={{ ...styles.detailCard, position: 'relative' }}>
-                            <div style={{ position: 'absolute', top: '20px', right: '20px', color: '#d1d5db' }}><X size={40} opacity={0.1} /></div>
-                            {candidate.coverLetter}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                        <div style={styles.section}>
+                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Education Path</h3>
+                            <div style={{ color: 'white', fontWeight: '600' }}>{candidate.education}</div>
+                        </div>
+                        <div style={styles.section}>
+                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Operational Cover</h3>
+                            <div style={{ color: 'var(--glass-text-secondary)', fontSize: '0.95rem', fontStyle: 'italic' }}>
+                                "{candidate.coverLetter.substring(0, 150)}..."
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div style={styles.footer}>
-                    <div style={{ display: 'flex', gap: '12px', marginRight: 'auto' }}>
+                {/* Footer Actions */}
+                <div style={{ padding: '32px 50px', borderTop: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '16px' }}>
                         {candidate.status !== 'Shortlisted' && (
                             <button
-                                style={{ padding: '12px 24px', backgroundColor: '#059669', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
                                 className="btn-scale"
+                                style={{ padding: '14px 32px', background: 'var(--glass-accent)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onShortlist(candidate.id); onClose(); }}
                             >
-                                <CheckCircle2 size={18} /> Shortlist
+                                <ShieldCheck size={20} /> SHORTLIST CANDIDATE
                             </button>
                         )}
                         {candidate.status !== 'Rejected' && (
                             <button
-                                style={{ padding: '12px 24px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
                                 className="btn-scale"
+                                style={{ padding: '14px 32px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onReject(candidate.id); onClose(); }}
                             >
-                                <XCircle size={18} /> Reject
-                            </button>
-                        )}
-                        {candidate.status !== 'Pending' && (
-                            <button
-                                style={{ padding: '12px 24px', backgroundColor: '#f3f4f6', color: 'var(--text-main)', border: '1px solid #e5e7eb', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                className="btn-scale"
-                                onClick={() => { onShortlist(candidate.id, 'Pending'); onClose(); }}
-                            >
-                                <RefreshCw size={18} /> Reset to Pending
+                                <XCircle size={20} /> REJECT APPLICATION
                             </button>
                         )}
                     </div>
                     <button
                         onClick={onClose}
-                        style={{ padding: '12px 24px', borderRadius: '12px', border: '1px solid var(--border-subtle)', background: 'transparent', fontWeight: '700', cursor: 'pointer' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--glass-text-secondary)', fontWeight: '700', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.85rem' }}
                     >
-                        Close Profile
+                        CLOSE INTELLIGENCE MODAL
                     </button>
                 </div>
             </div>
         </div>
     );
 };
-
 
 const Applications = () => {
     // API Hooks
@@ -339,7 +328,7 @@ const Applications = () => {
     const [selectedApp, setSelectedApp] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, onConfirm: null, title: '', message: '' });
 
-    // Derived Job Titles for filter
+    // Derived Data
     const uniqueJobs = ['All Jobs', ...new Set(serverApps.map(app => app.jobTitle || app.JobListing?.title))];
 
     // Filter Logic
@@ -359,8 +348,8 @@ const Applications = () => {
         if (newStatus === 'Rejected') {
             setConfirmModal({
                 isOpen: true,
-                title: 'Reject Application',
-                message: `Are you sure you want to reject ${name}? This candidate will be notified of your decision.`,
+                title: 'Terminate Application',
+                message: `Are you sure you want to terminate the recruitment process for ${name}? The candidate will be notified of the decision.`,
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else {
@@ -374,122 +363,168 @@ const Applications = () => {
 
     const styles = {
         container: {
-            padding: '30px 20px',
-            maxWidth: '1180px',
+            padding: '40px 32px 60px',
+            maxWidth: '1400px',
             margin: '0 auto',
+            minHeight: '100vh',
             fontFamily: 'var(--font-body)',
-            animation: 'fadeIn 0.5s ease-out'
+            color: 'white',
+            position: 'relative'
         },
         headerBanner: {
-            background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, #1a2a5e 100%)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '35px 50px',
-            color: 'white',
-            marginBottom: '30px',
+            backgroundColor: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '24px',
+            padding: '50px 64px',
+            marginBottom: '40px',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(5, 10, 26, 0.15)'
+            border: '1px solid var(--glass-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
         },
-        bannerContent: {
-            position: 'relative',
-            zIndex: 2
+        bannerOverline: {
+            fontSize: '0.8rem',
+            fontWeight: '800',
+            color: 'var(--glass-text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.3em',
+            fontFamily: 'var(--font-display)'
         },
         bannerTitle: {
-            fontSize: '2.5rem',
+            fontSize: '3.5rem',
             fontWeight: '800',
-            marginBottom: '10px',
-            letterSpacing: '-0.02em'
+            margin: 0,
+            letterSpacing: '-0.03em',
+            fontFamily: 'var(--font-display)',
+            lineHeight: 1.1,
+            color: 'white'
         },
         bannerSubtitle: {
-            fontSize: '1.2rem',
-            opacity: 0.9,
-            maxWidth: '600px'
-        },
-        bannerDecoration: {
-            position: 'absolute',
-            right: '-50px',
-            top: '-50px',
-            width: '280px',
-            height: '280px',
-            background: 'var(--color-brand-accent)',
-            borderRadius: '50%',
-            filter: 'blur(90px)',
-            opacity: 0.3
+            fontSize: '1.1rem',
+            color: 'var(--glass-text-secondary)',
+            fontWeight: '500',
+            maxWidth: '500px',
+            marginTop: '8px'
         },
         filterCard: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            padding: '24px 30px',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)',
-            marginBottom: '25px',
+            backgroundColor: 'var(--glass-surface)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '12px', // Tight horizontal panel
+            border: '1px solid var(--glass-border)',
+            marginBottom: '32px',
             display: 'flex',
-            gap: '16px',
+            gap: '20px',
             flexWrap: 'wrap',
-            alignItems: 'center'
+            alignItems: 'center',
         },
         searchWrapper: {
             position: 'relative',
-            flex: '1',
-            minWidth: '300px'
+            flex: '2',
+            minWidth: '350px'
         },
-        input: {
+        searchInput: {
             width: '100%',
-            padding: '16px 20px 16px 55px',
-            borderRadius: '15px',
-            border: '1px solid var(--border-subtle)',
-            backgroundColor: '#F9FAFB',
-            fontSize: '1rem',
+            padding: '12px 16px 12px 56px',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            fontSize: '0.9rem',
+            color: 'white',
             outline: 'none',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            fontWeight: '600',
+            fontFamily: 'var(--font-body)'
         },
         select: {
-            padding: '16px 24px',
-            borderRadius: '15px',
-            border: '1px solid var(--border-subtle)',
-            backgroundColor: '#F9FAFB',
-            fontSize: '1rem',
+            padding: '12px 24px',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            fontSize: '0.9rem',
+            color: 'white',
             outline: 'none',
             cursor: 'pointer',
-            minWidth: '200px',
-            transition: 'all 0.3s ease'
+            minWidth: '220px',
+            transition: 'all 0.3s ease',
+            fontWeight: '700',
+            appearance: 'none',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%3C3B82F6\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 16px center',
+            backgroundSize: '16px',
+            fontFamily: 'var(--font-body)'
         },
         tableWrapper: {
-            backgroundColor: 'white',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-premium)',
-            border: '1px solid var(--border-subtle)',
-            overflow: 'hidden'
+            backgroundColor: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
+            overflow: 'hidden',
+        },
+        th: {
+            padding: '20px 24px',
+            color: 'var(--glass-text-secondary)',
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            fontWeight: '800',
+            letterSpacing: '0.08em',
+            borderBottom: '1px solid var(--glass-border)',
+            backgroundColor: 'rgba(255, 255, 255, 0.01)',
+            fontFamily: 'var(--font-display)'
+        },
+        td: {
+            padding: '20px 24px',
+            borderBottom: '1px solid var(--glass-border)',
+            verticalAlign: 'middle',
+            fontSize: '0.95rem',
+            color: 'white'
         },
         statusBadge: (status) => {
-            let bg, color, icon;
+            let color, glow;
             switch (status) {
-                case 'Shortlisted': bg = '#ECFDF5'; color = '#059669'; icon = <CheckCircle2 size={12} />; break;
-                case 'Rejected': bg = '#FEF2F2'; color = '#DC2626'; icon = <XCircle size={12} />; break;
-                default: bg = '#FFFBEB'; color = '#D97706'; icon = <AlertCircle size={12} />; // Pending
+                case 'Shortlisted':
+                    color = '#3B82F6'; // Sapphire
+                    glow = 'rgba(59, 130, 246, 0.15)';
+                    break;
+                case 'Rejected':
+                    color = '#EF4444'; // Crimson
+                    glow = 'rgba(239, 68, 68, 0.15)';
+                    break;
+                case 'Accepted':
+                    color = '#10B981'; // Emerald
+                    glow = 'rgba(16, 185, 129, 0.15)';
+                    break;
+                default: // Pending
+                    color = '#F59E0B'; // Amber/Gold
+                    glow = 'rgba(245, 158, 11, 0.15)';
             }
             return (
-                <span style={{
-                    padding: '6px 14px', borderRadius: '25px', fontSize: '0.8rem', fontWeight: '800',
-                    backgroundColor: bg, color: color, display: 'inline-flex', alignItems: 'center', gap: '8px'
+                <span className="glass-badge-pulse" style={{
+                    backgroundColor: glow,
+                    color: color,
+                    border: `1px solid ${color}33`,
+                    boxShadow: `0 0 12px ${color}11`
                 }}>
-                    {icon} {status}
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />
+                    {status}
                 </span>
             );
         },
         actionBtn: (type) => ({
-            padding: '10px 18px',
+            width: '40px',
+            height: '40px',
             borderRadius: '12px',
-            border: 'none',
+            border: '1px solid var(--glass-border)',
             cursor: 'pointer',
-            fontWeight: '700',
-            fontSize: '0.85rem',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            backgroundColor: type === 'details' ? '#EFF6FF' : (type === 'success' ? '#ECFDF5' : '#FEF2F2'),
-            color: type === 'details' ? '#3B82F6' : (type === 'success' ? '#059669' : '#EF4444')
+            justifyContent: 'center',
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            backgroundColor: type === 'details' ? 'rgba(59, 130, 246, 0.1)' : (type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+            color: type === 'details' ? '#60A5FA' : (type === 'success' ? '#34D399' : '#F87171')
         }),
         emptyState: {
             textAlign: 'center',
@@ -497,266 +532,286 @@ const Applications = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center'
+        },
+        statLabel: {
+            fontSize: '0.7rem',
+            fontWeight: '800',
+            color: 'var(--glass-text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            marginBottom: '4px'
+        },
+        statValue: {
+            fontSize: '1.4rem',
+            fontWeight: '900',
+            color: 'white',
+            fontFamily: 'var(--font-display)'
         }
     };
 
     return (
-        <div style={styles.container}>
-            {/* Candidate Details Modal */}
-            <CandidateModal
-                isOpen={!!selectedApp}
-                onClose={() => setSelectedApp(null)}
-                candidate={selectedApp}
-                onShortlist={(id, status = 'Shortlisted') => updateStatus(id, status)}
-                onReject={(id) => triggerAction(id, 'Rejected')}
-            />
+        <div className="glass-main">
+            <div style={styles.container}>
+                {/* Modals */}
+                <CandidateModal
+                    isOpen={!!selectedApp}
+                    onClose={() => setSelectedApp(null)}
+                    candidate={selectedApp}
+                    onShortlist={(id, status = 'Shortlisted') => updateStatus(id, status)}
+                    onReject={(id) => triggerAction(id, 'Rejected')}
+                />
+                <ConfirmationModal
+                    {...confirmModal}
+                    onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                />
 
-            {/* Confirmation Modal */}
-            <ConfirmationModal
-                {...confirmModal}
-                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-            />
+                {/* Recruitment Operations Hero */}
+                <header style={styles.headerBanner} className="glass-reveal">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
+                        <div>
+                            <span style={styles.bannerOverline}>Recruitment Operations</span>
+                            <h1 style={styles.bannerTitle}>
+                                Applications <span className="text-gradient-sapphire">Intelligence.</span>
+                            </h1>
+                            <p style={styles.bannerSubtitle}>
+                                Track, evaluate, and manage candidate pipelines in real time with high-density precision.
+                            </p>
+                        </div>
 
-            {/* Header Banner */}
-            <header style={styles.headerBanner}>
-                <div style={styles.bannerDecoration} />
-                <div style={styles.bannerContent}>
-                    <h1 style={styles.bannerTitle}>Applications Hub</h1>
-                    <p style={styles.bannerSubtitle}>Efficiently track, review, and hire the best talent from your candidate pool.</p>
-                </div>
-            </header>
-
-            {/* Filters Section */}
-            <div style={styles.filterCard}>
-                <div style={styles.searchWrapper}>
-                    <Search size={22} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-                    <input
-                        style={styles.input}
-                        className="main-input"
-                        placeholder="Search candidates by name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ position: 'relative' }}>
-                        <select style={styles.select} className="main-input" value={jobFilter} onChange={(e) => setJobFilter(e.target.value)}>
-                            {uniqueJobs.map(job => <option key={job}>{job}</option>)}
-                        </select>
+                        {/* Inventory Quick Stats */}
+                        <div style={{ display: 'flex', gap: '32px' }}>
+                            <div className="glass-panel" style={{ padding: '16px 24px' }}>
+                                <div style={styles.statLabel}>Global Inventory</div>
+                                <div style={styles.statValue}>{serverApps.length}</div>
+                            </div>
+                            <div className="glass-panel" style={{ padding: '16px 24px' }}>
+                                <div style={styles.statLabel}>Active Pipeline</div>
+                                <div style={styles.statValue}>{serverApps.filter(a => a.status === 'Shortlisted').length}</div>
+                            </div>
+                        </div>
                     </div>
-                    <select style={styles.select} className="main-input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <option>All Status</option>
-                        <option>Pending</option>
-                        <option>Shortlisted</option>
-                        <option>Rejected</option>
-                    </select>
+
+                    {/* Background Glow */}
+                    <div style={{
+                        position: 'absolute', bottom: '-80px', right: '-80px', width: '250px', height: '250px',
+                        background: 'radial-gradient(circle, var(--glass-accent) 0%, transparent 70%)',
+                        opacity: 0.15, filter: 'blur(50px)', pointerEvents: 'none'
+                    }} />
+                </header>
+
+                {/* Glass Filter Bar */}
+                <div style={styles.filterCard} className="glass-reveal" style={{ animationDelay: '0.1s' }}>
+                    <div style={styles.searchWrapper}>
+                        <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
+                        <input
+                            style={styles.searchInput}
+                            placeholder="SEARCH CANDIDATE PROTOCOL..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ position: 'relative' }}>
+                            <select style={styles.select} value={jobFilter} onChange={(e) => setJobFilter(e.target.value)}>
+                                {uniqueJobs.map(job => <option key={job} style={{ background: '#0F1217' }}>{job}</option>)}
+                            </select>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                            <select style={styles.select} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                                <option style={{ background: '#0F1217' }}>All Status</option>
+                                <option style={{ background: '#0F1217' }}>Pending</option>
+                                <option style={{ background: '#0F1217' }}>Shortlisted</option>
+                                <option style={{ background: '#0F1217' }}>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Table Section */}
-            <div style={styles.tableWrapper}>
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead>
-                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '2px solid #f3f4f6' }}>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Candidate Profile</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Position</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Review CV</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Submission</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Current Status</th>
-                                <th style={{ padding: '16px 30px', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.05em' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {isLoading ? (
+                {/* Recruitment Intelligence Matrix */}
+                <div style={styles.tableWrapper} className="glass-reveal" style={{ animationDelay: '0.2s' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
                                 <tr>
-                                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading applications...</td>
+                                    <th style={styles.th}>Candidate Profile</th>
+                                    <th style={styles.th}>Position Matrix</th>
+                                    <th style={styles.th}>CV Access</th>
+                                    <th style={styles.th}>Initiation Date</th>
+                                    <th style={styles.th}>Current Protocol</th>
+                                    <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
                                 </tr>
-                            ) : filteredApps.length > 0 ? (
-                                filteredApps.map((app, index) => {
-                                    const candidateName = app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Candidate';
-                                    const candidateEmail = app.email || app.JobSeeker?.email || '';
-                                    const jobTitle = app.jobTitle || app.JobListing?.title || 'Unknown Position';
+                            </thead>
+                            <tbody>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                                                <RefreshCw size={24} className="spin-slow text-gradient-sapphire" />
+                                                <span style={{ fontWeight: '700', letterSpacing: '0.1em' }}>LOADING DATA POINTS...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : filteredApps.length > 0 ? (
+                                    filteredApps.map((app, index) => {
+                                        const candidateName = app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Node';
+                                        const candidateEmail = app.email || app.JobSeeker?.email || 'N/A';
+                                        const jobTitle = app.jobTitle || app.JobListing?.title || 'Unknown Position';
 
-                                    return (
-                                        <tr
-                                            key={app.id}
-                                            style={{
-                                                borderBottom: '1px solid #f3f4f6',
-                                                transition: 'background 0.2s',
-                                                animation: `fadeInUp 0.4s ease-out forwards ${index * 0.1}s`,
-                                                opacity: 0
-                                            }}
-                                            className="table-row"
-                                        >
-                                            <td style={{ padding: '18px 30px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                    <div style={{
-                                                        width: '42px', height: '42px', borderRadius: '12px',
-                                                        backgroundColor: 'var(--color-brand-primary)', color: 'white',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800',
-                                                        fontSize: '1rem', boxShadow: '0 4px 12px rgba(5, 10, 26, 0.1)'
-                                                    }}>
-                                                        {candidateName.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.95rem' }}>{candidateName}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                            <Mail size={12} /> {candidateEmail}
+                                        return (
+                                            <tr
+                                                key={app.id}
+                                                className="glass-row"
+                                                style={{
+                                                    animation: `glassEntrance 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards ${index * 60}ms`,
+                                                    opacity: 0,
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                        <div className="glass-avatar-tile">
+                                                            {candidateName.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '800', color: 'white', fontSize: '1rem', letterSpacing: '-0.01em' }}>{candidateName}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>{candidateEmail}</div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '18px 30px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#4B5563', fontSize: '0.9rem' }}>
-                                                    <Briefcase size={14} color="var(--color-brand-accent)" />
-                                                    {jobTitle}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '18px 30px' }}>
-                                                <button
-                                                    style={{ background: '#f3f4f6', border: 'none', color: 'var(--text-main)', padding: '8px 14px', borderRadius: '10px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', transition: 'all 0.2s' }}
-                                                    className="btn-scale"
-                                                    onClick={() => {
-                                                        const cvUrl = app.CV?.file_url || app.CV?.platform_data_url;
-                                                        if (cvUrl) window.open(cvUrl, '_blank');
-                                                        else alert('CV not found');
-                                                    }}
-                                                >
-                                                    <FileText size={14} /> View CV
-                                                </button>
-                                            </td>
-                                            <td style={{ padding: '18px 30px', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <Calendar size={14} /> {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '18px 30px' }}>
-                                                {styles.statusBadge(app.status)}
-                                            </td>
-                                            <td style={{ padding: '18px 30px' }}>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: 'white' }}>
+                                                        <Briefcase size={16} className="text-gradient-sapphire" />
+                                                        {jobTitle}
+                                                    </div>
+                                                </td>
+                                                <td style={styles.td}>
                                                     <button
-                                                        style={styles.actionBtn('details')}
                                                         className="btn-scale"
+                                                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'white', padding: '8px 16px', borderRadius: '10px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', letterSpacing: '0.05em' }}
                                                         onClick={() => {
-                                                            const formattedApp = {
-                                                                ...app,
-                                                                name: candidateName,
-                                                                email: candidateEmail,
-                                                                jobTitle: jobTitle,
-                                                                appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
-                                                                skills: app.JobSeeker?.skills || app.skills || [],
-                                                                education: app.JobSeeker?.education || app.education || 'N/A',
-                                                                about: app.JobSeeker?.summary || app.about || '',
-                                                                phone: app.JobSeeker?.phone || app.phone || '',
-                                                                location: app.JobSeeker?.location || app.location || '',
-                                                                coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
-                                                            };
-                                                            setSelectedApp(formattedApp);
+                                                            const cvUrl = app.CV?.file_url || app.CV?.platform_data_url;
+                                                            if (cvUrl) window.open(cvUrl, '_blank');
+                                                            else alert('CV data mismatch error.');
                                                         }}
                                                     >
-                                                        <Eye size={14} /> Details
+                                                        <FileText size={14} className="text-gradient-sapphire" /> VIEW CV
                                                     </button>
-
-                                                    {app.status !== 'Shortlisted' && (
+                                                </td>
+                                                <td style={{ ...styles.td, color: 'var(--glass-text-secondary)', fontWeight: '700', fontSize: '0.85rem' }}>
+                                                    {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate}
+                                                </td>
+                                                <td style={styles.td}>
+                                                    {styles.statusBadge(app.status)}
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                                                         <button
-                                                            style={styles.actionBtn('success')}
-                                                            title="Shortlist"
                                                             className="btn-scale"
-                                                            onClick={() => updateStatus(app.id, 'Shortlisted')}
-                                                        >
-                                                            <CheckCircle2 size={14} />
-                                                        </button>
-                                                    )}
-
-                                                    {app.status !== 'Rejected' && (
-                                                        <button
-                                                            style={styles.actionBtn('danger')}
-                                                            title="Reject"
-                                                            className="btn-scale"
-                                                            onClick={() => triggerAction(app.id, 'Rejected')}
-                                                        >
-                                                            <XCircle size={14} />
-                                                        </button>
-                                                    )}
-
-                                                    {app.status !== 'Pending' && (
-                                                        <button
                                                             style={styles.actionBtn('details')}
-                                                            title="Set to Pending"
-                                                            className="btn-scale"
-                                                            onClick={() => updateStatus(app.id, 'Pending')}
+                                                            title="View Details"
+                                                            onClick={() => {
+                                                                const formattedApp = {
+                                                                    ...app,
+                                                                    name: candidateName,
+                                                                    email: candidateEmail,
+                                                                    jobTitle: jobTitle,
+                                                                    appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
+                                                                    skills: app.JobSeeker?.skills || app.skills || [],
+                                                                    education: app.JobSeeker?.education || app.education || 'N/A',
+                                                                    about: app.JobSeeker?.summary || app.about || '',
+                                                                    phone: app.JobSeeker?.phone || app.phone || '',
+                                                                    location: app.JobSeeker?.location || app.location || '',
+                                                                    coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
+                                                                };
+                                                                setSelectedApp(formattedApp);
+                                                            }}
                                                         >
-                                                            <RefreshCw size={14} />
+                                                            <Eye size={18} />
                                                         </button>
-                                                    )}
+
+                                                        {app.status !== 'Shortlisted' && (
+                                                            <button
+                                                                className="btn-scale"
+                                                                style={styles.actionBtn('success')}
+                                                                title="Shortlist"
+                                                                onClick={() => updateStatus(app.id, 'Shortlisted')}
+                                                            >
+                                                                <ShieldCheck size={18} />
+                                                            </button>
+                                                        )}
+
+                                                        {app.status !== 'Rejected' && (
+                                                            <button
+                                                                className="btn-scale"
+                                                                style={styles.actionBtn('danger')}
+                                                                title="Terminate"
+                                                                onClick={() => triggerAction(app.id, 'Rejected')}
+                                                            >
+                                                                <XCircle size={18} />
+                                                            </button>
+                                                        )}
+
+                                                        {app.status !== 'Pending' && (
+                                                            <button
+                                                                className="btn-scale"
+                                                                style={styles.actionBtn('details')}
+                                                                title="Reset Protocol"
+                                                                onClick={() => updateStatus(app.id, 'Pending')}
+                                                            >
+                                                                <RefreshCw size={18} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6">
+                                            <div style={styles.emptyState}>
+                                                <div className="glass-panel" style={{ width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
+                                                    <Inbox size={60} color="var(--glass-text-muted)" />
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            ) : (
-                                <tr>
-                                    <td colSpan="6">
-                                        <div style={styles.emptyState}>
-                                            <div style={{
-                                                width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#F3F4F6',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '25px'
-                                            }}>
-                                                <Inbox size={60} color="#D1D5DB" />
+                                                <h3 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'white', marginBottom: '16px', letterSpacing: '-0.02em' }}>No Data Nodes Found</h3>
+                                                <p style={{ maxWidth: '400px', color: 'var(--glass-text-secondary)', lineHeight: '1.7', fontSize: '1.05rem' }}>
+                                                    The recruitment matrix is currently empty for the selected filters. Refine your query parameters.
+                                                </p>
+                                                <button
+                                                    onClick={() => { setSearchQuery(''); setJobFilter('All Jobs'); setStatusFilter('All Status'); }}
+                                                    style={{ marginTop: '32px', padding: '14px 32px', background: 'var(--glass-accent)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', fontFamily: 'var(--font-display)' }}
+                                                    className="btn-scale"
+                                                >
+                                                    RESET FILTERS
+                                                </button>
                                             </div>
-                                            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '10px' }}>No candidates found</h3>
-                                            <p style={{ maxWidth: '350px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-                                                We couldn't find any applications matching your current filters. Try refining your search or resetting the filters.
-                                            </p>
-                                            <button
-                                                onClick={() => { setSearchQuery(''); setJobFilter('All Jobs'); setStatusFilter('All Status'); }}
-                                                style={{ marginTop: '25px', padding: '12px 24px', background: 'var(--color-brand-primary)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}
-                                                className="btn-scale"
-                                            >
-                                                Reset Filters
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <style>{`
-                @keyframes fadeInUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes slideUp { 
-                    from { opacity: 0; transform: translateY(30px) scale(0.95); } 
-                    to { opacity: 1; transform: translateY(0) scale(1); } 
-                }
-
-                .table-row:hover { background-color: #fcfcfd !important; }
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .spin-slow { animation: spin 4s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 
-                .main-input:focus {
-                    background-color: white !important;
-                    border-color: var(--color-brand-accent) !important;
-                    box-shadow: 0 10px 20px rgba(62, 97, 255, 0.08) !important;
-                    transform: translateY(-2px);
+                .glass-row:hover {
+                    background-color: rgba(255, 255, 255, 0.02) !important;
+                    transform: translateX(4px);
                 }
                 
-                .btn-scale:hover { transform: scale(1.05); }
-                .btn-scale:active { transform: scale(0.95); }
-
-                .hide-scrollbar::-webkit-scrollbar {
-                    display: none;
+                select:focus, input:focus {
+                    border-color: var(--glass-accent-light) !important;
+                    box-shadow: 0 0 0 1px var(--glass-accent-light) !important;
                 }
 
-                @media (max-width: 1024px) {
-                    .filterCard { flex-direction: column; align-items: stretch; }
-                    .searchWrapper { width: 100%; }
-                }
+                .btn-scale { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                .btn-scale:hover { transform: scale(1.08); }
+                .btn-scale:active { transform: scale(0.92); }
             `}</style>
         </div>
     );
