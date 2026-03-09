@@ -79,13 +79,13 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                 <h3 style={{
                     fontSize: '2rem',
                     fontWeight: '800',
-                    color: 'white',
+                    color: 'var(--theme-text-primary)',
                     marginBottom: '16px',
                     fontFamily: 'var(--font-display)',
                     letterSpacing: '-0.02em'
                 }}>{title}</h3>
                 <p style={{
-                    color: 'var(--glass-text-secondary)',
+                    color: 'var(--theme-text-secondary)',
                     marginBottom: '40px',
                     lineHeight: '1.7',
                     fontSize: '1.05rem',
@@ -98,9 +98,9 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                         style={{
                             padding: '14px 28px',
                             borderRadius: '14px',
-                            border: '1px solid var(--glass-border)',
+                            border: '1px solid var(--theme-border)',
                             background: 'transparent',
-                            color: 'white',
+                            color: 'var(--theme-text-primary)',
                             fontWeight: '700',
                             cursor: 'pointer',
                             fontFamily: 'var(--font-display)'
@@ -220,14 +220,14 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                         {candidate.name.charAt(0)}
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '3rem', fontWeight: '800', color: 'white', marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: 'var(--font-display)' }}>
+                        <h2 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--theme-text-primary)', marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: 'var(--font-display)' }}>
                             {candidate.name}
                         </h2>
                         <div style={{ display: 'flex', gap: '24px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--theme-text-secondary)', fontWeight: '600' }}>
                                 <Briefcase size={18} className="text-gradient-sapphire" /> {candidate.jobTitle}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--theme-text-secondary)', fontWeight: '600' }}>
                                 <MapPin size={18} className="text-gradient-sapphire" /> {candidate.location}
                             </div>
                         </div>
@@ -368,7 +368,7 @@ const Applications = () => {
             margin: '0 auto',
             minHeight: '100vh',
             fontFamily: 'var(--font-body)',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             position: 'relative'
         },
         headerBanner: {
@@ -399,7 +399,7 @@ const Applications = () => {
             letterSpacing: '-0.03em',
             fontFamily: 'var(--font-display)',
             lineHeight: 1.1,
-            color: 'white'
+            color: 'var(--theme-text-primary)'
         },
         bannerSubtitle: {
             fontSize: '1.1rem',
@@ -429,10 +429,10 @@ const Applications = () => {
             width: '100%',
             padding: '12px 16px 12px 56px',
             borderRadius: '12px',
-            border: '1px solid var(--glass-border)',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            border: '1px solid var(--theme-border)',
+            backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '0.9rem',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             outline: 'none',
             transition: 'all 0.3s ease',
             fontWeight: '600',
@@ -480,7 +480,7 @@ const Applications = () => {
             borderBottom: '1px solid var(--glass-border)',
             verticalAlign: 'middle',
             fontSize: '0.95rem',
-            color: 'white'
+            color: 'var(--theme-text-primary)'
         },
         statusBadge: (status) => {
             let color, glow;
@@ -544,8 +544,9 @@ const Applications = () => {
         statValue: {
             fontSize: '1.4rem',
             fontWeight: '900',
-            color: 'white',
-            fontFamily: 'var(--font-display)'
+            color: 'var(--theme-text-primary)',
+            fontFamily: 'var(--font-display)',
+            textShadow: '0 4px 8px rgba(0,0,0,0.1)'
         }
     };
 
@@ -580,13 +581,45 @@ const Applications = () => {
 
                         {/* Inventory Quick Stats */}
                         <div style={{ display: 'flex', gap: '32px' }}>
-                            <div className="glass-panel" style={{ padding: '16px 24px' }}>
-                                <div style={styles.statLabel}>Global Inventory</div>
-                                <div style={styles.statValue}>{serverApps.length}</div>
+                            <div className="glass-panel" style={{
+                                padding: '16px 24px',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                backdropFilter: 'blur(20px)',
+                                background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
+                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
+                                border: '1px solid var(--theme-border-bright)'
+                            }}>
+                                <div style={{ position: 'relative', zIndex: 1 }}>
+                                    <div style={styles.statLabel}>Global Inventory</div>
+                                    <div style={styles.statValue}>{serverApps.length}</div>
+                                </div>
+                                {/* Gloss Reflection */}
+                                <div style={{
+                                    position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
+                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+                                    pointerEvents: 'none', zIndex: 0
+                                }} />
                             </div>
-                            <div className="glass-panel" style={{ padding: '16px 24px' }}>
-                                <div style={styles.statLabel}>Active Pipeline</div>
-                                <div style={styles.statValue}>{serverApps.filter(a => a.status === 'Shortlisted').length}</div>
+                            <div className="glass-panel" style={{
+                                padding: '16px 24px',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                backdropFilter: 'blur(20px)',
+                                background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
+                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
+                                border: '1px solid var(--theme-border-bright)'
+                            }}>
+                                <div style={{ position: 'relative', zIndex: 1 }}>
+                                    <div style={styles.statLabel}>Active Pipeline</div>
+                                    <div style={styles.statValue}>{serverApps.filter(a => a.status === 'Shortlisted').length}</div>
+                                </div>
+                                {/* Gloss Reflection */}
+                                <div style={{
+                                    position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
+                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+                                    pointerEvents: 'none', zIndex: 0
+                                }} />
                             </div>
                         </div>
                     </div>
@@ -600,7 +633,7 @@ const Applications = () => {
                 </header>
 
                 {/* Glass Filter Bar */}
-                <div style={styles.filterCard} className="glass-reveal" style={{ animationDelay: '0.1s' }}>
+                <div style={{ ...styles.filterCard, animationDelay: '0.1s' }} className="glass-reveal">
                     <div style={styles.searchWrapper}>
                         <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                         <input
@@ -628,7 +661,7 @@ const Applications = () => {
                 </div>
 
                 {/* Recruitment Intelligence Matrix */}
-                <div style={styles.tableWrapper} className="glass-reveal" style={{ animationDelay: '0.2s' }}>
+                <div style={{ ...styles.tableWrapper, animationDelay: '0.2s' }} className="glass-reveal">
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
@@ -673,13 +706,13 @@ const Applications = () => {
                                                             {candidateName.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div style={{ fontWeight: '800', color: 'white', fontSize: '1rem', letterSpacing: '-0.01em' }}>{candidateName}</div>
-                                                            <div style={{ fontSize: '0.8rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>{candidateEmail}</div>
+                                                            <div style={{ fontWeight: '800', color: 'var(--theme-text-primary)', fontSize: '1rem', letterSpacing: '-0.01em' }}>{candidateName}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', fontWeight: '500' }}>{candidateEmail}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: 'white' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: 'var(--theme-text-primary)' }}>
                                                         <Briefcase size={16} className="text-gradient-sapphire" />
                                                         {jobTitle}
                                                     </div>
@@ -687,7 +720,7 @@ const Applications = () => {
                                                 <td style={styles.td}>
                                                     <button
                                                         className="btn-scale"
-                                                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'white', padding: '8px 16px', borderRadius: '10px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', letterSpacing: '0.05em' }}
+                                                        style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-primary)', padding: '8px 16px', borderRadius: '10px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', letterSpacing: '0.05em' }}
                                                         onClick={() => {
                                                             const cvUrl = app.CV?.file_url || app.CV?.platform_data_url;
                                                             if (cvUrl) window.open(cvUrl, '_blank');
@@ -771,10 +804,10 @@ const Applications = () => {
                                         <td colSpan="6">
                                             <div style={styles.emptyState}>
                                                 <div className="glass-panel" style={{ width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
-                                                    <Inbox size={60} color="var(--glass-text-muted)" />
+                                                    <Inbox size={60} color="var(--theme-text-muted)" />
                                                 </div>
-                                                <h3 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'white', marginBottom: '16px', letterSpacing: '-0.02em' }}>No Data Nodes Found</h3>
-                                                <p style={{ maxWidth: '400px', color: 'var(--glass-text-secondary)', lineHeight: '1.7', fontSize: '1.05rem' }}>
+                                                <h3 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--theme-text-primary)', marginBottom: '16px', letterSpacing: '-0.02em' }}>No Data Nodes Found</h3>
+                                                <p style={{ maxWidth: '400px', color: 'var(--theme-text-secondary)', lineHeight: '1.7', fontSize: '1.05rem' }}>
                                                     The recruitment matrix is currently empty for the selected filters. Refine your query parameters.
                                                 </p>
                                                 <button

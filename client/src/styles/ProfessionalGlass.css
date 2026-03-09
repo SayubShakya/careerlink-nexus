@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* Glass Authority Palette */
-    --glass-bg: #0A0C10;
+    /* Map Glass Authority to Theme Tokens */
+    --glass-bg: var(--theme-bg);
     --glass-accent: #3F51B5;
     --glass-accent-light: #60A5FA;
-    --glass-surface: rgba(255, 255, 255, 0.03);
-    --glass-surface-hover: rgba(255, 255, 255, 0.06);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-border-bright: rgba(255, 255, 255, 0.15);
-    --glass-blur: 16px;
+    --glass-surface: var(--theme-card);
+    --glass-surface-hover: var(--theme-card-hover);
+    --glass-border: var(--theme-border);
+    --glass-border-bright: var(--theme-border-bright);
+    --glass-blur: var(--theme-glass-blur);
 
     /* Text Palette */
-    --glass-text-primary: #F8FAFC;
-    --glass-text-secondary: #94A3B8;
-    --glass-text-muted: #64748B;
+    --glass-text-primary: var(--theme-text-primary);
+    --glass-text-secondary: var(--theme-text-secondary);
+    --glass-text-muted: var(--theme-text-muted);
 
     /* Typography */
     --font-display: 'Outfit', sans-serif;
@@ -24,13 +24,12 @@
 .glass-main {
     min-height: 100vh;
     background-color: var(--glass-bg);
-    background-image:
-        radial-gradient(at 0% 0%, hsla(243, 75%, 20%, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, hsla(217, 91%, 20%, 0.1) 0px, transparent 50%);
+    background-image: var(--theme-bg-gradient);
     color: var(--glass-text-primary);
     font-family: var(--font-body);
     position: relative;
     overflow-x: hidden;
+    transition: var(--theme-transition);
 }
 
 .glass-main::before {

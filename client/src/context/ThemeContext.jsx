@@ -21,7 +21,14 @@ export const ThemeProvider = ({ children }) => {
     const themeKey = userId ? `theme_${userId}` : STORAGE_KEYS.THEME;
 
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem(themeKey) || THEME_MODES.LIGHT;
+        const savedTheme = localStorage.getItem(themeKey);
+        if (savedTheme) return savedTheme;
+
+        // Default based on role if no saved preference
+        if (user?.role === 'employer') {
+            return THEME_MODES.DARK;
+        }
+        return THEME_MODES.LIGHT;
     });
 
     // Handle theme switching when the user context changes (login/logout)
@@ -30,10 +37,14 @@ export const ThemeProvider = ({ children }) => {
         if (savedTheme && savedTheme !== theme) {
             setTheme(savedTheme);
         } else if (!savedTheme) {
-            // Default to light for new/unset users
-            setTheme(THEME_MODES.LIGHT);
+            // Default based on role for new/unset users
+            if (user?.role === 'employer') {
+                setTheme(THEME_MODES.DARK);
+            } else {
+                setTheme(THEME_MODES.LIGHT);
+            }
         }
-    }, [themeKey]);
+    }, [themeKey, user?.role]);
 
     // Save theme to localStorage whenever it changes
     useEffect(() => {

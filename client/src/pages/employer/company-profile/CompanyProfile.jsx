@@ -111,7 +111,7 @@ const CompanyProfile = () => {
         title: {
             fontSize: '3.5rem',
             fontWeight: '800',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             fontFamily: 'var(--font-display)',
             marginBottom: '16px',
             letterSpacing: '-0.03em',
@@ -156,10 +156,10 @@ const CompanyProfile = () => {
         input: {
             padding: '16px 20px',
             borderRadius: '16px',
-            border: '1px solid var(--glass-border)',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid var(--theme-border)',
+            backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '1rem',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             outline: 'none',
             fontFamily: 'var(--font-body)'
@@ -167,10 +167,10 @@ const CompanyProfile = () => {
         textarea: {
             padding: '16px 20px',
             borderRadius: '16px',
-            border: '1px solid var(--glass-border)',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid var(--theme-border)',
+            backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '1rem',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             minHeight: '180px',
             resize: 'vertical',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -193,11 +193,11 @@ const CompanyProfile = () => {
             overflow: 'hidden'
         },
         saveButton: {
-            background: 'var(--glass-surface)',
-            color: 'white',
+            background: 'var(--theme-bg-subtle)',
+            color: 'var(--theme-text-primary)',
             padding: '16px 36px',
             borderRadius: '14px',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--theme-border)',
             fontSize: '0.95rem',
             fontWeight: '800',
             cursor: 'pointer',
@@ -266,12 +266,12 @@ const CompanyProfile = () => {
                                                 {logoPreview ? (
                                                     <img src={logoPreview} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <div className="icon-surface" style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px' }}>
-                                                            <Building2 size={32} />
-                                                        </div>
-                                                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--glass-text-muted)' }}>UPLOAD LOGO</span>
-                                                    </div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div className="icon-surface" style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>
+                                            <Building2 size={32} />
+                                        </div>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-muted)' }}>UPLOAD LOGO</span>
+                                    </div>
                                                 )}
                                                 <input
                                                     type="file"

@@ -59,19 +59,32 @@ const StatCard = ({ label, value, icon, index }) => (
             gap: '20px',
             animationDelay: `${index * 0.1}s`,
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            backdropFilter: 'blur(30px)',
+            background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
+            border: '1px solid var(--theme-border-bright)'
         }}
     >
-        {/* Subtle Highlight Edge */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)' }} />
+        {/* Gloss Gradient Reflection */}
+        <div style={{
+            position: 'absolute',
+            top: '-50%',
+            left: '-50%',
+            width: '200%',
+            height: '200%',
+            background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            zIndex: 0
+        }} />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <div style={{
                 width: '48px',
                 height: '48px',
                 borderRadius: '14px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid var(--glass-border)',
+                background: 'var(--theme-bg-subtle)',
+                border: '1px solid var(--theme-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -79,16 +92,22 @@ const StatCard = ({ label, value, icon, index }) => (
             }}>
                 {icon}
             </div>
-            <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
                 Verified
             </div>
         </div>
 
-        <div>
-            <div style={{ fontSize: '3rem', fontWeight: '700', color: 'white', lineHeight: '1' }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+                fontSize: '3rem',
+                fontWeight: '700',
+                color: 'var(--theme-text-primary)',
+                lineHeight: '1',
+                textShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
                 <GlassCounter value={value} />
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600', marginTop: '8px' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--theme-text-secondary)', fontWeight: '600', marginTop: '8px' }}>
                 {label}
             </div>
         </div>
@@ -135,7 +154,7 @@ const EmployerDashboard = () => {
                                 Premium Command Panel
                             </span>
                         </div>
-                        <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'white', letterSpacing: '-0.03em', lineHeight: '0.95' }}>
+                        <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--theme-text-primary)', letterSpacing: '-0.03em', lineHeight: '0.95' }}>
                             Recruitment <br />
                             <span className="text-gradient-sapphire">Intelligence.</span>
                         </h1>
@@ -144,7 +163,7 @@ const EmployerDashboard = () => {
                         <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>Operational Integrity</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)' }} />
-                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'white', textTransform: 'uppercase' }}>Secure / Active</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-primary)', textTransform: 'uppercase' }}>Secure / Active</span>
                         </div>
                     </div>
                 </header>
@@ -163,16 +182,16 @@ const EmployerDashboard = () => {
                     <div className="glass-panel" style={{ padding: '0' }}>
                         <div style={{ padding: '32px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'white' }}>Talent Matrix</h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--glass-text-muted)', marginTop: '4px', fontWeight: '500' }}>Recent candidate interactions and intake.</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>Talent Matrix</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', marginTop: '4px', fontWeight: '500' }}>Recent candidate interactions and intake.</p>
                             </div>
                             <button
                                 onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}
                                 className="glass-btn-secondary"
                                 style={{
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid var(--glass-border)',
-                                    color: 'white',
+                                    background: 'var(--theme-bg-subtle)',
+                                    border: '1px solid var(--theme-border)',
+                                    color: 'var(--theme-text-primary)',
                                     padding: '10px 20px',
                                     borderRadius: '12px',
                                     fontSize: '0.85rem',
@@ -209,7 +228,7 @@ const EmployerDashboard = () => {
                                                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3F51B5, #1A237E)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>
                                                             {(app.name?.[0] || 'U').toUpperCase()}
                                                         </div>
-                                                        <div style={{ fontWeight: '700', color: 'white' }}>
+                                                        <div style={{ fontWeight: '700', color: 'var(--theme-text-primary)' }}>
                                                             {app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Record#742'}
                                                         </div>
                                                     </div>

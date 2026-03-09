@@ -12,14 +12,19 @@ import {
     BarChart3,
     Settings,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
+import { useTheme } from '@/hooks/useTheme';
+import { THEME_MODES } from '@/config/constants';
 
 const EmployerSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
     const { data: me } = useGetMe();
+    const { theme, toggleTheme } = useTheme();
     const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleLogout = () => {
@@ -58,16 +63,17 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
         sidebar: {
             width: isOpen ? '280px' : '88px',
             height: '100vh',
-            backgroundColor: 'var(--color-brand-primary)',
-            color: 'white',
+            backgroundColor: 'var(--theme-sidebar)',
+            color: 'var(--theme-text-primary)',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
             left: 0,
             top: 0,
             zIndex: 1001,
-            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease',
             boxShadow: '10px 0 30px rgba(0,0,0,0.15)',
+            borderRight: '1px solid var(--theme-border)',
             overflow: 'hidden',
         },
         header: {
@@ -137,7 +143,7 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             gap: '16px',
             padding: '14px 18px',
             borderRadius: '14px',
-            color: 'rgba(255,255,255,0.6)',
+            color: 'var(--theme-text-secondary)',
             textDecoration: 'none',
             fontWeight: '600',
             fontSize: '0.925rem',
@@ -146,9 +152,9 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             whiteSpace: 'nowrap'
         },
         activeLink: {
-            backgroundColor: 'rgba(62, 97, 255, 0.1)',
+            backgroundColor: 'var(--theme-sidebar-accent)',
             color: 'var(--color-brand-accent)',
-            boxShadow: 'inset 0 0 0 1px rgba(62, 97, 255, 0.2)'
+            boxShadow: 'inset 0 0 0 1px rgba(62, 97, 255, 0.1)'
         },
         label: {
             opacity: isOpen ? 1 : 0,
@@ -157,8 +163,51 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             display: isOpen ? 'inline-block' : 'none'
         },
         footer: {
-            padding: '24px 16px 32px',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
+            padding: '16px',
+            borderTop: '1px solid var(--theme-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+        },
+        themeToggle: {
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 18px',
+            borderRadius: '14px',
+            backgroundColor: 'var(--theme-bg-subtle)',
+            border: '1px solid var(--theme-border)',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            color: 'var(--theme-text-primary)'
+        },
+        themeToggleInner: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '0.85rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+        },
+        switchTrack: {
+            width: '40px',
+            height: '22px',
+            borderRadius: '20px',
+            backgroundColor: theme === THEME_MODES.DARK ? 'var(--color-brand-accent)' : '#CBD5E1',
+            padding: '2px',
+            position: 'relative',
+            transition: 'all 0.3s ease'
+        },
+        switchThumb: {
+            width: '18px',
+            height: '18px',
+            borderRadius: '50%',
+            backgroundColor: 'white',
+            position: 'absolute',
+            left: theme === THEME_MODES.DARK ? '20px' : '2px',
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         },
         logoutBtn: {
             width: '100%',
@@ -168,8 +217,8 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             gap: '16px',
             padding: '14px 18px',
             borderRadius: '14px',
-            color: '#FDA4AF',
-            backgroundColor: 'rgba(244, 63, 94, 0.05)',
+            color: '#EF4444',
+            backgroundColor: theme === THEME_MODES.LIGHT ? 'rgba(239, 68, 68, 0.05)' : 'rgba(244, 63, 94, 0.05)',
             border: 'none',
             cursor: 'pointer',
             fontSize: '0.925rem',
@@ -221,6 +270,24 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             </nav>
 
             <div style={styles.footer}>
+                <button
+                    onClick={() => toggleTheme(theme === THEME_MODES.LIGHT ? THEME_MODES.DARK : THEME_MODES.LIGHT)}
+                    style={styles.themeToggle}
+                    className="theme-toggle-switch"
+                    title={theme === THEME_MODES.LIGHT ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                >
+                    <div style={styles.themeToggleInner}>
+                        {theme === THEME_MODES.LIGHT ? <Sun size={18} /> : <Moon size={18} />}
+                        <span style={styles.label}>{theme === THEME_MODES.LIGHT ? 'Light Mode' : 'Dark Mode'}</span>
+                    </div>
+                    {isOpen && (
+                        <div style={styles.switchTrack}>
+                            <div style={styles.switchThumb}></div>
+                        </div>
+                    )}
+                    {!isOpen && <div className="link-tooltip">{theme === THEME_MODES.LIGHT ? 'Switch to Dark' : 'Switch to Light'}</div>}
+                </button>
+
                 <button
                     onClick={handleLogout}
                     style={styles.logoutBtn}

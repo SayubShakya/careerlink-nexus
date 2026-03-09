@@ -80,7 +80,7 @@ const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
                     fontFamily: 'var(--font-display)',
                     fontSize: '2rem',
                     fontWeight: '800',
-                    color: 'white',
+                    color: 'var(--theme-text-primary)',
                     marginBottom: '16px',
                     letterSpacing: '-0.02em'
                 }}>
@@ -104,8 +104,8 @@ const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
                                 padding: '14px 28px',
                                 borderRadius: '14px',
                                 background: 'transparent',
-                                border: '1px solid var(--glass-border)',
-                                color: 'white',
+                                border: '1px solid var(--theme-border)',
+                                color: 'var(--theme-text-primary)',
                                 fontWeight: '700',
                                 cursor: 'pointer',
                                 fontFamily: 'var(--font-display)'
@@ -312,7 +312,8 @@ const JobManagement = () => {
             margin: '0 auto',
             fontFamily: 'var(--font-body)',
             position: 'relative',
-            zIndex: 2
+            zIndex: 2,
+            color: 'var(--theme-text-primary)'
         },
         postTriggerCard: {
             background: 'var(--glass-surface)',
@@ -361,10 +362,10 @@ const JobManagement = () => {
             width: '100%',
             padding: '14px 18px',
             borderRadius: '12px',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--theme-border)',
             fontSize: '0.95rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-            color: 'var(--glass-text-primary)',
+            backgroundColor: 'var(--theme-bg-subtle)',
+            color: 'var(--theme-text-primary)',
             transition: 'all 0.2s ease',
             outline: 'none',
             fontFamily: 'var(--font-body)'
@@ -373,10 +374,10 @@ const JobManagement = () => {
             width: '100%',
             padding: '14px 18px',
             borderRadius: '12px',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--theme-border)',
             fontSize: '0.95rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-            color: 'var(--glass-text-primary)',
+            backgroundColor: 'var(--theme-bg-subtle)',
+            color: 'var(--theme-text-primary)',
             minHeight: '140px',
             resize: 'vertical',
             outline: 'none',
@@ -508,7 +509,7 @@ const JobManagement = () => {
                         <h1 style={{
                             fontSize: '4rem',
                             fontWeight: '800',
-                            color: 'white',
+                            color: 'var(--theme-text-primary)',
                             letterSpacing: '-0.04em',
                             lineHeight: '0.9',
                             fontFamily: 'var(--font-display)'
@@ -522,7 +523,12 @@ const JobManagement = () => {
                         padding: '20px 28px',
                         textAlign: 'right',
                         animationDelay: '0.2s',
-                        background: 'rgba(255,255,255,0.02)'
+                        position: 'relative',
+                        overflow: 'hidden',
+                        backdropFilter: 'blur(20px)',
+                        background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
+                        boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
+                        border: '1px solid var(--theme-border-bright)'
                     }}>
                         <div style={{
                             fontSize: '0.75rem',
@@ -543,15 +549,22 @@ const JobManagement = () => {
                                 boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)',
                                 animation: 'pulse 2s infinite'
                             }} />
-                            <span style={{
+                             <span style={{
                                 fontSize: '1.25rem',
                                 fontWeight: '900',
-                                color: 'white',
-                                fontFamily: 'var(--font-display)'
+                                color: 'var(--theme-text-primary)',
+                                fontFamily: 'var(--font-display)',
+                                textShadow: '0 4px 8px rgba(0,0,0,0.1)'
                             }}>
                                 {serverJobs.length} <span style={{ fontSize: '0.85rem', color: 'var(--glass-text-muted)', fontWeight: '600' }}>Active Nodes</span>
                             </span>
                         </div>
+                        {/* Gloss Reflection */}
+                        <div style={{
+                            position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
+                            background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+                            pointerEvents: 'none', zIndex: 0
+                        }} />
                     </div>
                 </header>
 
@@ -596,7 +609,7 @@ const JobManagement = () => {
                             <h3 style={{
                                 fontSize: '1.4rem',
                                 fontWeight: '800',
-                                color: 'white',
+                                color: 'var(--theme-text-primary)',
                                 fontFamily: 'var(--font-display)',
                                 marginBottom: '4px'
                             }}>

@@ -82,7 +82,7 @@ const History = () => {
         title: {
             fontSize: '3.5rem',
             fontWeight: '800',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             fontFamily: 'var(--font-display)',
             marginBottom: '12px',
             letterSpacing: '-0.03em',
@@ -101,14 +101,16 @@ const History = () => {
             marginBottom: '40px'
         },
         statCard: (isActive) => ({
-            background: 'var(--glass-surface)',
+            background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
             padding: '28px',
             borderRadius: '24px',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--theme-border-bright)',
             display: 'flex',
             alignItems: 'center',
             gap: '20px',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            backdropFilter: 'blur(30px)',
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
             cursor: 'default',
             position: 'relative',
             overflow: 'hidden'
@@ -128,11 +130,11 @@ const History = () => {
         statValue: {
             fontSize: '2rem',
             fontWeight: '800',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             lineHeight: '1',
             marginBottom: '4px',
             fontFamily: 'var(--font-display)',
-            textShadow: '0 0 15px rgba(255,255,255,0.1)'
+            textShadow: '0 4px 12px rgba(0,0,0,0.1)'
         },
         statLabel: {
             fontSize: '0.85rem',
@@ -163,8 +165,8 @@ const History = () => {
             borderRadius: '12px',
             border: '1px solid',
             borderColor: isActive ? 'var(--glass-border-bright)' : 'transparent',
-            background: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-            color: isActive ? 'white' : 'var(--glass-text-muted)',
+            background: isActive ? 'var(--theme-bg-subtle)' : 'transparent',
+            color: isActive ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
             fontSize: '0.9rem',
             fontWeight: '700',
             cursor: 'pointer',
@@ -182,9 +184,9 @@ const History = () => {
             width: '100%',
             padding: '12px 16px 12px 48px',
             borderRadius: '12px',
-            background: 'rgba(0,0,0,0.2)',
-            border: '1px solid var(--glass-border)',
-            color: 'white',
+            background: 'var(--theme-bg-subtle)',
+            border: '1px solid var(--theme-border)',
+            color: 'var(--theme-text-primary)',
             fontSize: '0.9rem',
             outline: 'none',
             transition: 'all 0.3s ease',
@@ -217,7 +219,7 @@ const History = () => {
         td: {
             padding: '20px 24px',
             fontSize: '0.95rem',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             borderBottom: '1px solid var(--glass-border)',
             transition: 'all 0.2s ease'
         },
@@ -248,9 +250,9 @@ const History = () => {
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '10px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid var(--glass-border)',
-            color: 'white',
+            background: 'var(--theme-bg-subtle)',
+            border: '1px solid var(--theme-border)',
+            color: 'var(--theme-text-primary)',
             fontSize: '0.85rem',
             fontWeight: '700',
             cursor: 'pointer',
@@ -304,10 +306,21 @@ const History = () => {
                                 <div style={styles.statIcon(item.color)}>
                                     <item.icon size={28} />
                                 </div>
-                                <div>
+                                <div style={{ position: 'relative', zIndex: 1 }}>
                                     <div style={styles.statValue}>{item.value}</div>
                                     <div style={styles.statLabel}>{item.label}</div>
                                 </div>
+                                {/* Gloss Reflection */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-50%',
+                                    left: '-50%',
+                                    width: '200%',
+                                    height: '200%',
+                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+                                    pointerEvents: 'none',
+                                    zIndex: 0
+                                }} />
                                 <div className="stat-sweep" />
                             </div>
                         ))}
@@ -479,10 +492,10 @@ const History = () => {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
                             <div>
-                                <h2 style={{ margin: '0 0 8px', fontSize: '2rem', fontWeight: '800', color: 'white' }}>{selectedCandidate.JobSeeker?.fullname}</h2>
+                                <h2 style={{ margin: '0 0 8px', fontSize: '2rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobSeeker?.fullname}</h2>
                                 <span style={styles.badge(selectedCandidate.status)}>{selectedCandidate.status}</span>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '10px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', borderRadius: '10px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--theme-text-primary)' }}>
                                 <XCircle size={20} />
                             </button>
                         </div>
