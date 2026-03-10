@@ -177,4 +177,28 @@ router.post('/logout', authController.logout);
  */
 router.get('/me', authMiddleware.protect, authController.getMe);
 
+/**
+ * @swagger
+ * /api/auth/google/verify:
+ *   post:
+ *     summary: Verify Google ID token and login/onboard
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Login successful or onboarding required
+ */
+router.post('/google/verify', authController.googleVerify);
+
 module.exports = router;

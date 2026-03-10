@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import authIllustration from '@/assets/images/auth-illustration.png';
 import logo from '@assets/images/temporary_logo.png';
@@ -6,12 +6,39 @@ import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useAuth } from '@/hooks/useAuth';
 import usePostLogin from '../../hooks/api/auth/usePostLogin';
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, login: setAuth } = useAuth();
     const { mutate: login, isPending: loading } = usePostLogin();
     const role = localStorage.getItem('role');
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const res = await axios.post('http://localhost:5000/api/auth/google/verify', {
+                    token: tokenResponse.access_token
+                });
+
+                // If success, they already have an account
+
+                const { token, data } = res.data;
+                localStorage.setItem("userToken", token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("role", data.role);
+
+                toast.success('Login successful!');
+                window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
+            } catch (error) {
+                const message = error.response?.data?.message || 'Please sign up first before trying to log in.';
+                toast.error(message, { duration: 5000 });
+                console.error(error);
+            }
+        },
+        onError: () => toast.error('Please sign up first before trying to log in.', { duration: 5000 }),
+    });
 
     useEffect(() => {
         if (isAuthenticated()) {
@@ -135,16 +162,19 @@ const Login = () => {
             width: '100%',
             padding: '12px',
             backgroundColor: 'white',
-            color: 'var(--text-muted)',
-            border: '1px solid var(--border-subtle)',
+            color: '#4A5568',
+            border: '1px solid #E2E8F0',
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.9rem',
-            fontWeight: '500',
+            fontSize: '1rem',
+            fontWeight: '600',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px'
+            gap: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            transition: 'all 0.2s ease',
+            marginBottom: '20px'
         },
         switchText: {
             marginTop: 'auto',
@@ -278,9 +308,9 @@ const Login = () => {
                             <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px solid #E2E8F0', zIndex: 0 }}></div>
                         </div>
 
-                        <button type="button" style={styles.googleBtn} className="google-btn">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
-                            Google Account
+                        <button type="button" style={styles.googleBtn} className="google-btn" onClick={() => handleGoogleLogin()}>
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style={{ width: '20px', height: '20px' }} />
+                            Sign in with Google
                         </button>
 
                         <p style={styles.switchText}>

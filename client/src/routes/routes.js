@@ -22,5 +22,6 @@ export const ROUTES = {
     EMPLOYER_COMPANY_PROFILE: '/dashboard/employer/company-profile',
     EMPLOYER_HISTORY: '/dashboard/employer/history',
     LOGOUT_CONFIRMATION: '/logout-confirmation',
+    SSO_ONBOARDING: '/sso-onboarding',
     NOT_FOUND: '*',
 };
