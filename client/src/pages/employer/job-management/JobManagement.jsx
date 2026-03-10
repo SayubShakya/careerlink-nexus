@@ -185,7 +185,17 @@ const JobManagement = () => {
     // Error State
     const [errors, setErrors] = useState({});
 
+    // Filtering State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+
     // --- Helper Functions ---
+    const filteredJobs = serverJobs.filter(job => {
+        const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             job.location.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'All' || (job.status || 'Active') === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
     const showModal = (title, message, type = 'success', onConfirm = null) => {
         setModal({ isOpen: true, title, message, type, onConfirm });
     };
@@ -568,15 +578,7 @@ const JobManagement = () => {
                     </div>
                 </header>
 
-                {/* Custom Modal */}
-                <CustomModal
-                    isOpen={modal.isOpen}
-                    onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
-                    title={modal.title}
-                    message={modal.message}
-                    type={modal.type}
-                    onConfirm={modal.onConfirm}
-                />
+                {/* Removal of CustomModal from here to bottom of component wrap */}
 
                 {/* Collapsible Trigger (Industrial Glass Panel) */}
                 <div
@@ -829,25 +831,51 @@ const JobManagement = () => {
                                 <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)' }}>Job Matrix</h2>
                             </div>
                             <p style={{ fontSize: '0.9rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>
-                                Managing <span style={{ color: 'white', fontWeight: '700' }}>{serverJobs.length}</span> active operational nodes
+                                Managing <span style={{ color: 'white', fontWeight: '700' }}>{filteredJobs.length}</span> operational nodes {searchQuery || statusFilter !== 'All' ? '(filtered)' : ''}
                             </p>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            <button style={{
-                                padding: '10px 16px',
-                                borderRadius: '10px',
-                                background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid var(--glass-border)',
-                                color: 'white',
-                                fontSize: '0.8rem',
-                                fontWeight: '700',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                cursor: 'pointer'
-                            }}>
-                                <Filter size={14} /> Filter
-                            </button>
+                            <div style={{ position: 'relative' }}>
+                                <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                <input
+                                    type="text"
+                                    placeholder="Search nodes..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    style={{
+                                        padding: '10px 16px 10px 36px',
+                                        borderRadius: '10px',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid var(--glass-border)',
+                                        color: 'white',
+                                        fontSize: '0.8rem',
+                                        width: '200px',
+                                        outline: 'none'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ position: 'relative' }}>
+                                <Filter size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    style={{
+                                        padding: '10px 16px 10px 36px',
+                                        borderRadius: '10px',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid var(--glass-border)',
+                                        color: 'white',
+                                        fontSize: '0.8rem',
+                                        outline: 'none',
+                                        appearance: 'none',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="All" style={{ background: '#0F1217' }}>All Status</option>
+                                    <option value="Active" style={{ background: '#0F1217' }}>Active</option>
+                                    <option value="Closed" style={{ background: '#0F1217' }}>Closed</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -872,8 +900,8 @@ const JobManagement = () => {
                                             <p style={{ color: 'var(--glass-text-muted)', fontWeight: '600' }}>Synchronizing with database…</p>
                                         </td>
                                     </tr>
-                                ) : serverJobs.length > 0 ? (
-                                    serverJobs.map(job => (
+                                ) : filteredJobs.length > 0 ? (
+                                    filteredJobs.map(job => (
                                         <tr key={job.id} className="glass-row">
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -900,7 +928,7 @@ const JobManagement = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600', fontSize: '0.85rem' }}>
-                                                    <Clock size={14} style={{ opacity: 0.6 }} /> {job.postedDate || new Date(job.createdAt).toLocaleDateString()}
+                                                    <Clock size={14} style={{ opacity: 0.6 }} /> {job.postedDate || (job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Active Proto')}
                                                 </div>
                                             </td>
                                             <td>
@@ -974,17 +1002,31 @@ const JobManagement = () => {
                                                 }}>
                                                     <Search size={48} color="var(--glass-text-muted)" opacity={0.3} />
                                                 </div>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>Inventory Empty</h3>
+                                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>
+                                                    {searchQuery || statusFilter !== 'All' ? 'No Matching Nodes' : 'Inventory Empty'}
+                                                </h3>
                                                 <p style={{ maxWidth: '400px', margin: '0 auto 32px', color: 'var(--glass-text-muted)', lineHeight: '1.6', fontWeight: '500' }}>
-                                                    No operational nodes identified in the current sector. Initialize a new recruitment protocol to begin.
+                                                    {searchQuery || statusFilter !== 'All' 
+                                                        ? 'Adjust your search parameters or classification filters to scan the sector again.'
+                                                        : 'No operational nodes identified in the current sector. Initialize a new recruitment protocol to begin.'}
                                                 </p>
-                                                <button
-                                                    onClick={() => setIsFormExpanded(true)}
-                                                    style={styles.submitBtn}
-                                                    className="btn-scale"
-                                                >
-                                                    <Plus size={20} /> INITIALIZE PROTOCOL
-                                                </button>
+                                                {searchQuery || statusFilter !== 'All' ? (
+                                                     <button
+                                                        onClick={() => { setSearchQuery(''); setStatusFilter('All'); }}
+                                                        style={styles.submitBtn}
+                                                        className="btn-scale"
+                                                     >
+                                                        <X size={20} /> CLEAR FILTERS
+                                                     </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setIsFormExpanded(true)}
+                                                        style={styles.submitBtn}
+                                                        className="btn-scale"
+                                                    >
+                                                        <Plus size={20} /> INITIALIZE PROTOCOL
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -1052,6 +1094,15 @@ const JobManagement = () => {
                 }
             `}</style>
             </div>
+            {/* Custom Modal - Moved to end of component for stability */}
+            <CustomModal
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                title={modal.title}
+                message={modal.message}
+                type={modal.type}
+                onConfirm={modal.onConfirm}
+            />
         </div>
     );
 };
