@@ -22,7 +22,9 @@ import {
     Monitor,
     Camera,
     Image,
-    Plus
+    Plus,
+    MapPin,
+    Phone
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -33,7 +35,9 @@ const MyProfile = () => {
         firstName: '',
         lastName: '',
         email: '',
-        profile_picture: ''
+        profile_picture: '',
+        location: '',
+        phone: ''
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -52,7 +56,9 @@ const MyProfile = () => {
                 firstName: serverProfile?.firstName || '',
                 lastName: serverProfile?.lastName || '',
                 email: serverProfile?.email || '',
-                profile_picture: serverProfile?.profile_picture || ''
+                profile_picture: serverProfile?.profile_picture || '',
+                location: serverProfile?.Profile?.location || '',
+                phone: serverProfile?.Profile?.phone || ''
             });
             if (serverProfile?.profile_picture) {
                 setPreviewUrl(`/${serverProfile.profile_picture}`);
@@ -79,6 +85,8 @@ const MyProfile = () => {
         const formData = new FormData();
         formData.append('firstName', profile.firstName);
         formData.append('lastName', profile.lastName);
+        formData.append('location', profile.location);
+        formData.append('phone', profile.phone);
         if (selectedFile) {
             formData.append('avatar', selectedFile);
         }
@@ -471,6 +479,28 @@ const MyProfile = () => {
                                                 <Lock size={12} /> LOCKED
                                             </span>
                                         </div>
+                                    </div>
+                                    <div className="input-group">
+                                        <label><MapPin size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />Location</label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            value={profile.location}
+                                            onChange={handleChange}
+                                            className="input-field"
+                                            placeholder="e.g. Kathmandu, Nepal"
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label><Phone size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />Contact Number</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={profile.phone}
+                                            onChange={handleChange}
+                                            className="input-field"
+                                            placeholder="e.g. +977 9800000000"
+                                        />
                                     </div>
                                 </div>
                                 <button className="save-btn" disabled={saving}>

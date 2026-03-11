@@ -39,4 +39,15 @@ export const API_ENDPOINTS = {
         COMPANY_GET: '/employers/profile',
         COMPANY_UPDATE: '/employers/profile',
     },
+    ADMIN: {
+        STATS: '/admin/stats',
+        EMPLOYERS: '/admin/employers',
+        EMPLOYER_JOBS: (id) => `/admin/employers/${id}/jobs`,
+        DELETE_EMPLOYER: (id) => `/admin/employers/${id}`,
+        JOBS: '/admin/jobs',
+        JOB_SEEKERS: '/admin/job-seekers',
+        VERIFY_EMPLOYER: (id) => `/admin/verify-employer/${id}`,
+        BAN_JOB: (id) => `/admin/ban-job/${id}`,
+    },
 };
+

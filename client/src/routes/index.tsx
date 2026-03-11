@@ -28,6 +28,13 @@ import SavedJobs from '../pages/jobseeker/SavedJobs';
 import LogoutConfirmation from '../pages/auth/LogoutConfirmation';
 import ErrorPage from '../pages/error/ErrorPage';
 
+// Admin imports
+import AdminLayout from '../components/layout/admin/AdminLayout';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminEmployers from '../pages/admin/AdminEmployers';
+import AdminJobs from '../pages/admin/AdminJobs';
+import AdminJobSeekers from '../pages/admin/AdminJobSeekers';
+
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -147,6 +154,29 @@ export const router = createBrowserRouter([
                 element: <History />,
             },
             // Future employer routes like /post-job
+        ]
+    },
+    {
+        // Admin specific routes
+        element: <AdminLayout />,
+        errorElement: <ErrorPage />,
+        children: [
+            {
+                path: ROUTES.ADMIN_DASHBOARD,
+                element: <AdminDashboard />,
+            },
+            {
+                path: ROUTES.ADMIN_EMPLOYERS,
+                element: <AdminEmployers />,
+            },
+            {
+                path: ROUTES.ADMIN_JOBS,
+                element: <AdminJobs />,
+            },
+            {
+                path: ROUTES.ADMIN_JOBSEEKERS,
+                element: <AdminJobSeekers />,
+            },
         ]
     },
     {
