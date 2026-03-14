@@ -27,7 +27,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     if (decoded.id === ADMIN_ID) {
         req.user = {
             id: ADMIN_ID,
-            email: 'Admin@nexus.com',
+            email: 'admin@nexus.com',
             firstName: 'System',
             lastName: 'Admin',
             Role: { name: 'admin' }

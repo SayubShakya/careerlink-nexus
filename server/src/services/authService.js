@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const AppError = require('../utils/AppError');
 
 // Hardcoded admin credentials
-const ADMIN_EMAIL = 'Admin@nexus.com';
+const ADMIN_EMAIL = 'admin@nexus.com';
 const ADMIN_PASSWORD = 'AdminNexus';
 const ADMIN_ID = '00000000-0000-0000-0000-000000000001';
 
