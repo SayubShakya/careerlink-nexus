@@ -9,7 +9,8 @@ import {
     X,
     ChevronRight,
     Briefcase,
-    Shield
+    Shield,
+    Link2
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 
@@ -31,7 +32,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 <div className="sidebar-brand">
                     <div className="brand-logo">
                         <div className="brand-icon">
-                            <span>C</span>
+                            <Link2 size={20} color="white" strokeWidth={2.5} style={{ transform: 'rotate(-45deg)' }} />
                         </div>
                         {isOpen && (
                             <div className="brand-text">
@@ -118,10 +119,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 .brand-icon {
                     width: 38px; height: 38px;
                     border-radius: 10px;
-                    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+                    background: linear-gradient(135deg, #3E61FF 0%, #8B5CF6 100%);
                     display: flex; align-items: center; justify-content: center;
-                    font-weight: 700; font-size: 1rem;
-                    box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+                    box-shadow: 0 4px 10px rgba(62, 97, 255, 0.3);
                     flex-shrink: 0;
                 }
                 .brand-text { display: flex; flex-direction: column; }
