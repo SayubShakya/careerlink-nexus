@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
+import logoImg from '@assets/images/CareerLink-Logo.png';
 
 const EmployerSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
@@ -191,8 +192,8 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 </button>
 
                 <div style={styles.logoContainer}>
-                    <div style={{ width: isOpen ? '160px' : '48px', height: isOpen ? '45px' : '48px', background: '#fff', borderRadius: '10px', padding: '4px', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src="/src/assets/images/CareerLink-Logo.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <div style={{ width: isOpen ? '180px' : '52px', height: isOpen ? '50px' : '52px', background: '#fff', borderRadius: '12px', padding: '6px', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={logoImg} alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <span style={styles.orgName}>
                         {user?.organization_name || 'Employer Portal'}

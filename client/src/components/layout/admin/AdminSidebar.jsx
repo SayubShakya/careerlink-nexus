@@ -9,10 +9,10 @@ import {
     X,
     ChevronRight,
     Briefcase,
-    Shield,
-    Link2
+    Shield
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
+import logoImg from '@assets/images/CareerLink-Logo.png';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
@@ -31,8 +31,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 {/* Brand */}
                 <div className="sidebar-brand">
                     <div className="brand-logo">
-                        <div className="brand-icon" style={{ padding: '4px', background: '#fff', boxShadow: 'none', borderRadius: '10px' }}>
-                            <img src="/src/assets/images/CareerLink-Logo.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <div className="brand-icon">
+                            <img src={logoImg} alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         {isOpen && (
                             <div className="brand-text">
@@ -117,11 +117,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                     gap: 12px;
                 }
                 .brand-icon {
-                    width: 38px; height: 38px;
+                    width: 44px; height: 44px;
                     border-radius: 10px;
-                    background: linear-gradient(135deg, #3E61FF 0%, #8B5CF6 100%);
+                    background: #ffffff;
                     display: flex; align-items: center; justify-content: center;
-                    box-shadow: 0 4px 10px rgba(62, 97, 255, 0.3);
+                    padding: 6px;
                     flex-shrink: 0;
                 }
                 .brand-text { display: flex; flex-direction: column; }
