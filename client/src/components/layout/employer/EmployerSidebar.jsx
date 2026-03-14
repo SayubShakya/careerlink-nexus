@@ -191,7 +191,9 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 </button>
 
                 <div style={styles.logoContainer}>
-                    <span style={styles.logo}>{isOpen ? 'CAREERLINK' : 'CL'}</span>
+                    <div style={{ width: isOpen ? '160px' : '48px', height: isOpen ? '45px' : '48px', background: '#fff', borderRadius: '10px', padding: '4px', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src="/src/assets/images/CareerLink-Logo.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
                     <span style={styles.orgName}>
                         {user?.organization_name || 'Employer Portal'}
                     </span>
