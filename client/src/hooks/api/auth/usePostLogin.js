@@ -41,6 +41,8 @@ const usePostLogin = () => {
                 window.location.href = ROUTES.JOBSEEKER_DASHBOARD;
             } else if (role === 'employer') {
                 window.location.href = ROUTES.EMPLOYER_DASHBOARD;
+            } else if (role === 'admin') {
+                window.location.href = ROUTES.ADMIN_DASHBOARD;
             } else {
                 window.location.href = ROUTES.HOME;
             }

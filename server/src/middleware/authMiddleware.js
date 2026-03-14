@@ -6,6 +6,8 @@ const Employer = require('../models/Employer');
 
 const Role = require('../models/Role');
 
+const ADMIN_ID = '00000000-0000-0000-0000-000000000001';
+
 // Protect routes - verifies JWT token
 exports.protect = catchAsync(async (req, res, next) => {
     // 1) Get token from header
@@ -21,7 +23,20 @@ exports.protect = catchAsync(async (req, res, next) => {
     // 2) Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 3) Check if user still exists (check both tables)
+    // 3) Check if user is admin (virtual user)
+    if (decoded.id === ADMIN_ID) {
+        req.user = {
+            id: ADMIN_ID,
+            email: 'Admin@nexus.com',
+            firstName: 'System',
+            lastName: 'Admin',
+            Role: { name: 'admin' }
+        };
+        req.role = 'admin';
+        return next();
+    }
+
+    // 4) Check if user still exists (check both tables)
     let currentUser = await JobSeeker.findByPk(decoded.id, {
         include: [{ model: Role, attributes: ['name'] }]
     });
@@ -36,7 +51,7 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new AppError('The user belonging to this token no longer exists.', 401));
     }
 
-    // 4) Grant access - attach user and role to request
+    // 5) Grant access - attach user and role to request
     req.user = currentUser;
     req.role = currentUser.Role.name;
     next();

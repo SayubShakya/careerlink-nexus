@@ -46,6 +46,8 @@ const Login = () => {
                 navigate(ROUTES.JOBSEEKER_DASHBOARD);
             } else if (role === 'employer') {
                 navigate(ROUTES.EMPLOYER_DASHBOARD);
+            } else if (role === 'admin') {
+                navigate(ROUTES.ADMIN_DASHBOARD);
             }
         }
     }, [isAuthenticated, role, navigate]);

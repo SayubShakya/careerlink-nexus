@@ -80,7 +80,9 @@ router.use(authMiddleware.restrictTo('job_seeker'));
 // Routes specific to job seeker
 router.get('/me', jobSeekerController.getMe);
 router.get('/full-profile', jobSeekerController.getFullProfile);
-router.patch('/me', upload.single('profile_picture'), jobSeekerController.updateMe);
+router.route('/me')
+    .patch(upload.single('profile_picture'), jobSeekerController.updateMe)
+    .put(upload.single('profile_picture'), jobSeekerController.updateMe);
 router.get('/me/stats', jobSeekerController.getStats);
 router.get('/me/feed', jobSeekerController.getActivityFeed);
 router.get('/me/saved-jobs', jobSeekerController.getSavedJobs);
