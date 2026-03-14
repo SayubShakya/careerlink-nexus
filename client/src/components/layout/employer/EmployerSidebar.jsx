@@ -192,8 +192,8 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 </button>
 
                 <div style={styles.logoContainer}>
-                    <div style={{ width: isOpen ? '200px' : '56px', height: isOpen ? '56px' : '56px', background: '#fff', borderRadius: '14px', padding: '8px', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src={logoImg} alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <div style={{ width: isOpen ? '200px' : '56px', height: isOpen ? '56px' : '56px', background: '#fff', borderRadius: '14px', overflow: 'hidden', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={logoImg} alt="CareerLink" style={{ width: '180%', height: '180%', objectFit: 'contain' }} />
                     </div>
                     <span style={styles.orgName}>
                         {user?.organization_name || 'Employer Portal'}

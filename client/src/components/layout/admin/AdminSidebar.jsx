@@ -32,7 +32,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 <div className="sidebar-brand">
                     <div className="brand-logo">
                         <div className="brand-icon">
-                            <img src={logoImg} alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <img src={logoImg} alt="CareerLink" style={{ width: '180%', height: '180%', objectFit: 'contain' }} />
                         </div>
                         {isOpen && (
                             <div className="brand-text">
@@ -121,7 +121,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                     border-radius: 12px;
                     background: #ffffff;
                     display: flex; align-items: center; justify-content: center;
-                    padding: 8px;
+                    overflow: hidden;
+                    padding: 0;
                     flex-shrink: 0;
                 }
                 .brand-text { display: flex; flex-direction: column; }

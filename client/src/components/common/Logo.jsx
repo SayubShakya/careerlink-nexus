@@ -20,17 +20,27 @@ const Logo = ({ className = '', variant = 'full', theme = 'light', size = 'md' }
     const s = sizes[size] || sizes.md;
 
     return (
-        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
-            <img
-                src={logoImg}
-                alt="CareerLink"
-                style={{
-                    height: s.icon,
-                    width: 'auto',
-                    objectFit: 'contain',
-                    filter: theme === 'dark' ? 'brightness(0) invert(1)' : 'none'
-                }}
-            />
+        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '2px', textDecoration: 'none' }}>
+            <div style={{
+                width: s.icon,
+                height: s.icon,
+                overflow: 'hidden',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <img
+                    src={logoImg}
+                    alt="CareerLink"
+                    style={{
+                        width: '180%',
+                        height: '180%',
+                        objectFit: 'contain',
+                        filter: theme === 'dark' ? 'brightness(0) invert(1)' : 'none'
+                    }}
+                />
+            </div>
             {variant === 'full' && (
                 <span style={{
                     fontSize: s.text,
