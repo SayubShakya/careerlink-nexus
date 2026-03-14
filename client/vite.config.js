@@ -27,10 +27,26 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            if (err.code === 'ECONNREFUSED') {
+              res.writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Backend server is starting up.' }));
+            }
+          });
+        }
       },
       '/uploads': {
         target: 'http://localhost:5000',
         changeOrigin: true,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            if (err.code === 'ECONNREFUSED') {
+              res.writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Backend server is starting up.' }));
+            }
+          });
+        }
       }
     }
   }
