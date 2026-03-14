@@ -12,15 +12,15 @@ const Logo = ({ className = '', variant = 'full', theme = 'light', size = 'md' }
     const textColor = theme === 'dark' ? '#FFFFFF' : '#0F172A';
 
     const sizes = {
-        sm: { icon: '32px', text: '1.1rem' },
-        md: { icon: '42px', text: '1.4rem' },
-        lg: { icon: '56px', text: '1.8rem' },
+        sm: { icon: '38px', text: '1.2rem' },
+        md: { icon: '52px', text: '1.6rem' },
+        lg: { icon: '68px', text: '2.2rem' },
     };
 
     const s = sizes[size] || sizes.md;
 
     return (
-        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>
             <img
                 src={logoImg}
                 alt="CareerLink"
@@ -36,7 +36,7 @@ const Logo = ({ className = '', variant = 'full', theme = 'light', size = 'md' }
                     fontSize: s.text,
                     fontWeight: 800,
                     color: textColor,
-                    letterSpacing: '-0.02em',
+                    letterSpacing: '-0.03em',
                     fontFamily: "'Inter', sans-serif",
                     whiteSpace: 'nowrap'
                 }}>
