@@ -117,8 +117,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                     gap: 12px;
                 }
                 .brand-icon {
-                    width: 52px; height: 52px;
-                    border-radius: 12px;
+                    width: 40px; height: 40px;
+                    border-radius: 10px;
                     background: #ffffff;
                     display: flex; align-items: center; justify-content: center;
                     overflow: hidden;
@@ -126,8 +126,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                     flex-shrink: 0;
                 }
                 .brand-text { display: flex; flex-direction: column; }
-                .brand-name { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; color: #F1F5F9; }
-                .brand-label { font-size: 0.65rem; font-weight: 600; color: #818CF8; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+                .brand-name { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: #F1F5F9; }
+                .brand-label { font-size: 0.6rem; font-weight: 500; color: #818CF8; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
                 .sidebar-toggle {
                     width: 32px; height: 32px; border-radius: 8px;
                     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);

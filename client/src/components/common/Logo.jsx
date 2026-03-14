@@ -12,9 +12,9 @@ const Logo = ({ className = '', variant = 'full', theme = 'light', size = 'md' }
     const textColor = theme === 'dark' ? '#FFFFFF' : '#0F172A';
 
     const sizes = {
-        sm: { icon: '38px', text: '1.2rem' },
-        md: { icon: '52px', text: '1.6rem' },
-        lg: { icon: '68px', text: '2.2rem' },
+        sm: { icon: '30px', text: '1rem' },
+        md: { icon: '38px', text: '1.3rem' },
+        lg: { icon: '52px', text: '1.8rem' },
     };
 
     const s = sizes[size] || sizes.md;
