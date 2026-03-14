@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import authIllustration from '@/assets/images/auth-illustration.png';
-import logo from '@assets/images/careerlink_logo.png';
+
 import { ROUTES } from '@/routes/routes';
 
 const styles = {

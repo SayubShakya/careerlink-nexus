@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import authIllustration from '@/assets/images/auth-illustration.png';
-import logo from '@assets/images/careerlink_logo.png';
+
 import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useAuth } from '@/hooks/useAuth';

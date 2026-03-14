@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '@assets/images/careerlink_logo.png';
+import { Link2 } from 'lucide-react';
 
 /**
  * Premium CareerLink Logo Component
@@ -10,16 +10,27 @@ import logoImg from '@assets/images/careerlink_logo.png';
 const Logo = ({ className = '', variant = 'full', theme = 'light' }) => {
     // Colors
     const primaryColor = '#3E61FF';
-    const secondaryColor = '#8B5CF6';
     const textColor = theme === 'dark' ? '#FFFFFF' : '#0F172A';
+
+    const logoIcon = (
+        <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #3E61FF 0%, #8B5CF6 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 10px rgba(62, 97, 255, 0.3)',
+            flexShrink: 0
+        }}>
+            <Link2 size={22} color="white" strokeWidth={2.5} style={{ transform: 'rotate(-45deg)' }} />
+        </div>
+    );
 
     return (
         <div className={`flex items-center gap-3 ${className}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <img 
-                src={logoImg} 
-                alt="CareerLink Logo" 
-                style={{ height: '40px', objectFit: 'contain' }}
-            />
+            {logoIcon}
 
             {variant === 'full' && (
                 <div className="logo-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
