@@ -1,16 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="36" height="36" rx="10" fill="url(#brandGradOuter)" />
+  <path d="M22 13H15C12.7909 13 11 14.7909 11 17C11 19.2091 12.7909 21 15 21H18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  <path d="M14 23H21C23.2091 23 25 21.2091 25 19C25 16.7909 23.2091 15 21 15H18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  <circle cx="21" cy="15" r="3.5" fill="#6EE7B7" />
+  <circle cx="15" cy="21" r="2.5" fill="#F472B6" />
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3E61FF" />
-      <stop offset="100%" stop-color="#8B5CF6" />
-    </linearGradient>
+      <linearGradient id="brandGradOuter" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#3E61FF"/>
+          <stop offset="1" stopColor="#8B5CF6"/>
+      </linearGradient>
   </defs>
-  <rect width="36" height="36" rx="10" fill="url(#grad)" />
-  <g transform="translate(18, 18) rotate(-45) translate(-11, -11)">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 17H7A5 5 0 0 1 7 7h2" />
-      <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
-      <line x1="8" x2="16" y1="12" y2="12" />
-    </svg>
-  </g>
 </svg>
