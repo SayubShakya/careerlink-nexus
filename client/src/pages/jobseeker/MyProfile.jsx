@@ -88,7 +88,7 @@ const MyProfile = () => {
         formData.append('location', profile.location);
         formData.append('phone', profile.phone);
         if (selectedFile) {
-            formData.append('avatar', selectedFile);
+            formData.append('profile_picture', selectedFile);
         }
 
         updateProfile(formData);

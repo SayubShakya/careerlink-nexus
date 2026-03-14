@@ -250,7 +250,6 @@ const AdminJobs = () => {
                                     <div className="jb-card-divider" />
                                     <div className="jb-card-footer">
                                         <div className="jb-card-stat"><Eye size={14} /><span className="jb-card-stat-val">{job.views || 0}</span><span className="jb-card-stat-label">views</span></div>
-                                        <div className="jb-card-stat"><UsersIcon size={14} /><span className="jb-card-stat-val">{job.totalApplications || 0}</span><span className="jb-card-stat-label">applicants</span></div>
                                         <button className="jb-card-view-btn" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}>View <ArrowUpRight size={13} /></button>
                                     </div>
                                 </div>

@@ -195,7 +195,7 @@ const AdminEmployers = () => {
                                                 <div className="ep-card-industry">{emp.industry || 'Industry not set'}</div>
                                             </div>
                                         </div>
-                                        <span className={`ep-card-status ${emp.is_verified ? 'verified' : 'pending'}`}><span className="ep-card-status-dot" />{emp.is_verified ? 'Verified' : 'Pending'}</span>
+                                        <span className={`ep-card-status ${emp.is_verified ? 'verified' : 'active'}`}><span className="ep-card-status-dot" />{emp.is_verified ? 'Verified' : 'Active'}</span>
                                     </div>
                                     <div className="ep-card-info">
                                         <div className="ep-card-info-item"><Mail size={13} className="ep-info-icon" /><span className="ep-info-text">{emp.email}</span></div>
@@ -338,10 +338,10 @@ const AdminEmployers = () => {
 
                 .ep-card-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
                 .ep-card-status.verified { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
-                .ep-card-status.pending { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
+                .ep-card-status.active { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
                 .ep-card-status-dot { width: 5px; height: 5px; border-radius: 50%; }
                 .ep-card-status.verified .ep-card-status-dot { background: #10B981; }
-                .ep-card-status.pending .ep-card-status-dot { background: #F59E0B; }
+                .ep-card-status.active .ep-card-status-dot { background: #6366F1; }
 
                 .ep-card-info { padding: 16px 24px 0; display: flex; flex-direction: column; gap: 8px; }
                 .ep-card-info-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #4B5563; }
