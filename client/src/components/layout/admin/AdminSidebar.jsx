@@ -32,7 +32,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 <div className="sidebar-brand">
                     <div className="brand-logo">
                         <div className="brand-icon" style={{ padding: 0, background: 'none', boxShadow: 'none' }}>
-                            <img src="/src/assets/images/careerlink_logo_4.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <img src="/src/assets/images/CareerLink-Logo.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         {isOpen && (
                             <div className="brand-text">
