@@ -31,20 +31,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 {/* Brand */}
                 <div className="sidebar-brand">
                     <div className="brand-logo">
-                        <div className="brand-icon" style={{ padding: 0, background: 'none' }}>
-                            <svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="36" height="36" rx="10" fill="url(#adminBrandGrad)" />
-                                <path d="M22 13H15C12.7909 13 11 14.7909 11 17C11 19.2091 12.7909 21 15 21H18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M14 23H21C23.2091 23 25 21.2091 25 19C25 16.7909 23.2091 15 21 15H18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                <circle cx="21" cy="15" r="3.5" fill="#6EE7B7" />
-                                <circle cx="15" cy="21" r="2.5" fill="#F472B6" />
-                                <defs>
-                                    <linearGradient id="adminBrandGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#3E61FF"/>
-                                        <stop offset="1" stopColor="#8B5CF6"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                        <div className="brand-icon" style={{ padding: 0, background: 'none', boxShadow: 'none' }}>
+                            <img src="/src/assets/images/careerlink_logo_4.png" alt="CareerLink" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         {isOpen && (
                             <div className="brand-text">
