@@ -20,7 +20,7 @@ const Logo = ({ className = '', variant = 'full', theme = 'light', size = 'md' }
     const s = sizes[size] || sizes.md;
 
     return (
-        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>
+        <div className={className} style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
             <img
                 src={logoImg}
                 alt="CareerLink"
