@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import authIllustration from '@/assets/images/auth-illustration.png';
-import logo from '@assets/images/temporary_logo.png';
+import logo from '@assets/images/careerlink_logo.png';
 import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import usePostRegisterEmployer from '@/hooks/api/auth/usePostRegisterEmployer';
