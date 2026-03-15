@@ -261,7 +261,7 @@ const SavedJobs = () => {
                                     <div className="sj-card-top">
                                         <div className="sj-logo" style={{ background: employer.logo ? '#F8FAFC' : `linear-gradient(135deg, ${color}, ${hex2rgba(color, 0.7)})` }}>
                                             {employer.logo ? (
-                                                <img src={`/${employer.logo}`} alt={employer.name} />
+                                                <img src={employer.logo.startsWith('http') ? employer.logo : `http://localhost:5000/uploads/${employer.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} alt={employer.name} />
                                             ) : (
                                                 (employer.name || job.title || 'J').charAt(0).toUpperCase()
                                             )}

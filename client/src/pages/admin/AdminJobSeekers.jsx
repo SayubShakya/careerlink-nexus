@@ -165,7 +165,7 @@ const AdminJobSeekers = () => {
                                             <div className="js-td-profile">
                                                 <div className="js-td-avatar" style={{ background: getAvatarGradient(getName(s)) }}>
                                                     {s.profile_picture ? (
-                                                        <img src={`/${s.profile_picture}`} alt="" />
+                                                        <img src={s.profile_picture.startsWith('http') ? s.profile_picture : `http://localhost:5000/uploads/${s.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} alt="" />
                                                     ) : getName(s)[0]}
                                                 </div>
                                                 <div className="js-td-name-col">

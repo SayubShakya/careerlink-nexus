@@ -28,7 +28,7 @@ const CompanyProfile = () => {
                 website: serverCompany.companyWebsite || '',
             });
             if (serverCompany.profile_picture) {
-                setLogoPreview(`/${serverCompany.profile_picture}`);
+                setLogoPreview(serverCompany.profile_picture.startsWith('http') ? serverCompany.profile_picture : `http://localhost:5000/uploads/${serverCompany.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/'));
             }
         }
     }, [serverCompany]);

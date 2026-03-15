@@ -89,7 +89,7 @@ export default function Navbar() {
                             <Link to={getDashboardRoute()} style={navStyles.link} className="nav-item">Dashboard</Link>
                             {user?.profile_picture ? (
                                 <img 
-                                    src={`/${user.profile_picture.replace(/\\/g, '/')}`} 
+                                    src={user.profile_picture.startsWith('http') ? user.profile_picture : `http://localhost:5000/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} 
                                     alt="Profile" 
                                     style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-brand-primary)' }} 
                                 />
