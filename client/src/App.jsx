@@ -2,6 +2,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from '@/routes/index';
 import '@/styles/variables.css';
 import '@/styles/global.css';
+import '@/styles/Responsive.css';
 import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';

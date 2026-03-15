@@ -1,0 +1,92 @@
+/* Master Responsive Overrides for CareerLink */
+
+@media (max-width: 1200px) {
+    /* Compress container padding */
+    .glass-container {
+        padding: 40px 24px !important;
+    }
+}
+
+@media (max-width: 1023px) {
+    /* Collapse Sidebar fully visually if possible, or hide it behind hamburger */
+    .sidebar-glass {
+        width: 280px !important;
+        transform: translateX(-100%);
+        z-index: 1000;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        padding-top: 80px !important; /* Space for mobile header */
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    }
+    .sidebar-glass.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .main-content-area {
+        margin-left: 0 !important;
+    }
+
+    /* Force grids with 3+ columns or unequal columns into 1 or 2 columns */
+    div[style*="grid-template-columns: repeat(3"],
+    div[style*="grid-template-columns: 2.5fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography scaling */
+    h1 {
+        font-size: 2.2rem !important;
+    }
+    h2 {
+        font-size: 1.8rem !important;
+    }
+
+    .glass-container {
+        padding: 24px 16px !important;
+        margin-top: 60px; /* Space for mobile header */
+    }
+
+    .glass-panel {
+        padding: 24px !important;
+    }
+
+    /* Crush 2-column or multi-column flex/grids into stack */
+    div[style*="grid-template-columns: 1fr 1fr"],
+    div[style*="grid-template-columns: 2fr 1fr"],
+    div[style*="grid-template-columns: repeat(auto-fit, minmax(280px"],
+    div[style*="grid-template-columns: repeat(auto-fit, minmax(300px"],
+    div[style*="grid-template-columns: repeat(12, 1fr)"] {
+        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Convert specific flex rows to columns */
+    div[style*="display: flex"][style*="justify-content: space-between"],
+    div[style*="display: flex"][style*="gap: 30px"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 16px !important;
+    }
+
+    /* Tables */
+    .glass-table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        border-radius: 12px;
+    }
+    
+    .glass-table th, .glass-table td {
+        padding: 16px 20px !important;
+    }
+
+    /* Modals */
+    .glass-modal {
+        width: 95% !important;
+        padding: 24px !important;
+    }
+}

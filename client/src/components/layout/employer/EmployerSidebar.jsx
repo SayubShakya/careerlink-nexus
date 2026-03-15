@@ -215,7 +215,7 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
     };
 
     return (
-        <aside style={styles.sidebar} className="sidebar-glass">
+        <aside style={styles.sidebar} className={`sidebar-glass ${isOpen ? 'mobile-open' : ''}`}>
             <div style={styles.header}>
                 <div style={styles.logoSection} className="sidebar-id-hub">
                     <div 
@@ -241,6 +241,11 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                             to={item.path}
                             style={styles.navItem(isActive)}
                             className={({ isActive }) => `sidebar-link-glass ${isActive ? 'active' : ''}`}
+                            onClick={() => {
+                                if (window.innerWidth <= 1023) {
+                                    setIsOpen(false);
+                                }
+                            }}
                         >
                             <div style={styles.iconBox(isActive)} className="glass-icon-wrapper">
                                 {item.icon}

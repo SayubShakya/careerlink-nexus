@@ -1,0 +1,71 @@
+/* Global Responsive Overrides */
+@media screen and (max-width: 1024px) {
+    /* Collapse Sidebar Widths */
+    .sidebar-glass {
+        width: 88px !important;
+    }
+    .main-content-area {
+        margin-left: 88px !important;
+    }
+    
+    /* Convert 2+ column grids to 1 column */
+    div[style*="grid-template-columns: 2.5fr"],
+    div[style*="grid-template-columns: repeat(3"],
+    div[style*="grid-template-columns: 1fr 1fr"],
+    div[style*="grid-template-columns: 2fr 1fr"],
+    div[style*="gridTemplateColumns: 2.5fr"],
+    div[style*="gridTemplateColumns: repeat(3"],
+    div[style*="gridTemplateColumns: 1fr 1fr"],
+    div[style*="gridTemplateColumns: 2fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Relax Flex rows to column */
+    .glass-reveal > div[style*="display: flex"] {
+        flex-wrap: wrap !important;
+    }
+    
+    .glass-container {
+        padding: 40px 20px !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    /* Hide sidebar completely, show bottom nav or hamburger (requires component changes, but let's hide for now or keep 60px) */
+    .sidebar-glass {
+        width: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    .main-content-area {
+        margin-left: 0 !important;
+    }
+    
+    .glass-container {
+        padding: 24px 16px !important;
+    }
+
+    h1, h2 {
+        font-size: 2rem !important;
+    }
+    
+    /* Ensure tables can scroll horizontally */
+    .glass-panel table {
+        display: block;
+        max-width: -moz-fit-content;
+        max-width: fit-content;
+        margin: 0 auto;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .glass-panel {
+        padding: 20px !important;
+    }
+    
+    /* Job Card Grid */
+    div[style*="grid-template-columns: repeat(auto-fit"] {
+        grid-template-columns: 1fr !important;
+    }
+}
