@@ -462,7 +462,7 @@ const AdminDashboard = () => {
                 .td-industry { font-size: 0.88rem; font-weight: 600; color: #475569; }
                 .td-location { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #94A3B8; }
                 
-                .td-date-badge { display: inline-flex; padding: 5px 12px; background: #EEF2FF; border: 1px solid #E0E7FF; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #4F46E5; }
+                .td-date-badge { display: inline-flex; padding: 5px 12px; background: #EEF2FF; border: 1px solid #E0E7FF; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #4F46E5; white-space: nowrap; }
 
                 .td-actions { display: flex; gap: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
                 .btn-icon { width: 36px; height: 36px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
