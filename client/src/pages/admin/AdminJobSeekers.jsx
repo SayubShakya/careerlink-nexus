@@ -147,32 +147,57 @@ const AdminJobSeekers = () => {
                         <p>Adjust your search to find more candidates.</p>
                     </div>
                 ) : (
-                    <div className="js-grid">
-                        {current.map((s, i) => (
-                            <div key={s.id} className="js-card" style={{ animationDelay: `${i * 0.04}s` }}>
-                                <div className="js-card-top">
-                                    <div className="js-profile">
-                                        <div className="js-avatar" style={{ background: getAvatarGradient(getName(s)) }}>
-                                            {s.profile_picture ? (
-                                                <img src={`/${s.profile_picture}`} alt="" />
-                                            ) : getName(s)[0]}
-                                        </div>
-                                        <div className="js-info">
-                                            <div className="js-name">{getName(s)}</div>
-                                            <div className="js-headline">{s.Profile?.headline || 'Open for opportunities'}</div>
-                                            <div className="js-status-pill"><span className="js-dot" /> Online</div>
-                                        </div>
-                                    </div>
-                                    <button className="js-more-btn" title="View Profile"><ArrowUpRight size={14} /></button>
-                                </div>
-                                <div className="js-details-grid">
-                                    <DetailField icon={<Mail size={12} />} label="Email" value={s.email} />
-                                    <DetailField icon={<Phone size={12} />} label="Phone" value={s.Profile?.phone || 'Not provided'} />
-                                    <DetailField icon={<MapPin size={12} />} label="Location" value={s.Profile?.location || 'Not specified'} />
-                                    <DetailField icon={<Calendar size={12} />} label="Joined" value={s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'} />
-                                </div>
-                            </div>
-                        ))}
+                    <div className="js-table-container">
+                        <table className="js-custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Talent Profile</th>
+                                    <th>Contact Info</th>
+                                    <th>Location</th>
+                                    <th>Status & Join Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {current.map((s, i) => (
+                                    <tr key={s.id} style={{ animationDelay: `${i * 0.04}s` }} className="js-table-row">
+                                        <td>
+                                            <div className="js-td-profile">
+                                                <div className="js-td-avatar" style={{ background: getAvatarGradient(getName(s)) }}>
+                                                    {s.profile_picture ? (
+                                                        <img src={`/${s.profile_picture}`} alt="" />
+                                                    ) : getName(s)[0]}
+                                                </div>
+                                                <div className="js-td-name-col">
+                                                    <span className="js-td-name">{getName(s)}</span>
+                                                    <span className="js-td-headline">{s.Profile?.headline || 'Open for opportunities'}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="js-td-contact">
+                                                <span className="js-td-email"><Mail size={12}/> {s.email}</span>
+                                                <span className="js-td-phone"><Phone size={12}/> {s.Profile?.phone || 'Not provided'}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="js-td-location"><MapPin size={12}/> {s.Profile?.location || 'Not specified'}</span>
+                                        </td>
+                                        <td>
+                                            <div className="js-td-meta">
+                                                <span className="js-td-status-md"><span className="js-dot" /> Online</span>
+                                                <span className="js-td-date">
+                                                    {s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button className="js-btn-view" title="View Profile"><ArrowUpRight size={14} /></button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
@@ -241,28 +266,35 @@ const AdminJobSeekers = () => {
 
                 .js-results-info { font-size: 0.78rem; color: #6B7280; margin-bottom: 16px; animation: jsFadeUp 0.4s ease 0.1s both; }
 
-                /* ── Grid ── */
-                .js-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 28px; }
-                .js-empty { grid-column: 1 / -1; padding: 100px 40px; text-align: center; background: white; border-radius: 18px; border: 1px solid #E5E7EB; color: #9CA3AF; animation: jsFadeUp 0.4s ease 0.1s both; }
+                /* ── Table ── */
+                .js-table-container { background: white; border-radius: 18px; border: 1px solid #E5E7EB; overflow-x: auto; margin-bottom: 24px; animation: jsFadeUp 0.4s ease both; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+                .js-custom-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 850px; }
+                .js-custom-table th { color: #64748B; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 18px 24px; text-align: left; border-bottom: 1px solid #E5E7EB; background: #F8FAFC; white-space: nowrap; }
+                .js-custom-table th:first-child { border-top-left-radius: 18px; }
+                .js-custom-table th:last-child { border-top-right-radius: 18px; }
+                
+                .js-table-row { transition: all 0.25s ease; background: white; }
+                .js-table-row:hover { background: #F8FAFC; }
+                .js-table-row td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid #E5E7EB; }
+                .js-table-row:last-child td { border-bottom: none; }
+                
+                .js-td-profile { display: flex; align-items: center; gap: 14px; }
+                .js-td-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; }
+                .js-td-avatar img { width: 100%; height: 100%; object-fit: cover; }
+                .js-td-name-col { display: flex; flex-direction: column; gap: 4px; }
+                .js-td-name { font-size: 0.98rem; font-weight: 700; color: #111827; letter-spacing: -0.01em; }
+                .js-td-headline { font-size: 0.75rem; color: #6B7280; font-weight: 450; line-height: 1.3; max-width: 200px; }
+                
+                .js-td-contact { display: flex; flex-direction: column; gap: 8px; }
+                .js-td-email, .js-td-phone, .js-td-location, .js-td-date { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #4B5563; white-space: nowrap; }
+                
+                .js-td-meta { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+                .js-td-status-md { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 650; white-space: nowrap; background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+                .js-dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; animation: jsPulse 2s infinite; }
+                
+                .js-btn-view { width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #9CA3AF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+                .js-btn-view:hover { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); }
 
-                /* ── Card ── */
-                .js-card { border: 1px solid #E5E7EB; background: white; border-radius: 20px; padding: 24px; transition: all 0.25s ease; animation: jsFadeUp 0.4s ease both; position: relative; }
-                .js-card:hover { border-color: #D1D5DB; box-shadow: 0 10px 35px rgba(0,0,0,0.06); transform: translateY(-3px); }
-
-                .js-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-                .js-profile { display: flex; align-items: center; gap: 15px; }
-                .js-avatar { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.15rem; flex-shrink: 0; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-                .js-avatar img { width: 100%; height: 100%; object-fit: cover; }
-                .js-info { display: flex; flex-direction: column; gap: 4px; }
-                .js-name { font-size: 1.02rem; font-weight: 700; color: #111827; letter-spacing: -0.01em; }
-                .js-headline { font-size: 0.75rem; color: #6B7280; font-weight: 450; line-height: 1.3; max-width: 180px; }
-                .js-status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 0.65rem; font-weight: 600; color: #10B981; }
-                .js-dot { width: 5px; height: 5px; border-radius: 50%; background: #10B981; animation: jsPulse 2s infinite; }
-
-                .js-more-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #9CA3AF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-                .js-more-btn:hover { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; transform: rotate(45deg); }
-
-                .js-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
                 /* ── Pagination ── */
                 .js-pagination { display: flex; justify-content: center; align-items: center; gap: 10px; animation: jsFadeUp 0.4s ease 0.15s both; }
