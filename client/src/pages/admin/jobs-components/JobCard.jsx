@@ -52,7 +52,6 @@ const JobCard = ({ job, index, onSelect }) => {
             <div className="jb-pc-footer">
                 <div className="jb-pc-date"><Clock size={14} /> {formatDate(job.createdAt || job.created_at)}</div>
                 <div className="jb-pc-actions">
-                    <button className="jb-pc-btn-mini" onClick={e => { e.stopPropagation(); /* TODO: Ban Logic */ }} title="Stop This Job"><Ban size={16} /></button>
                     <button className="jb-pc-btn-view">Details <ArrowUpRight size={16} /></button>
                 </div>
             </div>
