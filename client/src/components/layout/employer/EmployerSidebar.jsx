@@ -20,6 +20,7 @@ import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
 import { useTheme } from '@/hooks/useTheme';
 import { THEME_MODES } from '@/config/constants';
+import logoImg from '@assets/images/CareerLink-Logo.png';
 
 const EmployerSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
@@ -240,7 +241,9 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 </button>
 
                 <div style={styles.logoContainer}>
-                    <span style={styles.logo}>{isOpen ? 'CAREERLINK' : 'CL'}</span>
+                    <div style={{ width: isOpen ? '200px' : '56px', height: isOpen ? '56px' : '56px', background: '#fff', borderRadius: '14px', overflow: 'hidden', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={logoImg} alt="CareerLink" style={{ width: '180%', height: '180%', objectFit: 'contain' }} />
+                    </div>
                     <span style={styles.orgName}>
                         {user?.organization_name || 'Employer Portal'}
                     </span>

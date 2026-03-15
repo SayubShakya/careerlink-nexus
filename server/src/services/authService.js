@@ -1,7 +1,13 @@
 const JobSeeker = require('../models/JobSeeker');
 const Employer = require('../models/Employer');
 const Role = require('../models/Role');
+const bcrypt = require('bcryptjs');
 const AppError = require('../utils/AppError');
+
+// Hardcoded admin credentials
+const ADMIN_EMAIL = 'admin@nexus.com';
+const ADMIN_PASSWORD = 'AdminNexus';
+const ADMIN_ID = '00000000-0000-0000-0000-000000000001';
 
 class AuthService {
     /**
@@ -19,6 +25,29 @@ class AuthService {
      * Business logic for finding a user by email across both tables
      */
     async findUserByEmail(email) {
+        // Check Admin (hardcoded virtual user)
+        if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+            const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
+            const adminUser = {
+                id: ADMIN_ID,
+                email: ADMIN_EMAIL,
+                firstName: 'System',
+                lastName: 'Admin',
+                password_hash: hashedPassword,
+                Role: { name: 'admin' },
+                correctPassword: async (candidatePassword) => {
+                    return candidatePassword === ADMIN_PASSWORD;
+                },
+                toJSON: () => ({
+                    id: ADMIN_ID,
+                    email: ADMIN_EMAIL,
+                    firstName: 'System',
+                    lastName: 'Admin',
+                })
+            };
+            return { user: adminUser, role: 'admin' };
+        }
+
         // Check JobSeeker
         const jobSeeker = await JobSeeker.findOne({
             where: { email },
@@ -78,6 +107,10 @@ class AuthService {
      * Verify password using the model's instance method
      */
     async verifyPassword(user, candidatePassword) {
+        // Admin user has a simplified correctPassword that only takes candidatePassword
+        if (user.id === ADMIN_ID) {
+            return await user.correctPassword(candidatePassword);
+        }
         return await user.correctPassword(candidatePassword, user.password_hash);
     }
 }

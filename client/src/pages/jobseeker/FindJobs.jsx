@@ -273,7 +273,7 @@ const FindJobs = () => {
                                         <div className="fj-logo-wrap">
                                             {group.logo ? (
                                                 <img
-                                                    src={`/${group.logo}`}
+                                                    src={group.logo.startsWith('http') ? group.logo : `http://localhost:5000/uploads/${group.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
                                                     alt={group.name}
                                                     className="fj-logo-img"
                                                     onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import authIllustration from '@/assets/images/auth-illustration.png';
-import logo from '@assets/images/temporary_logo.png';
+
 import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,6 +28,7 @@ const Login = () => {
                 localStorage.setItem("userToken", token);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("role", data.role);
+                localStorage.setItem("loginTimestamp", Date.now().toString());
 
                 toast.success('Login successful!');
                 window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
@@ -46,6 +47,8 @@ const Login = () => {
                 navigate(ROUTES.JOBSEEKER_DASHBOARD);
             } else if (role === 'employer') {
                 navigate(ROUTES.EMPLOYER_DASHBOARD);
+            } else if (role === 'admin') {
+                navigate(ROUTES.ADMIN_DASHBOARD);
             }
         }
     }, [isAuthenticated, role, navigate]);

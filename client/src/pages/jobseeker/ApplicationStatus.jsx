@@ -170,7 +170,7 @@ const ApplicationStatus = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
                                         {employer.logo ? (
-                                            <img src={`/${employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '16px' }} />
+                                            <img src={employer.logo.startsWith('http') ? employer.logo : `http://localhost:5000/uploads/${employer.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '16px' }} />
                                         ) : (
                                             <Building2 size={24} />
                                         )}

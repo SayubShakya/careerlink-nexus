@@ -1,28 +1,16 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-        <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#3E61FF" />
-            <stop offset="100%" stop-color="#8B5CF6" />
-        </linearGradient>
-    </defs>
-    
-    <!-- Main Symbol: Stylized Connected Nodes -->
-    <path 
-        d="M20 5C11.7157 5 5 11.7157 5 20C5 28.2843 11.7157 35 20 35C28.2843 35 35 28.2843 35 20" 
-        stroke="url(#logoGradient)" 
-        stroke-width="3.5" 
-        stroke-linecap="round"
-        stroke-dasharray="10 5"
-    />
-    
-    <!-- Inner Core: Represents the 'Nexus' -->
-    <path 
-        d="M20 12L27 16V24L20 28L13 24V16L20 12Z" 
-        fill="url(#logoGradient)" 
-        opacity="0.9"
-    />
-    
-    <!-- Connection Dots -->
-    <circle cx="20" cy="5" r="3" fill="#3E61FF" />
-    <circle cx="35" cy="20" r="3" fill="#8B5CF6" />
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3E61FF" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+  </defs>
+  <rect width="36" height="36" rx="10" fill="url(#grad)" />
+  <g transform="translate(18, 18) rotate(-45) translate(-11, -11)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+      <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
+      <line x1="8" x2="16" y1="12" y2="12" />
+    </svg>
+  </g>
 </svg>

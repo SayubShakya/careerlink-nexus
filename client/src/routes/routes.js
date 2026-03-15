@@ -21,7 +21,12 @@ export const ROUTES = {
     EMPLOYER_APPLICATIONS: '/dashboard/employer/applications',
     EMPLOYER_COMPANY_PROFILE: '/dashboard/employer/company-profile',
     EMPLOYER_HISTORY: '/dashboard/employer/history',
+    ADMIN_DASHBOARD: '/admin/dashboard',
+    ADMIN_EMPLOYERS: '/admin/employers',
+    ADMIN_JOBS: '/admin/jobs',
+    ADMIN_JOBSEEKERS: '/admin/job-seekers',
     LOGOUT_CONFIRMATION: '/logout-confirmation',
     SSO_ONBOARDING: '/sso-onboarding',
     NOT_FOUND: '*',
 };
+

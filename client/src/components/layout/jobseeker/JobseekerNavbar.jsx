@@ -113,7 +113,7 @@ const JobseekerNavbar = () => {
                     <div style={{ ...styles.avatarBox, overflow: 'hidden' }}>
                         {user?.profile_picture ? (
                             <img
-                                src={`/${user.profile_picture}`}
+                                src={user.profile_picture.startsWith('http') ? user.profile_picture : `http://localhost:5000/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
                                 alt="Profile"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

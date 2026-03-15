@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import authIllustration from '@/assets/images/auth-illustration.png';
-import logo from '@assets/images/temporary_logo.png';
+
 import { Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import usePostRegisterEmployer from '@/hooks/api/auth/usePostRegisterEmployer';
@@ -186,6 +186,7 @@ const EmployerSignup = () => {
                 localStorage.setItem("userToken", token);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("role", data.role);
+                localStorage.setItem("loginTimestamp", Date.now().toString());
                 toast.success('Login successful!');
                 window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;
             } catch (error) {

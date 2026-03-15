@@ -36,7 +36,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 1 * 60 * 60 * 1000 // 1 hour
     }
 }));
 
@@ -58,6 +58,7 @@ app.use('/api/resumes', resumeRoutes);
 
 // Handle Undefined Routes
 app.all(/(.*)/, (req, res, next) => {
+    console.log(`[404] Method: ${req.method}, URL: ${req.originalUrl}`);
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 

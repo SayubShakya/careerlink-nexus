@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '@assets/images/temporary_logo.png';
+
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
 
