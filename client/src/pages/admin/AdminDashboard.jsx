@@ -4,7 +4,7 @@ import {
     Building2, Briefcase, Users, ArrowUpRight, FileText,
     Trash2, X, TrendingUp, Globe, Activity, Zap, ChevronRight, Shield,
     Clock, Mail, Phone, MapPin, Calendar, ExternalLink, Filter, CheckCircle2,
-    XCircle, Info, BarChart3, Star, Cloud, Moon, Sun
+    XCircle, Info, BarChart3, Star, Cloud, Moon, Sun, ChevronLeft
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import {
@@ -147,7 +147,13 @@ const AdminDashboard = () => {
     };
 
     const ds = stats || { totalEmployers: 0, totalJobSeekers: 0, totalJobs: 0, totalApplications: 0 };
-    const recent = employers.slice(0, 5);
+    
+    // Pagination logic
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const totalPages = Math.ceil(employers.length / itemsPerPage);
+    const paginatedEmployers = employers.slice(startIndex, startIndex + itemsPerPage);
 
     const cards = [
         { label: 'Employers', value: ds.totalEmployers, icon: <Building2 size={20} />, color: '#6366F1', bg: '#EEF2FF' },
@@ -206,32 +212,91 @@ const AdminDashboard = () => {
                                 View All <ArrowUpRight size={14} />
                             </button>
                         </div>
-                        <div className="recent-list">
-                            {empLoading ? (
-                                <div className="list-empty">Loading companies...</div>
-                            ) : recent.length === 0 ? (
-                                <div className="list-empty">No companies registered yet.</div>
-                            ) : recent.map((emp, i) => (
-                                <div key={emp.id} className="recent-item" style={{ animationDelay: `${i * 0.05}s` }}>
-                                    <div className="item-avatar">{(emp.companyName || '?')[0]}</div>
-                                    <div className="item-info">
-                                        <div className="item-name">{emp.companyName}</div>
-                                        <div className="item-meta">
-                                            <span>{emp.industry || 'General'}</span>
-                                            <span className="bullet">•</span>
-                                            <span>{emp.location || 'Nepal'}</span>
-                                        </div>
+                        <div className="admin-table-container">
+                            <table className="admin-custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company Profile</th>
+                                        <th>Location & Sector</th>
+                                        <th>Join Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {empLoading ? (
+                                        <tr><td colSpan="4" className="list-empty">Loading companies...</td></tr>
+                                    ) : paginatedEmployers.length === 0 ? (
+                                        <tr><td colSpan="4" className="list-empty">No companies registered yet.</td></tr>
+                                    ) : paginatedEmployers.map((emp, i) => {
+                                        const colorVariations = [
+                                            { bg: 'linear-gradient(135deg, #EEF2FF 0%, #C7D2FE 100%)', text: '#4338CA', border: '#A5B4FC' }, // Indigo
+                                            { bg: 'linear-gradient(135deg, #F0FDF4 0%, #BBF7D0 100%)', text: '#15803D', border: '#86EFAC' }, // Green
+                                            { bg: 'linear-gradient(135deg, #FFFBEB 0%, #FDE68A 100%)', text: '#B45309', border: '#FCD34D' }, // Amber
+                                            { bg: 'linear-gradient(135deg, #FDF2F8 0%, #FBCFE8 100%)', text: '#BE185D', border: '#F9A8D4' }, // Pink
+                                            { bg: 'linear-gradient(135deg, #F5F3FF 0%, #DDD6FE 100%)', text: '#6D28D9', border: '#C4B5FD' }, // Violet
+                                        ];
+                                        const color = colorVariations[(emp.companyName?.length || i) % colorVariations.length];
+                                        
+                                        return (
+                                        <tr key={emp.id} style={{ animationDelay: `${i * 0.05}s` }} className="table-row-animate">
+                                            <td>
+                                                <div className="td-company-info">
+                                                    <div className="item-avatar" style={{ background: color.bg, color: color.text, borderColor: color.border }}>
+                                                        {(emp.companyName || '?')[0]}
+                                                    </div>
+                                                    <div className="td-name-col">
+                                                        <span className="td-company-name">{emp.companyName}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="td-meta-col">
+                                                    <span className="td-industry">{emp.industry || 'General Sector'}</span>
+                                                    <span className="td-location"><MapPin size={12}/> {emp.location || 'Nepal'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="td-date-badge">
+                                                    {new Date(emp.createdAt || emp.created_at || new Date()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="td-actions">
+                                                    <button className="btn-icon view" onClick={() => setJobsModalEmpId(emp.id)} title="View Jobs">
+                                                        <Briefcase size={14} />
+                                                    </button>
+                                                    <button className="btn-icon delete" onClick={() => setConfirmDelId(emp.id)} title="Delete">
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+
+                            {totalPages > 0 && (
+                                <div className="table-pagination">
+                                    <button 
+                                        className="pag-btn" 
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        <ChevronLeft size={16} /> Prev
+                                    </button>
+                                    <div className="pag-info">
+                                        <span className="pag-page-num">Page {currentPage} of {totalPages}</span>
                                     </div>
-                                    <div className="item-actions">
-                                        <button className="btn-icon view" onClick={() => setJobsModalEmpId(emp.id)} title="View Jobs">
-                                            <Briefcase size={14} />
-                                        </button>
-                                        <button className="btn-icon delete" onClick={() => setConfirmDelId(emp.id)} title="Delete">
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
+                                    <button 
+                                        className="pag-btn" 
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next <ChevronRight size={16} />
+                                    </button>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 
@@ -375,20 +440,45 @@ const AdminDashboard = () => {
                 .card-action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; color: #334155; font-size: 0.75rem; font-weight: 650; cursor: pointer; transition: all 0.2s; }
                 .card-action-btn:hover { background: #F1F5F9; border-color: #CBD5E1; color: #111827; }
 
-                /* ── LISTS ── */
-                .recent-list { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 6px; }
-                .recent-item { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 14px; transition: all 0.15s; cursor: default; animation: dashFadeUp 0.4s ease both; }
-                .recent-item:hover { background: #F8FAFC; }
-                .item-avatar { width: 44px; height: 44px; border-radius: 12px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #111827; font-size: 1.1rem; flex-shrink: 0; }
-                .item-info { flex: 1; min-width: 0; }
-                .item-name { font-size: 0.92rem; font-weight: 650; color: #111827; margin-bottom: 2px; }
-                .item-meta { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #64748B; }
-                .item-actions { display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s; }
-                .recent-item:hover .item-actions { opacity: 1; }
-                .btn-icon { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #E2E8F0; background: white; color: #64748B; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-                .btn-icon.view:hover { background: #F0F9FF; color: #0284C7; border-color: #BAE6FD; }
-                .btn-icon.delete:hover { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+                /* ── TABLE LISTS & PAGINATION ── */
+                .admin-table-container { padding: 0 24px 24px; display: flex; flex-direction: column; overflow-x: auto; }
+                .admin-custom-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; }
+                .admin-custom-table th { color: #64748B; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 20px 10px; text-align: left; border-bottom: 1px solid #F1F5F9; }
+                
+                .admin-custom-table tbody tr { background: #FFFFFF; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+                .admin-custom-table tbody tr:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.1); position: relative; z-index: 2; }
+                
+                .admin-custom-table td { padding: 16px 20px; font-size: 0.95rem; color: #334155; vertical-align: middle; border-top: 1px solid #F1F5F9; border-bottom: 1px solid #F1F5F9; }
+                .admin-custom-table td:first-child { border-left: 1px solid #F1F5F9; border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+                .admin-custom-table td:last-child { border-right: 1px solid #F1F5F9; border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+                .td-company-info { display: flex; align-items: center; gap: 14px; }
+                .item-avatar { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #4338CA; font-size: 1.3rem; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(255,255,255,0.6); text-transform: uppercase; }
+                .td-name-col { display: flex; flex-direction: column; gap: 4px; }
+                .td-company-name { font-size: 1.05rem; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; }
+                .td-company-id { font-size: 0.7rem; color: #94A3B8; font-family: monospace; }
+                
+                .td-meta-col { display: flex; flex-direction: column; gap: 4px; }
+                .td-industry { font-size: 0.88rem; font-weight: 600; color: #475569; }
+                .td-location { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #94A3B8; }
+                
+                .td-date-badge { display: inline-flex; padding: 5px 12px; background: #EEF2FF; border: 1px solid #E0E7FF; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #4F46E5; }
+
+                .td-actions { display: flex; gap: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+                .btn-icon { width: 36px; height: 36px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+                .btn-icon.view { background: #F0F9FF; color: #0284C7; border-color: #E0F2FE; }
+                .btn-icon.view:hover { background: #E0F2FE; color: #0369A1; border-color: #BAE6FD; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15); }
+                .btn-icon.delete { background: #FEF2F2; color: #EF4444; border-color: #FEE2E2; }
+                .btn-icon.delete:hover { background: #FEE2E2; color: #DC2626; border-color: #FECACA; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); }
                 .list-empty { padding: 40px; text-align: center; color: #94A3B8; font-size: 0.88rem; }
+                
+                .table-row-animate { animation: dashFadeUp 0.4s ease both; }
+
+                .table-pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 12px 16px; background: #FAF5FF; border-radius: 14px; border: 1px solid #F3E8FF; }
+                .pag-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; background: #9333EA; border: 1px solid #7E22CE; color: white; font-size: 0.8rem; font-weight: 650; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(147, 51, 234, 0.2); }
+                .pag-btn:hover:not(:disabled) { background: #7E22CE; border-color: #6B21A8; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(147, 51, 234, 0.3); }
+                .pag-btn:disabled { background: #D8B4FE; border-color: #C084FC; color: rgba(255,255,255,0.8); cursor: not-allowed; box-shadow: none; transform: none; }
+                .pag-info { font-size: 0.82rem; font-weight: 700; color: #7E22CE; }
 
                 /* ── SIDE COL ── */
                 .admin-side-col { display: flex; flex-direction: column; gap: 24px; }
