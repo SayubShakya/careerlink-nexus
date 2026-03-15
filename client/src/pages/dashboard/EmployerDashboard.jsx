@@ -48,7 +48,6 @@ const GlassCounter = ({ value }) => {
     return <span className="glass-number">{count}</span>;
 };
 
-// --- Stat Card Component ---
 const StatCard = ({ label, value, icon, index }) => (
     <div
         className="glass-panel"
@@ -60,55 +59,54 @@ const StatCard = ({ label, value, icon, index }) => (
             animationDelay: `${index * 0.1}s`,
             position: 'relative',
             overflow: 'hidden',
-            backdropFilter: 'blur(30px)',
-            background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
-            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
-            border: '1px solid var(--theme-border-bright)'
         }}
     >
-        {/* Gloss Gradient Reflection */}
+        {/* Deep Gloss Gradient Reflection */}
         <div style={{
             position: 'absolute',
             top: '-50%',
             left: '-50%',
             width: '200%',
             height: '200%',
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at center, rgba(96, 165, 250, 0.08) 0%, transparent 70%)',
             pointerEvents: 'none',
             zIndex: 0
         }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '14px',
-                background: 'var(--theme-bg-subtle)',
-                border: '1px solid var(--theme-border)',
+                width: '52px',
+                height: '52px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.2), rgba(96, 165, 250, 0.05))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--glass-accent-light)'
+                color: 'var(--glass-accent-light)',
+                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.2)'
             }}>
                 {icon}
             </div>
-            <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-                Verified
+            <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                {label}
             </div>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 1, marginTop: '8px' }}>
             <div style={{
-                fontSize: '3rem',
-                fontWeight: '700',
-                color: 'var(--theme-text-primary)',
+                fontSize: '3.5rem',
+                fontWeight: '800',
+                color: 'var(--glass-text-primary)',
                 lineHeight: '1',
-                textShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                textShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                fontFamily: 'var(--font-display)',
+                letterSpacing: '-0.03em'
             }}>
                 <GlassCounter value={value} />
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--theme-text-secondary)', fontWeight: '600', marginTop: '8px' }}>
-                {label}
+            <div style={{ fontSize: '0.9rem', color: 'var(--glass-accent-light)', fontWeight: '600', marginTop: '12px', letterSpacing: '0.05em', opacity: 0.8 }}>
+                Total {label}
             </div>
         </div>
     </div>
@@ -135,14 +133,18 @@ const EmployerDashboard = () => {
     const isLoading = isStatsLoading || isAppsLoading;
 
     const statsConfig = [
-        { label: 'Market Reach', value: stats.totalJobs, icon: <Briefcase size={22} /> },
-        { label: 'Active Targets', value: stats.activeJobs, icon: <Target size={22} /> },
-        { label: 'Talent Inflow', value: stats.totalApplications, icon: <Users size={22} /> },
-        { label: 'Accepted Assets', value: stats.shortlisted, icon: <CheckCircle2 size={22} /> },
+        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={22} /> },
+        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={22} /> },
+        { label: 'Applications', value: stats.totalApplications, icon: <Users size={22} /> },
+        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={22} /> },
     ];
 
     return (
-        <div className="glass-main">
+        <div className="glass-main" style={{ position: 'relative' }}>
+            {/* Ambient Background Glows */}
+            <div className="glow-effect" style={{ top: '10%', left: '5%', background: '#60A5FA', width: '300px', height: '300px' }} />
+            <div className="glow-effect" style={{ top: '40%', right: '5%', background: '#3F51B5', width: '400px', height: '400px', opacity: 0.2 }} />
+
             <div className="glass-container glass-reveal">
 
                 {/* Authority Header */}
@@ -151,16 +153,16 @@ const EmployerDashboard = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                             <Layers size={18} className="text-gradient-sapphire" />
                             <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-                                Premium Command Panel
+                                Employer Dashboard
                             </span>
                         </div>
                         <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--theme-text-primary)', letterSpacing: '-0.03em', lineHeight: '0.95' }}>
                             Recruitment <br />
-                            <span className="text-gradient-sapphire">Intelligence.</span>
+                            <span className="text-gradient-sapphire">Dashboard</span>
                         </h1>
                     </div>
                     <div style={{ textAlign: 'right', animationDelay: '0.1s' }}>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>Operational Integrity</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>System Status</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)' }} />
                             <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-primary)', textTransform: 'uppercase' }}>Secure / Active</span>
@@ -182,8 +184,8 @@ const EmployerDashboard = () => {
                     <div className="glass-panel" style={{ padding: '0' }}>
                         <div style={{ padding: '32px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>Talent Matrix</h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', marginTop: '4px', fontWeight: '500' }}>Recent candidate interactions and intake.</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>Recent Applications</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', marginTop: '4px', fontWeight: '500' }}>Recent candidate applications.</p>
                             </div>
                             <button
                                 onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)}
@@ -203,7 +205,7 @@ const EmployerDashboard = () => {
                                     transition: 'all 0.2s'
                                 }}
                             >
-                                Hub Overview <ArrowUpRight size={16} />
+                                View All <ArrowUpRight size={16} />
                             </button>
                         </div>
 
@@ -211,25 +213,25 @@ const EmployerDashboard = () => {
                             <table className="glass-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                 <thead>
                                     <tr>
-                                        <th>Professional Identity</th>
-                                        <th>Target Sector</th>
-                                        <th>Timeline</th>
+                                        <th>Candidate Name</th>
+                                        <th>Job Title</th>
+                                        <th>Date Applied</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {isLoading ? (
-                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>Scanning records...</td></tr>
+                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>Loading applications...</td></tr>
                                     ) : recentApplications.length > 0 ? (
                                         recentApplications.map((app) => (
                                             <tr key={app.id} className="glass-row" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3F51B5, #1A237E)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>
-                                                            {(app.name?.[0] || 'U').toUpperCase()}
+                                                            {(app.JobSeeker?.fullname?.[0] || app.JobSeeker?.firstName?.[0] || app.name?.[0] || 'U').toUpperCase()}
                                                         </div>
                                                         <div style={{ fontWeight: '700', color: 'var(--theme-text-primary)' }}>
-                                                            {app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Record#742'}
+                                                            {app.JobSeeker?.fullname || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || app.name || 'Unknown Candidate'}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -239,7 +241,7 @@ const EmployerDashboard = () => {
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>No recent activity detected.</td></tr>
+                                        <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>No recent applications found.</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -251,12 +253,12 @@ const EmployerDashboard = () => {
                         <div className="glass-panel" style={{ padding: '32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                                 <ShieldCheck size={20} className="text-gradient-sapphire" />
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'white' }}>Operations</h3>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'white' }}>Quick Actions</h3>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <OperationButton label="Deploy Job Post" icon={<PlusCircle size={20} />} primary onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
-                                <OperationButton label="Candidate Hub" icon={<Users size={20} />} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)} />
-                                <OperationButton label="Listing Audit" icon={<Briefcase size={20} />} onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                                <OperationButton label="Post a Job" icon={<PlusCircle size={20} />} primary onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                                <OperationButton label="View Applications" icon={<Users size={20} />} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)} />
+                                <OperationButton label="Manage Jobs" icon={<Briefcase size={20} />} onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
                             </div>
                         </div>
 
@@ -264,10 +266,10 @@ const EmployerDashboard = () => {
                         <div className="glass-panel" style={{ padding: '28px', background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08), transparent)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                                 <TrendingUp size={18} className="text-gradient-sapphire" />
-                                <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>Operational Pulse</h4>
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>Hiring Overview</h4>
                             </div>
                             <p style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', lineHeight: '1.6', fontWeight: '500' }}>
-                                Your hiring velocity is <strong>12% higher</strong> than the quarterly baseline. Shortlisting candidates within 48 hours is recommended for optimal retention.
+                                You have <strong>{stats.activeJobs} active job{stats.activeJobs !== 1 ? 's' : ''}</strong> with <strong>{stats.totalApplications} total application{stats.totalApplications !== 1 ? 's' : ''}</strong>. {stats.shortlisted > 0 ? `${stats.shortlisted} candidate${stats.shortlisted !== 1 ? 's have' : ' has'} been shortlisted.` : 'Review incoming applications to build your shortlist.'}
                             </p>
                         </div>
                     </div>
@@ -315,9 +317,12 @@ const OperationButton = ({ label, icon, primary, onClick }) => (
 const StatusPill = ({ status }) => {
     const getStyles = () => {
         switch (status) {
-            case 'Shortlisted': return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: 'rgba(16, 185, 129, 0.2)' };
+            case 'Shortlisted': return { bg: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: 'rgba(59, 130, 246, 0.2)' };
+            case 'Accepted': return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: 'rgba(16, 185, 129, 0.2)' };
             case 'Rejected': return { bg: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: 'rgba(239, 68, 68, 0.2)' };
-            default: return { bg: 'rgba(96, 165, 250, 0.1)', color: '#60A5FA', border: 'rgba(96, 165, 250, 0.2)' };
+            case 'Reviewed': return { bg: 'rgba(168, 85, 247, 0.1)', color: '#A855F7', border: 'rgba(168, 85, 247, 0.2)' };
+            case 'Interview': return { bg: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: 'rgba(245, 158, 11, 0.2)' };
+            default: return { bg: 'rgba(96, 165, 250, 0.1)', color: '#60A5FA', border: 'rgba(96, 165, 250, 0.2)' }; // Pending
         }
     };
     const s = getStyles();

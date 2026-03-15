@@ -41,6 +41,9 @@ export const useCreateJob = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["jobs"] });
+            // Also refresh employer-specific job list
+            queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "stats"] });
         }
     });
 };
@@ -57,7 +60,10 @@ export const useUpdateJob = () => {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["jobs"] });
-            queryClient.invalidateQueries({ queryKey: ["jobs", data.id] });
+            if (data?.id) queryClient.invalidateQueries({ queryKey: ["jobs", data.id] });
+            // Also refresh employer-specific job list
+            queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "stats"] });
         }
     });
 };
@@ -73,6 +79,9 @@ export const useDeleteJob = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["jobs"] });
+            // Also refresh employer-specific job list
+            queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "stats"] });
         }
     });
 };

@@ -39,8 +39,14 @@ export const useUpdateApplicationStatus = () => {
             const response = await api.put(`${API_ENDPOINTS.EMPLOYER.APPLICATIONS}/${id}/status`, { status });
             return response.data.data.application;
         },
-        onSuccess: () => {
+        onSuccess: (data, variables) => {
+            toast.success(`Application status updated to ${variables.status}`);
             queryClient.invalidateQueries({ queryKey: ["employer", "applications"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "stats"] });
+        },
+        onError: (error) => {
+            const errorMessage = error?.response?.data?.message || "Failed to update application status";
+            toast.error(errorMessage);
         }
     });
 };

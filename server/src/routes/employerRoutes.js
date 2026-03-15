@@ -68,8 +68,14 @@ router.get('/me/stats', employerController.getStats);
 router.get('/me/feed', employerController.getActivityFeed);
 router.get('/my-jobs', employerController.getMyJobs);
 
+// Company Profile Management (dedicated routes for company profile page)
+router.get('/profile', employerController.getProfile);
+router.put('/profile', upload.single('logo'), employerController.updateProfile);
+
 // Application Management
 router.get('/applications', applicationController.getAllApplications);
 router.patch('/applications/:id/status', applicationController.updateApplicationStatus);
+// Also support PUT for frontend compatibility
+router.put('/applications/:id/status', applicationController.updateApplicationStatus);
 
 module.exports = router;

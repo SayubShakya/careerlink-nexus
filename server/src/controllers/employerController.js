@@ -26,8 +26,60 @@ exports.getMe = catchAsync(async (req, res, next) => {
 const JobListing = require('../models/JobListing');
 const Application = require('../models/Application');
 
+// Get company profile for the Company Profile page
+exports.getProfile = catchAsync(async (req, res, next) => {
+    const employer = await Employer.findByPk(req.user.id, {
+        attributes: { exclude: ['password_hash'] }
+    });
+
+    if (!employer) {
+        return next(new AppError('Employer not found', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            company: employer
+        }
+    });
+});
+
+// Update company profile
+exports.updateProfile = catchAsync(async (req, res, next) => {
+    if (req.body.password || req.body.passwordConfirm) {
+        return next(new AppError('This route is not for password updates.', 400));
+    }
+
+    const allowedFields = ['companyName', 'industry', 'companyWebsite', 'contact_person', 'description', 'location'];
+    const filteredBody = {};
+    Object.keys(req.body).forEach(el => {
+        if (allowedFields.includes(el)) {
+            filteredBody[el] = req.body[el] === '' && el === 'companyWebsite' ? null : req.body[el];
+        }
+    });
+
+    // Support both 'logo' and 'profile_picture' field names from frontend
+    if (req.file) filteredBody.profile_picture = req.file.path.replace(/\\/g, '/');
+
+    await Employer.update(filteredBody, {
+        where: { id: req.user.id }
+    });
+
+    const updatedUser = await Employer.findByPk(req.user.id, {
+        attributes: { exclude: ['password_hash'] }
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            company: updatedUser
+        }
+    });
+});
+
 // Get Stats for Employer Dashboard
 exports.getStats = catchAsync(async (req, res, next) => {
+    const totalJobs = await JobListing.count({ where: { employer_id: req.user.id } });
     const activeJobs = await JobListing.count({ where: { employer_id: req.user.id, is_active: true } });
     const totalApplications = await Application.count({
         include: [{
@@ -36,10 +88,8 @@ exports.getStats = catchAsync(async (req, res, next) => {
         }]
     });
 
-    // Simple logic for "New Cards" (e.g. applications in last 7 days)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const newCards = await Application.count({
-        where: { applied_at: { [Op.gte]: sevenDaysAgo } },
+    const shortlisted = await Application.count({
+        where: { status: 'shortlisted' },
         include: [{
             model: JobListing,
             where: { employer_id: req.user.id }
@@ -50,9 +100,10 @@ exports.getStats = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
             stats: {
+                totalJobs,
                 activeJobs,
                 totalApplications,
-                newCards
+                shortlisted
             }
         }
     });
@@ -88,7 +139,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     const allowedFields = ['companyName', 'industry', 'companyWebsite', 'contact_person', 'description', 'location'];
     const filteredBody = {};
     Object.keys(req.body).forEach(el => {
-        if (allowedFields.includes(el)) filteredBody[el] = req.body[el];
+        if (allowedFields.includes(el)) {
+            filteredBody[el] = req.body[el] === '' && el === 'companyWebsite' ? null : req.body[el];
+        }
     });
 
     if (req.file) filteredBody.profile_picture = req.file.path.replace(/\\/g, '/');

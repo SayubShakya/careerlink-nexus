@@ -32,9 +32,9 @@ const History = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Filter for processed candidates (non-Pending)
+    // Filter for processed candidates (non-Pending, i.e. not 'applied')
     const historyData = useMemo(() => {
-        return serverApps.filter(app => app.status !== 'Pending');
+        return serverApps.filter(app => app.status !== 'Pending' && app.status !== 'applied');
     }, [serverApps]);
 
     // Calculate Summary Stats
@@ -282,22 +282,26 @@ const History = () => {
     };
 
     return (
-        <div className="glass-main">
+        <div className="glass-main" style={{ position: 'relative' }}>
+            {/* Ambient Background Glows */}
+            <div className="glow-effect" style={{ top: '5%', left: '-5%', background: '#60A5FA', width: '300px', height: '300px', opacity: 0.15 }} />
+            <div className="glow-effect" style={{ top: '65%', right: '-5%', background: '#818CF8', width: '400px', height: '400px', opacity: 0.1 }} />
+
             <div style={styles.container}>
                 <div className="glass-reveal">
                     {/* Operational Hero Section */}
                     <div style={styles.headerHero}>
                         <h1 style={styles.title}>Hiring <span className="text-gradient-sapphire">History.</span></h1>
                         <p style={styles.subtitle}>
-                            Track and review processed candidate applications with industrial precision.
-                            Your organization's complete recruitment legacy in one command center.
+                            Track and review past candidate applications.
+                            Your organization's complete hiring history.
                         </p>
                     </div>
 
                     {/* Summary Intelligence Stats */}
                     <div style={styles.statsGrid}>
                         {[
-                            { label: 'Total Processed', value: stats.total, icon: Users, color: 'var(--glass-accent-light)' },
+                            { label: 'Total Applications', value: stats.total, icon: Users, color: 'var(--glass-accent-light)' },
                             { label: 'Accepted', value: stats.accepted, icon: CheckCircle, color: '#10B981' },
                             { label: 'Shortlisted', value: stats.shortlisted, icon: Clock, color: '#3B82F6' },
                             { label: 'Rejected', value: stats.rejected, icon: XCircle, color: '#EF4444' }
@@ -344,7 +348,7 @@ const History = () => {
                             <SearchIcon size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                             <input
                                 type="text"
-                                placeholder="Search hiring protocols…"
+                                placeholder="Search applications…"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={styles.searchInput}
@@ -358,17 +362,17 @@ const History = () => {
                         {isLoading ? (
                             <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                 <RefreshCw size={48} className="animate-spin" opacity={0.3} style={{ margin: '0 auto 20px' }} />
-                                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>Synchronizing History Matrix…</p>
+                                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>Loading History…</p>
                             </div>
                         ) : filteredData.length > 0 ? (
                             <table style={styles.table}>
                                 <thead>
                                     <tr>
-                                        <th style={styles.th}>Candidate Intelligence</th>
-                                        <th style={styles.th}>Job Allocation</th>
-                                        <th style={styles.th}>Status Protocol</th>
-                                        <th style={styles.th}>Processed Date</th>
-                                        <th style={styles.th}>Control</th>
+                                        <th style={styles.th}>Candidate</th>
+                                        <th style={styles.th}>Job Title</th>
+                                        <th style={styles.th}>Status</th>
+                                        <th style={styles.th}>Date Processed</th>
+                                        <th style={styles.th}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -380,7 +384,7 @@ const History = () => {
                                             </td>
                                             <td style={styles.td}>
                                                 <div style={{ color: 'var(--glass-accent-light)', fontWeight: '700' }}>{item.JobListing?.title}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--glass-text-muted)' }}>ID: {item.id.slice(0, 8)}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--glass-text-muted)' }}>ID: {typeof item.id === 'string' ? item.id.slice(0, 8) : item.id}</div>
                                             </td>
                                             <td style={styles.td}>
                                                 <span style={styles.badge(item.status)}>
@@ -409,8 +413,8 @@ const History = () => {
                         ) : (
                             <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                 <Clock size={60} opacity={0.1} style={{ margin: '0 auto 24px' }} />
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '8px' }}>Void History</h3>
-                                <p style={{ maxWidth: '300px', margin: '0 auto' }}>No hiring protocols match your current parameters. Attempt a system reset.</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '8px' }}>No History Found</h3>
+                                <p style={{ maxWidth: '300px', margin: '0 auto' }}>No applications match your search. Try changing the filters.</p>
                             </div>
                         )}
                     </div>
@@ -506,7 +510,7 @@ const History = () => {
                                     <Briefcase size={22} />
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Application Protocol</div>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Application For</div>
                                     <div style={{ fontSize: '1rem', fontWeight: '700', color: 'white' }}>{selectedCandidate.JobListing?.title}</div>
                                 </div>
                             </div>
@@ -526,16 +530,17 @@ const History = () => {
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><TrendingUp size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.experience || 'N/A'}</div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{(selectedCandidate.CV?.content?.experience && selectedCandidate.CV.content.experience.length > 0) ? selectedCandidate.CV.content.experience[0].title : 'Experience Not Listed'}</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><BookOpen size={14} /></div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{(selectedCandidate.CV?.content?.education && selectedCandidate.CV.content.education.length > 0) ? `${selectedCandidate.CV.content.education[0].degree} at ${selectedCandidate.CV.content.education[0].school}` : 'Education Not Listed'}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '40px', display: 'flex', gap: '16px' }}>
-                            <button style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'var(--glass-accent)', color: 'white', border: '1px solid var(--glass-border-bright)', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} className="btn-scale">
-                                <ExternalLink size={18} /> FULL PROFILE
-                            </button>
-                            <button onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid var(--glass-border)', fontWeight: '800', cursor: 'pointer' }}>
+                        <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
+                            <button onClick={() => setIsModalOpen(false)} style={{ padding: '16px 48px', borderRadius: '12px', background: 'var(--glass-accent)', color: 'white', border: '1px solid var(--glass-border-bright)', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} className="btn-scale">
                                 CLOSE
                             </button>
                         </div>

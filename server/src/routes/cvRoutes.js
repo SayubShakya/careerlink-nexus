@@ -113,18 +113,20 @@ router.use((req, res, next) => {
     next();
 });
 router.use(authMiddleware.protect);
-// Restrict to job seekers only
-router.use(authMiddleware.restrictTo('job_seeker'));
 
-router.get('/', cvController.getAllCVs);
-router.post('/', cvController.createPlatformCV);
+// Allow employers and admins to download CVs, but restrict other operations to job_seekers
+const seekerOnly = authMiddleware.restrictTo('job_seeker');
+const allUsers = authMiddleware.restrictTo('job_seeker', 'employer', 'admin');
 
-router.post('/upload', upload.single('file'), cvController.uploadCV);
+router.get('/', seekerOnly, cvController.getAllCVs);
+router.post('/', seekerOnly, cvController.createPlatformCV);
 
-router.get('/:id', cvController.getCV);
-router.delete('/:id', cvController.deleteCV);
-router.patch('/:id', cvController.updateCV);
+router.post('/upload', seekerOnly, upload.single('file'), cvController.uploadCV);
 
-router.get('/:id/download', cvController.downloadCV);
+router.get('/:id', seekerOnly, cvController.getCV);
+router.delete('/:id', seekerOnly, cvController.deleteCV);
+router.patch('/:id', seekerOnly, cvController.updateCV);
+
+router.get('/:id/download', allUsers, cvController.downloadCV);
 
 module.exports = router;

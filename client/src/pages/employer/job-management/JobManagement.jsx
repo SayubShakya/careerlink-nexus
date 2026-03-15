@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
 import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
 import {
@@ -34,6 +35,7 @@ import {
 
 // Design System
 import '@/styles/ProfessionalGlass.css';
+import { ROUTES } from '../../../routes/routes';
 
 // --- Custom Modal Component (Redesigned for Glass Authority) ---
 const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
@@ -133,7 +135,7 @@ const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
                             onClose();
                         }}
                     >
-                        {type === 'confirm' ? 'CONFIRM DEPLOY' : 'ACKNOWLEDGE'}
+                        {type === 'confirm' ? 'CONFIRM' : 'OK'}
                     </button>
                 </div>
             </div>
@@ -144,6 +146,7 @@ const CustomModal = ({ isOpen, onClose, title, message, type, onConfirm }) => {
 
 
 const JobManagement = () => {
+    const navigate = useNavigate();
     // API Hooks
     const { data: serverJobs = [], isLoading: jobsLoading } = useGetEmployerJobs();
     const { mutate: createJob, isLoading: isCreating } = useCreateJob();
@@ -192,8 +195,9 @@ const JobManagement = () => {
     // --- Helper Functions ---
     const filteredJobs = serverJobs.filter(job => {
         const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                             job.location.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'All' || (job.status || 'Active') === statusFilter;
+            job.location.toLowerCase().includes(searchQuery.toLowerCase());
+        const jobStatus = job.is_active === false ? 'Closed' : 'Active';
+        const matchesStatus = statusFilter === 'All' || jobStatus === statusFilter;
         return matchesSearch && matchesStatus;
     });
     const showModal = (title, message, type = 'success', onConfirm = null) => {
@@ -308,11 +312,7 @@ const JobManagement = () => {
     };
 
     const viewApplications = (job) => {
-        showModal(
-            'Job Applications',
-            `Redirecting to applications for ${job.title}. Total applicants: ${job.applicants || 0}`,
-            'success'
-        );
+        navigate(ROUTES.EMPLOYER_APPLICATIONS);
     };
 
     const styles = {
@@ -452,7 +452,7 @@ const JobManagement = () => {
             marginRight: '10px'
         }),
         badge: (status) => {
-            const isActive = (status || 'Active') === 'Active';
+            const isActive = status === 'Active' || status === true;
             return {
                 padding: '6px 14px',
                 borderRadius: '20px',
@@ -486,6 +486,10 @@ const JobManagement = () => {
 
     return (
         <div className="glass-main" style={{ position: 'relative' }}>
+            {/* Ambient Background Glows */}
+            <div className="glow-effect" style={{ top: '15%', left: '-5%', background: '#60A5FA', width: '300px', height: '300px', opacity: 0.15 }} />
+            <div className="glow-effect" style={{ top: '55%', right: '-5%', background: '#3F51B5', width: '400px', height: '400px', opacity: 0.1 }} />
+
             <div className="glass-container glass-reveal">
                 {/* Authority Header (Operational Hero) */}
                 <header style={{
@@ -513,7 +517,7 @@ const JobManagement = () => {
                                 letterSpacing: '0.25em',
                                 fontFamily: 'var(--font-display)'
                             }}>
-                                Recruitment Intelligence
+                                Job Management
                             </span>
                         </div>
                         <h1 style={{
@@ -525,7 +529,7 @@ const JobManagement = () => {
                             fontFamily: 'var(--font-display)'
                         }}>
                             Job <br />
-                            <span className="text-gradient-sapphire">Authority.</span>
+                            <span className="text-gradient-sapphire">Dashboard</span>
                         </h1>
                     </div>
 
@@ -548,7 +552,7 @@ const JobManagement = () => {
                             letterSpacing: '0.1em',
                             marginBottom: '4px'
                         }}>
-                            Global Inventory
+                            Total Jobs
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'flex-end' }}>
                             <div style={{
@@ -559,14 +563,14 @@ const JobManagement = () => {
                                 boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)',
                                 animation: 'pulse 2s infinite'
                             }} />
-                             <span style={{
+                            <span style={{
                                 fontSize: '1.25rem',
                                 fontWeight: '900',
                                 color: 'var(--theme-text-primary)',
                                 fontFamily: 'var(--font-display)',
                                 textShadow: '0 4px 8px rgba(0,0,0,0.1)'
                             }}>
-                                {serverJobs.length} <span style={{ fontSize: '0.85rem', color: 'var(--glass-text-muted)', fontWeight: '600' }}>Active Nodes</span>
+                                {serverJobs.length} <span style={{ fontSize: '0.85rem', color: 'var(--glass-text-muted)', fontWeight: '600' }}>Active Jobs</span>
                             </span>
                         </div>
                         {/* Gloss Reflection */}
@@ -615,10 +619,10 @@ const JobManagement = () => {
                                 fontFamily: 'var(--font-display)',
                                 marginBottom: '4px'
                             }}>
-                                {isEditing ? `Reconfiguring: ${formData.title}` : 'Initialize Recruitment Protocol'}
+                                {isEditing ? `Editing: ${formData.title}` : 'Post a New Job'}
                             </h3>
                             <p style={{ fontSize: '0.9rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>
-                                {isEditing ? 'Adjusting operational parameters and technical requirements.' : 'Deploy high-performance roles to the global network.'}
+                                {isEditing ? 'Update the job details below.' : 'Fill out the form below to post a new job.'}
                             </p>
                         </div>
                     </div>
@@ -657,13 +661,13 @@ const JobManagement = () => {
                                     <Info size={16} />
                                 </div>
                                 <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)', letterSpacing: '0.02em' }}>
-                                    Complete all protocol fields marked with asterisk (*)
+                                    Complete all fields marked with an asterisk (*)
                                 </span>
                             </div>
 
                             <div style={styles.grid}>
                                 <div className="form-group">
-                                    <label style={styles.label}>Position Title *</label>
+                                    <label style={styles.label}>Job Title *</label>
                                     <input
                                         style={{ ...styles.input, borderColor: errors.title ? '#ef4444' : 'var(--glass-border)' }}
                                         name="title"
@@ -675,7 +679,7 @@ const JobManagement = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label style={styles.label}>Deployment Location *</label>
+                                    <label style={styles.label}>Location *</label>
                                     <div style={{ position: 'relative' }}>
                                         <MapPin size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                         <input
@@ -706,7 +710,7 @@ const JobManagement = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label style={styles.label}>Classification</label>
+                                    <label style={styles.label}>Job Type</label>
                                     <div style={{ position: 'relative' }}>
                                         <Layers size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)', pointerEvents: 'none' }} />
                                         <select
@@ -725,7 +729,7 @@ const JobManagement = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label style={styles.label}>Operation Deadline *</label>
+                                    <label style={styles.label}>Application Deadline *</label>
                                     <div style={{ position: 'relative' }}>
                                         <Calendar size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                         <input
@@ -741,7 +745,7 @@ const JobManagement = () => {
                             </div>
 
                             <div style={{ marginBottom: '32px' }}>
-                                <label style={styles.label}>Scope Description *</label>
+                                <label style={styles.label}>Job Description *</label>
                                 <textarea
                                     style={{ ...styles.textarea, borderColor: errors.description ? '#ef4444' : 'var(--glass-border)' }}
                                     name="description"
@@ -753,7 +757,7 @@ const JobManagement = () => {
 
                             <div style={styles.grid}>
                                 <div className="form-group">
-                                    <label style={styles.label}>Core Responsibilities</label>
+                                    <label style={styles.label}>Responsibilities</label>
                                     <textarea
                                         style={{ ...styles.textarea, minHeight: '120px' }}
                                         name="responsibilities"
@@ -763,7 +767,7 @@ const JobManagement = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label style={styles.label}>Technical Requirements</label>
+                                    <label style={styles.label}>Qualifications</label>
                                     <textarea
                                         style={{ ...styles.textarea, minHeight: '120px' }}
                                         name="qualifications"
@@ -776,7 +780,7 @@ const JobManagement = () => {
 
                             {/* Skills Tag Input (Industrial Style) */}
                             <div style={{ marginBottom: '40px' }}>
-                                <label style={styles.label}>Required Skill Matrix (Enter to Add)</label>
+                                <label style={styles.label}>Skills (Press Enter to Add)</label>
                                 <div style={{ position: 'relative' }}>
                                     <Zap size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                     <input
@@ -807,7 +811,7 @@ const JobManagement = () => {
                             <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
                                 <button type="submit" style={styles.submitBtn} className="btn-scale">
                                     {isEditing ? <ShieldCheck size={20} /> : <Zap size={20} />}
-                                    {isEditing ? 'COMMIT CHANGES' : 'DEPLOY POSITION'}
+                                    {isEditing ? 'SAVE CHANGES' : 'POST JOB'}
                                 </button>
                                 <button
                                     type="button"
@@ -815,7 +819,7 @@ const JobManagement = () => {
                                     style={styles.cancelBtn}
                                     className="btn-scale"
                                 >
-                                    ABORT PROTOCOL
+                                    CANCEL
                                 </button>
                             </div>
                         </form>
@@ -828,10 +832,10 @@ const JobManagement = () => {
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                 <LayoutGrid size={16} className="text-gradient-sapphire" />
-                                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)' }}>Job Matrix</h2>
+                                <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)' }}>All Jobs</h2>
                             </div>
                             <p style={{ fontSize: '0.9rem', color: 'var(--glass-text-muted)', fontWeight: '500' }}>
-                                Managing <span style={{ color: 'white', fontWeight: '700' }}>{filteredJobs.length}</span> operational nodes {searchQuery || statusFilter !== 'All' ? '(filtered)' : ''}
+                                Managing <span style={{ color: 'white', fontWeight: '700' }}>{filteredJobs.length}</span> jobs {searchQuery || statusFilter !== 'All' ? '(filtered)' : ''}
                             </p>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
@@ -839,7 +843,7 @@ const JobManagement = () => {
                                 <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                 <input
                                     type="text"
-                                    placeholder="Search nodes..."
+                                    placeholder="Search jobs..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     style={{
@@ -883,11 +887,11 @@ const JobManagement = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }} className="glass-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '40%' }}>Node Information</th>
-                                    <th>Deployment Date</th>
-                                    <th>Link Status</th>
-                                    <th>Engagement</th>
-                                    <th style={{ textAlign: 'center' }}>Directives</th>
+                                    <th style={{ width: '40%' }}>Job Information</th>
+                                    <th>Date Posted</th>
+                                    <th>Status</th>
+                                    <th>Applicants</th>
+                                    <th style={{ textAlign: 'center' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -897,7 +901,7 @@ const JobManagement = () => {
                                             <div className="spin-slow" style={{ color: 'var(--glass-accent)', marginBottom: '16px' }}>
                                                 <Layers size={32} />
                                             </div>
-                                            <p style={{ color: 'var(--glass-text-muted)', fontWeight: '600' }}>Synchronizing with database…</p>
+                                            <p style={{ color: 'var(--glass-text-muted)', fontWeight: '600' }}>Loading jobs…</p>
                                         </td>
                                     </tr>
                                 ) : filteredJobs.length > 0 ? (
@@ -928,13 +932,13 @@ const JobManagement = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--glass-text-secondary)', fontWeight: '600', fontSize: '0.85rem' }}>
-                                                    <Clock size={14} style={{ opacity: 0.6 }} /> {job.postedDate || (job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Active Proto')}
+                                                    <Clock size={14} style={{ opacity: 0.6 }} /> {job.postedDate || (job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Active Proto')}
                                                 </div>
                                             </td>
                                             <td>
-                                                <span style={styles.badge(job.status || 'Active')}>
+                                                <span style={styles.badge(job.is_active === false ? 'Closed' : 'Active')}>
                                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', boxShadow: '0 0 8px currentColor' }} />
-                                                    {job.status || 'Active'}
+                                                    {job.is_active === false ? 'Closed' : 'Active'}
                                                 </span>
                                             </td>
                                             <td>
@@ -960,7 +964,7 @@ const JobManagement = () => {
                                                     <button
                                                         style={styles.actionBtn('edit')}
                                                         className="btn-scale"
-                                                        title="Modify Parameters"
+                                                        title="Edit Job"
                                                         onClick={() => editJob(job)}
                                                     >
                                                         <Settings size={18} />
@@ -968,7 +972,7 @@ const JobManagement = () => {
                                                     <button
                                                         style={styles.actionBtn('applicants')}
                                                         className="btn-scale"
-                                                        title="Scan Applicants"
+                                                        title="View Applicants"
                                                         onClick={() => viewApplications(job)}
                                                     >
                                                         <ArrowUpRight size={18} />
@@ -976,7 +980,7 @@ const JobManagement = () => {
                                                     <button
                                                         style={styles.actionBtn('delete')}
                                                         className="btn-scale"
-                                                        title="Purge Record"
+                                                        title="Delete Job"
                                                         onClick={() => deleteJob(job.id)}
                                                     >
                                                         <Trash2 size={18} />
@@ -1003,28 +1007,28 @@ const JobManagement = () => {
                                                     <Search size={48} color="var(--glass-text-muted)" opacity={0.3} />
                                                 </div>
                                                 <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', fontFamily: 'var(--font-display)', marginBottom: '12px' }}>
-                                                    {searchQuery || statusFilter !== 'All' ? 'No Matching Nodes' : 'Inventory Empty'}
+                                                    {searchQuery || statusFilter !== 'All' ? 'No Matching Jobs' : 'No Jobs Found'}
                                                 </h3>
                                                 <p style={{ maxWidth: '400px', margin: '0 auto 32px', color: 'var(--glass-text-muted)', lineHeight: '1.6', fontWeight: '500' }}>
-                                                    {searchQuery || statusFilter !== 'All' 
-                                                        ? 'Adjust your search parameters or classification filters to scan the sector again.'
-                                                        : 'No operational nodes identified in the current sector. Initialize a new recruitment protocol to begin.'}
+                                                    {searchQuery || statusFilter !== 'All'
+                                                        ? 'Try modifying your search or filters.'
+                                                        : 'You haven\'t posted any jobs yet. Create a new job to get started.'}
                                                 </p>
                                                 {searchQuery || statusFilter !== 'All' ? (
-                                                     <button
+                                                    <button
                                                         onClick={() => { setSearchQuery(''); setStatusFilter('All'); }}
                                                         style={styles.submitBtn}
                                                         className="btn-scale"
-                                                     >
+                                                    >
                                                         <X size={20} /> CLEAR FILTERS
-                                                     </button>
+                                                    </button>
                                                 ) : (
                                                     <button
                                                         onClick={() => setIsFormExpanded(true)}
                                                         style={styles.submitBtn}
                                                         className="btn-scale"
                                                     >
-                                                        <Plus size={20} /> INITIALIZE PROTOCOL
+                                                        <Plus size={20} /> POST A JOB
                                                     </button>
                                                 )}
                                             </div>

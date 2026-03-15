@@ -28,6 +28,9 @@ import {
     Target
 } from 'lucide-react';
 
+import api from '@/api/client';
+import { API_ENDPOINTS } from '@/api/endpoints';
+
 // Design System
 import '@/styles/ProfessionalGlass.css';
 
@@ -106,7 +109,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                             fontFamily: 'var(--font-display)'
                         }}
                     >
-                        CANCEL PROTOCOL
+                        CANCEL
                     </button>
                     <button
                         onClick={() => { onConfirm(); onClose(); }}
@@ -123,7 +126,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                             boxShadow: `0 8px 20px -4px ${type === 'warning' ? 'rgba(63, 81, 181, 0.4)' : 'rgba(220, 38, 38, 0.4)'}`
                         }}
                     >
-                        CONFIRM ACTION
+                        CONFIRM
                     </button>
                 </div>
             </div>
@@ -217,7 +220,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
 
                 <div style={styles.header}>
                     <div className="glass-avatar-tile" style={{ width: '120px', height: '120px', borderRadius: '32px', fontSize: '3.5rem' }}>
-                        {candidate.name.charAt(0)}
+                        {(candidate.name || '?').charAt(0)}
                     </div>
                     <div>
                         <h2 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--theme-text-primary)', marginBottom: '12px', letterSpacing: '-0.03em', fontFamily: 'var(--font-display)' }}>
@@ -251,32 +254,34 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                     </div>
 
                     <div style={styles.section}>
-                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Candidate Intelligence Summary</h3>
+                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>About Candidate</h3>
                         <p style={{ color: 'var(--glass-text-secondary)', lineHeight: '1.8', fontSize: '1.1rem', fontWeight: '500', margin: 0 }}>
                             {candidate.about || "No profile summary provided in the data matrix."}
                         </p>
                     </div>
 
                     <div style={styles.section}>
-                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Technical Skill Matrix</h3>
+                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Skills</h3>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                            {candidate.skills.map((skill, i) => (
+                            {(candidate.skills || []).length > 0 ? (candidate.skills || []).map((skill, i) => (
                                 <span key={i} className="glass-badge-pulse" style={{ background: 'rgba(96, 165, 250, 0.1)', color: '#93C5FD', border: '1px solid rgba(96, 165, 250, 0.2)' }}>
                                     <Target size={14} /> {skill}
                                 </span>
-                            ))}
+                            )) : (
+                                <span style={{ color: 'var(--glass-text-muted)', fontStyle: 'italic' }}>No skills listed</span>
+                            )}
                         </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
                         <div style={styles.section}>
-                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Education Path</h3>
+                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Education</h3>
                             <div style={{ color: 'white', fontWeight: '600' }}>{candidate.education}</div>
                         </div>
                         <div style={styles.section}>
-                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Operational Cover</h3>
+                            <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Cover Letter</h3>
                             <div style={{ color: 'var(--glass-text-secondary)', fontSize: '0.95rem', fontStyle: 'italic' }}>
-                                "{candidate.coverLetter.substring(0, 150)}..."
+                                "{(candidate.coverLetter || 'No cover letter provided.').substring(0, 150)}{(candidate.coverLetter || '').length > 150 ? '...' : ''}"
                             </div>
                         </div>
                     </div>
@@ -291,7 +296,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                                 style={{ padding: '14px 32px', background: 'var(--glass-accent)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onShortlist(candidate.id); onClose(); }}
                             >
-                                <ShieldCheck size={20} /> SHORTLIST CANDIDATE
+                                <ShieldCheck size={20} /> SHORTLIST
                             </button>
                         )}
                         {candidate.status !== 'Rejected' && (
@@ -300,7 +305,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                                 style={{ padding: '14px 32px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onReject(candidate.id); onClose(); }}
                             >
-                                <XCircle size={20} /> REJECT APPLICATION
+                                <XCircle size={20} /> REJECT
                             </button>
                         )}
                     </div>
@@ -308,7 +313,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                         onClick={onClose}
                         style={{ background: 'transparent', border: 'none', color: 'var(--glass-text-secondary)', fontWeight: '700', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.85rem' }}
                     >
-                        CLOSE INTELLIGENCE MODAL
+                        CLOSE
                     </button>
                 </div>
             </div>
@@ -320,6 +325,22 @@ const Applications = () => {
     // API Hooks
     const { data: serverApps = [], isLoading } = useGetEmployerApplications();
     const { mutate: updateAppStatus } = useUpdateApplicationStatus();
+    
+    const handleViewCV = async (cvId) => {
+        if (!cvId) {
+            alert('No CV data found for this candidate.');
+            return;
+        }
+        try {
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch (err) {
+            console.error('View failed:', err);
+            alert('Failed to view CV. Please try again.');
+        }
+    };
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
@@ -551,7 +572,11 @@ const Applications = () => {
     };
 
     return (
-        <div className="glass-main">
+        <div className="glass-main" style={{ position: 'relative' }}>
+            {/* Ambient Background Glows */}
+            <div className="glow-effect" style={{ top: '5%', left: '-5%', background: '#818CF8', width: '400px', height: '400px', opacity: 0.15 }} />
+            <div className="glow-effect" style={{ top: '60%', right: '0%', background: '#3B82F6', width: '500px', height: '500px', opacity: 0.1 }} />
+
             <div style={styles.container}>
                 {/* Modals */}
                 <CandidateModal
@@ -570,12 +595,12 @@ const Applications = () => {
                 <header style={styles.headerBanner} className="glass-reveal">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
                         <div>
-                            <span style={styles.bannerOverline}>Recruitment Operations</span>
+                            <span style={styles.bannerOverline}>Applications</span>
                             <h1 style={styles.bannerTitle}>
-                                Applications <span className="text-gradient-sapphire">Intelligence.</span>
+                                Manage <span className="text-gradient-sapphire">Applications.</span>
                             </h1>
                             <p style={styles.bannerSubtitle}>
-                                Track, evaluate, and manage candidate pipelines in real time with high-density precision.
+                                Track, evaluate, and manage candidates in real time.
                             </p>
                         </div>
 
@@ -591,7 +616,7 @@ const Applications = () => {
                                 border: '1px solid var(--theme-border-bright)'
                             }}>
                                 <div style={{ position: 'relative', zIndex: 1 }}>
-                                    <div style={styles.statLabel}>Global Inventory</div>
+                                    <div style={styles.statLabel}>Total Applications</div>
                                     <div style={styles.statValue}>{serverApps.length}</div>
                                 </div>
                                 {/* Gloss Reflection */}
@@ -611,7 +636,7 @@ const Applications = () => {
                                 border: '1px solid var(--theme-border-bright)'
                             }}>
                                 <div style={{ position: 'relative', zIndex: 1 }}>
-                                    <div style={styles.statLabel}>Active Pipeline</div>
+                                    <div style={styles.statLabel}>Shortlisted</div>
                                     <div style={styles.statValue}>{serverApps.filter(a => a.status === 'Shortlisted').length}</div>
                                 </div>
                                 {/* Gloss Reflection */}
@@ -638,7 +663,7 @@ const Applications = () => {
                         <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                         <input
                             style={styles.searchInput}
-                            placeholder="SEARCH CANDIDATE PROTOCOL..."
+                            placeholder="SEARCH CANDIDATES..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -654,6 +679,7 @@ const Applications = () => {
                                 <option style={{ background: '#0F1217' }}>All Status</option>
                                 <option style={{ background: '#0F1217' }}>Pending</option>
                                 <option style={{ background: '#0F1217' }}>Shortlisted</option>
+                                <option style={{ background: '#0F1217' }}>Accepted</option>
                                 <option style={{ background: '#0F1217' }}>Rejected</option>
                             </select>
                         </div>
@@ -666,11 +692,11 @@ const Applications = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr>
-                                    <th style={styles.th}>Candidate Profile</th>
-                                    <th style={styles.th}>Position Matrix</th>
-                                    <th style={styles.th}>CV Access</th>
-                                    <th style={styles.th}>Initiation Date</th>
-                                    <th style={styles.th}>Current Protocol</th>
+                                    <th style={styles.th}>Candidate</th>
+                                    <th style={styles.th}>Job Title</th>
+                                    <th style={styles.th}>Resume</th>
+                                    <th style={styles.th}>Date Applied</th>
+                                    <th style={styles.th}>Status</th>
                                     <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
                                 </tr>
                             </thead>
@@ -680,13 +706,13 @@ const Applications = () => {
                                         <td colSpan="6" style={{ padding: '60px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                                                 <RefreshCw size={24} className="spin-slow text-gradient-sapphire" />
-                                                <span style={{ fontWeight: '700', letterSpacing: '0.1em' }}>LOADING DATA POINTS...</span>
+                                                <span style={{ fontWeight: '700', letterSpacing: '0.1em' }}>LOADING APPLICATIONS...</span>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : filteredApps.length > 0 ? (
                                     filteredApps.map((app, index) => {
-                                        const candidateName = app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Node';
+                                        const candidateName = app.JobSeeker?.fullname || app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Candidate';
                                         const candidateEmail = app.email || app.JobSeeker?.email || 'N/A';
                                         const jobTitle = app.jobTitle || app.JobListing?.title || 'Unknown Position';
 
@@ -722,9 +748,8 @@ const Applications = () => {
                                                         className="btn-scale"
                                                         style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-primary)', padding: '8px 16px', borderRadius: '10px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', letterSpacing: '0.05em' }}
                                                         onClick={() => {
-                                                            const cvUrl = app.CV?.file_url || app.CV?.platform_data_url;
-                                                            if (cvUrl) window.open(cvUrl, '_blank');
-                                                            else alert('CV data mismatch error.');
+                                                            const cvId = app.cv_id || app.CV?.id;
+                                                            handleViewCV(cvId);
                                                         }}
                                                     >
                                                         <FileText size={14} className="text-gradient-sapphire" /> VIEW CV
@@ -749,8 +774,8 @@ const Applications = () => {
                                                                     email: candidateEmail,
                                                                     jobTitle: jobTitle,
                                                                     appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
-                                                                    skills: app.JobSeeker?.skills || app.skills || [],
-                                                                    education: app.JobSeeker?.education || app.education || 'N/A',
+                                                                    skills: (app.CV?.content?.skills && Array.isArray(app.CV.content.skills)) ? app.CV.content.skills.map(s => s.name || s) : [],
+                                                                    education: (app.CV?.content?.education && Array.isArray(app.CV.content.education)) ? app.CV.content.education.map(e => `${e.degree || ''} at ${e.school || ''}`).join(', ') : 'N/A',
                                                                     about: app.JobSeeker?.summary || app.about || '',
                                                                     phone: app.JobSeeker?.phone || app.phone || '',
                                                                     location: app.JobSeeker?.location || app.location || '',
@@ -777,10 +802,26 @@ const Applications = () => {
                                                             <button
                                                                 className="btn-scale"
                                                                 style={styles.actionBtn('danger')}
-                                                                title="Terminate"
+                                                                title="Reject Application"
                                                                 onClick={() => triggerAction(app.id, 'Rejected')}
                                                             >
                                                                 <XCircle size={18} />
+                                                            </button>
+                                                        )}
+
+                                                        {app.status !== 'Accepted' && app.status !== 'Rejected' && (
+                                                            <button
+                                                                className="btn-scale"
+                                                                style={{
+                                                                    ...styles.actionBtn('success'),
+                                                                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                                                                    color: '#10B981',
+                                                                    border: '1px solid rgba(16, 185, 129, 0.3)'
+                                                                }}
+                                                                title="Accept & Hire"
+                                                                onClick={() => updateStatus(app.id, 'Accepted')}
+                                                            >
+                                                                <CheckCircle2 size={18} />
                                                             </button>
                                                         )}
 
@@ -788,7 +829,7 @@ const Applications = () => {
                                                             <button
                                                                 className="btn-scale"
                                                                 style={styles.actionBtn('details')}
-                                                                title="Reset Protocol"
+                                                                title="Reset Status"
                                                                 onClick={() => updateStatus(app.id, 'Pending')}
                                                             >
                                                                 <RefreshCw size={18} />
@@ -806,9 +847,9 @@ const Applications = () => {
                                                 <div className="glass-panel" style={{ width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
                                                     <Inbox size={60} color="var(--theme-text-muted)" />
                                                 </div>
-                                                <h3 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--theme-text-primary)', marginBottom: '16px', letterSpacing: '-0.02em' }}>No Data Nodes Found</h3>
+                                                <h3 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--theme-text-primary)', marginBottom: '16px', letterSpacing: '-0.02em' }}>No Applications Found</h3>
                                                 <p style={{ maxWidth: '400px', color: 'var(--theme-text-secondary)', lineHeight: '1.7', fontSize: '1.05rem' }}>
-                                                    The recruitment matrix is currently empty for the selected filters. Refine your query parameters.
+                                                    No applications found with the selected filters.
                                                 </p>
                                                 <button
                                                     onClick={() => { setSearchQuery(''); setJobFilter('All Jobs'); setStatusFilter('All Status'); }}

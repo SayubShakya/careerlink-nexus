@@ -85,16 +85,23 @@ exports.deleteCV = catchAsync(async (req, res, next) => {
 
 // Download/View CV (Supports both uploaded and platform-generated)
 exports.downloadCV = catchAsync(async (req, res, next) => {
+    let whereClause = { id: req.params.id };
+    
+    // Only restrict by user_id if the user is a job seeker
+    if (req.role === 'job_seeker') {
+        whereClause.user_id = req.user.id;
+    }
+
     const cv = await CV.findOne({
-        where: { id: req.params.id, user_id: req.user.id }
+        where: whereClause
     });
 
     if (!cv) {
-        return next(new AppError('No CV found with that ID', 404));
+        return next(new AppError('No CV found with that ID or unauthorized', 404));
     }
 
     if (cv.type === 'platform') {
-        const user = await JobSeeker.findByPk(req.user.id);
+        const user = await JobSeeker.findByPk(cv.user_id);
         const pdfBuffer = await pdfGenerator.generateCV(cv, user);
 
         console.log(`DEBUG: Generating PDF for CV ID: ${cv.id}, Title: ${cv.title}`);
