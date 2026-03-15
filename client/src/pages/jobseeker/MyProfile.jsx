@@ -17,7 +17,6 @@ import {
     EyeOff,
     Moon,
     Sun,
-    Bell,
     Globe,
     Monitor,
     Camera,
@@ -42,7 +41,6 @@ const MyProfile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [emailNotifications, setEmailNotifications] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [language, setLanguage] = useState('en');
 
@@ -538,37 +536,6 @@ const MyProfile = () => {
                                     >
                                         <Moon size={16} /> Dark
                                     </button>
-                                </div>
-                            </div>
-
-                            <div className="pref-card">
-                                <div>
-                                    <div style={{ fontWeight: 850, color: 'var(--text-main)', marginBottom: '4px' }}>Notification Alerts</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Get email alerts for new job matches.</div>
-                                </div>
-                                <div
-                                    onClick={() => setEmailNotifications(!emailNotifications)}
-                                    style={{
-                                        width: '44px',
-                                        height: '24px',
-                                        background: emailNotifications ? '#3E61FF' : '#CBD5E1',
-                                        borderRadius: '100px',
-                                        position: 'relative',
-                                        cursor: 'pointer',
-                                        transition: 'background-color 0.3s ease'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        background: 'white',
-                                        borderRadius: '50%',
-                                        position: 'absolute',
-                                        top: '2px',
-                                        left: emailNotifications ? '22px' : '2px',
-                                        transition: 'left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }} />
                                 </div>
                             </div>
 

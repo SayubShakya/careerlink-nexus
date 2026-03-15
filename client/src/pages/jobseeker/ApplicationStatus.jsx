@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import { useGetAppliedJobs } from '@/hooks/api/jobs/useJobs';
 import {
     Clock,
@@ -20,6 +21,8 @@ const ApplicationStatus = () => {
     const { data: appliedJobs = [], isLoading } = useGetAppliedJobs();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 9;
 
     const filteredJobs = appliedJobs.filter(job => {
         const matchesSearch = job.JobListing?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,6 +30,13 @@ const ApplicationStatus = () => {
         const matchesStatus = statusFilter === 'All' || job.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
+
+    const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
+    const paginatedJobs = filteredJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -136,7 +146,7 @@ const ApplicationStatus = () => {
                     <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} size={20} />
                     <input
                         style={styles.input}
-                        placeholder="Search by job or company..."
+                        placeholder="Search by job"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -159,8 +169,9 @@ const ApplicationStatus = () => {
                     <Loader2 className="animate-spin" size={48} color="#3E61FF" />
                 </div>
             ) : filteredJobs.length > 0 ? (
+                <>
                 <div style={styles.jobGrid}>
-                    {filteredJobs.map((app, index) => {
+                    {paginatedJobs.map((app, index) => {
                         const job = app.JobListing || {};
                         const employer = job.Employer || {};
                         const statusInfo = getStatusColor(app.status);
@@ -223,6 +234,16 @@ const ApplicationStatus = () => {
                         );
                     })}
                 </div>
+                <div style={{ marginTop: '32px' }}>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={filteredJobs.length}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                    />
+                </div>
+                </>
             ) : (
                 <div style={{ textAlign: 'center', padding: '100px 40px', background: '#F8FAFC', borderRadius: '24px', border: '2px dashed #E2E8F0' }}>
                     <div style={{ width: '80px', height: '80px', backgroundColor: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>

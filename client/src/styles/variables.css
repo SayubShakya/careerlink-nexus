@@ -63,50 +63,58 @@
     /* Transition */
     --theme-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* --- Theme Tokens - Light Mode (Space Gray Aesthetic) --- */
-    --theme-bg: #F1F5F9;
-    --theme-bg-subtle: #E2E8F0;
-    --theme-bg-gradient: radial-gradient(at 0% 0%, hsla(210, 40%, 96%, 1) 0px, transparent 50%),
-                         radial-gradient(at 100% 100%, hsla(210, 40%, 92%, 1) 0px, transparent 50%);
-    --theme-card: rgba(255, 255, 255, 0.7);
-    --theme-card-hover: rgba(255, 255, 255, 0.9);
-    --theme-border: rgba(0, 0, 0, 0.08);
-    --theme-border-bright: rgba(0, 0, 0, 0.15);
-    --theme-text-primary: #1E293B;
+    /* --- Theme Tokens - Light Mode (Premium Quartz) --- */
+    --theme-bg: #F8FAFC;
+    --theme-bg-subtle: #F1F5F9;
+    --theme-bg-gradient: radial-gradient(at 0% 0%, hsla(210, 40%, 98%, 1) 0px, transparent 50%),
+                         radial-gradient(at 100% 100%, hsla(210, 40%, 96%, 1) 0px, transparent 50%);
+    --theme-card: #FFFFFF;
+    --theme-card-hover: #FFFFFF;
+    --theme-border: rgba(15, 23, 42, 0.08);
+    --theme-border-bright: rgba(15, 23, 42, 0.15);
+    --theme-text-primary: #0F172A;
     --theme-text-secondary: #475569;
     --theme-text-muted: #94A3B8;
     --theme-sidebar: #FFFFFF;
-    --theme-sidebar-accent: rgba(62, 97, 255, 0.08);
-    --theme-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
-    --theme-glass-blur: 12px;
+    --theme-sidebar-accent: rgba(62, 97, 255, 0.05);
+    --theme-shadow: 0 10px 40px -12px rgba(15, 23, 42, 0.06);
+    --theme-glass-blur: 10px;
+
+    /* Base mappings for convenience */
+    --bg-dashboard: var(--theme-bg);
+    --card-dashboard: var(--theme-card);
+    --border-dashboard: var(--theme-border);
+    --text-main: var(--theme-text-primary);
+    --text-muted: var(--theme-text-secondary);
 }
 
-/* --- Theme Tokens - Dark Mode (Deep Blue / Midnight) --- */
+/* --- Theme Tokens - Dark Mode (Midnight Luxe) --- */
 .dark-theme {
-    --theme-bg: #050A1A;
-    --theme-bg-subtle: #0A1125;
-    --theme-bg-gradient: radial-gradient(at 0% 0%, hsla(243, 75%, 20%, 0.15) 0px, transparent 50%),
-                         radial-gradient(at 100% 100%, hsla(217, 91%, 20%, 0.1) 0px, transparent 50%);
-    --theme-card: rgba(255, 255, 255, 0.03);
-    --theme-card-hover: rgba(255, 255, 255, 0.06);
-    --theme-border: rgba(255, 255, 255, 0.08);
-    --theme-border-bright: rgba(255, 255, 255, 0.15);
-    --theme-text-primary: #F8FAFC;
+    --theme-bg: #020617;
+    --theme-bg-subtle: #0B1120;
+    --theme-bg-gradient: radial-gradient(at 0% 0%, hsla(243, 75%, 20%, 0.2) 0px, transparent 50%),
+                         radial-gradient(at 100% 100%, hsla(217, 91%, 20%, 0.15) 0px, transparent 50%);
+    --theme-card: #0B1120; /* Solid card for better readability in dark */
+    --theme-card-hover: #151C2C;
+    --theme-border: rgba(255, 255, 255, 0.06);
+    --theme-border-bright: rgba(255, 255, 255, 0.12);
+    --theme-text-primary: #F1F5F9;
     --theme-text-secondary: #94A3B8;
     --theme-text-muted: #64748B;
-    --theme-sidebar: #050A1A;
-    --theme-sidebar-accent: rgba(255, 255, 255, 0.04);
-    --theme-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+    --theme-sidebar: #020617;
+    --theme-sidebar-accent: rgba(255, 255, 255, 0.03);
+    --theme-shadow: 0 15px 50px -12px rgba(0, 0, 0, 0.6);
     --theme-glass-blur: 16px;
 
-    /* Map back to existing variables for compatibility */
+    /* Map back to core variables for consistency */
     --bg-main: var(--theme-bg);
     --bg-subtle: var(--theme-bg-subtle);
     --bg-dashboard: var(--theme-bg);
     --card-dashboard: var(--theme-card);
     --border-dashboard: var(--theme-border);
-    --bg-glass: var(--theme-card);
+    --bg-glass: rgba(11, 17, 32, 0.8);
     --text-main: var(--theme-text-primary);
     --text-muted: var(--theme-text-secondary);
     --text-light: var(--theme-text-muted);
-}
+}
+

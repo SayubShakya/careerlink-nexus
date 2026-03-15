@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     Briefcase,
     Users,
@@ -8,13 +8,10 @@ import {
     Menu,
     X,
     LayoutDashboard,
-    MessageSquare,
     BarChart3,
-    Settings,
-    ChevronLeft,
-    ChevronRight,
     Sun,
-    Moon
+    Moon,
+    ShieldCheck
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
@@ -24,6 +21,7 @@ import logoImg from '@assets/images/CareerLink-Logo.png';
 
 const EmployerSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { data: me } = useGetMe();
     const { theme, toggleTheme } = useTheme();
     const user = me?.user || JSON.parse(localStorage.getItem('user') || '{}');
@@ -36,27 +34,27 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
         {
             label: 'Dashboard',
             path: ROUTES.EMPLOYER_DASHBOARD,
-            icon: <LayoutDashboard size={20} strokeWidth={2} />
+            icon: <LayoutDashboard size={20} />
         },
         {
-            label: 'Job Management',
+            label: 'Manage Jobs',
             path: ROUTES.JOB_MANAGEMENT,
-            icon: <Briefcase size={20} strokeWidth={2} />
+            icon: <Briefcase size={20} />
         },
         {
-            label: 'Applications',
+            label: 'Candidate List',
             path: ROUTES.EMPLOYER_APPLICATIONS,
-            icon: <Users size={20} strokeWidth={2} />
+            icon: <Users size={20} />
         },
         {
-            label: 'Company Profile',
+            label: 'My Company',
             path: ROUTES.EMPLOYER_COMPANY_PROFILE,
-            icon: <BarChart3 size={20} strokeWidth={2} />
+            icon: <BarChart3 size={20} />
         },
         {
             label: 'History',
             path: ROUTES.EMPLOYER_HISTORY,
-            icon: <History size={20} strokeWidth={2} />
+            icon: <History size={20} />
         }
     ];
 
@@ -72,8 +70,8 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             left: 0,
             top: 0,
             zIndex: 1001,
-            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease',
-            boxShadow: '10px 0 30px rgba(0,0,0,0.15)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            backdropFilter: 'blur(20px)',
             borderRight: '1px solid var(--theme-border)',
             overflow: 'hidden',
         },
@@ -86,129 +84,117 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             transition: 'padding 0.4s'
         },
         toggleBtn: {
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'white',
-            cursor: 'pointer',
-            padding: '10px',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            position: isOpen ? 'absolute' : 'relative',
-            right: isOpen ? '20px' : 'auto',
-            top: isOpen ? '32px' : 'auto',
+            display: 'none', // Managed by mobile drawer if needed, or hidden for cleaner desktop look
         },
-        logoContainer: {
+        logoSection: {
+            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: isOpen ? 'flex-start' : 'center',
-            transition: 'all 0.4s',
-            opacity: 1,
-            width: '100%'
+            padding: isOpen ? '0 12px' : '0',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         },
-        logo: {
-            fontSize: isOpen ? '1.5rem' : '1.1rem',
-            fontWeight: '900',
-            color: 'var(--color-brand-accent)',
+        logoWrapper: {
+            width: isOpen ? '100%' : '64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isOpen ? 'flex-start' : 'center',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            marginBottom: '8px',
+            padding: isOpen ? '0 12px' : '0',
+            gap: '8px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            background: 'none',
+            border: 'none',
+            boxShadow: 'none'
+        },
+        logoImg: {
+            width: isOpen ? '44px' : '32px',
+            height: isOpen ? '44px' : '32px',
+            objectFit: 'contain',
+            filter: theme === THEME_MODES.DARK ? 'brightness(1.1) drop-shadow(0 0 12px rgba(62, 97, 255, 0.4))' : 'none',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        },
+        brandName: {
+            display: isOpen ? 'block' : 'none',
+            fontSize: '1.55rem',
+            fontWeight: '950',
             letterSpacing: '-0.04em',
+            fontFamily: 'var(--font-display)',
+            color: 'var(--theme-text-primary)',
             whiteSpace: 'nowrap',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            marginBottom: '4px'
+            lineHeight: '1',
+            paddingTop: '2px'
         },
-        orgName: {
-            fontSize: '0.75rem',
-            color: 'rgba(255,255,255,0.5)',
-            fontWeight: '500',
+        identityContainer: {
+            display: isOpen ? 'flex' : 'none',
+            flexDirection: 'column',
+            gap: '0',
+            paddingLeft: '52px', // Perfectly aligned with 'CareerLink'
+            marginBottom: '32px'
+        },
+        identityName: {
+            fontSize: '0.85rem',
+            fontWeight: '700',
+            color: 'var(--theme-text-muted)',
+            margin: 0,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            display: isOpen ? 'block' : 'none',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '200px',
-            animation: isOpen ? 'fadeIn 0.4s forwards' : 'none'
+            opacity: 0.8
         },
         nav: {
             flexGrow: 1,
-            padding: '0 16px',
+            padding: '24px 16px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px'
+            gap: '8px'
         },
-        navLink: {
+        navItem: (isActive) => ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: isOpen ? 'flex-start' : 'center',
             gap: '16px',
             padding: '14px 18px',
-            borderRadius: '14px',
-            color: 'var(--theme-text-secondary)',
+            borderRadius: '16px',
+            color: isActive ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
             textDecoration: 'none',
-            fontWeight: '600',
+            fontWeight: '700',
             fontSize: '0.925rem',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            position: 'relative',
-            whiteSpace: 'nowrap'
-        },
-        activeLink: {
-            backgroundColor: 'var(--theme-sidebar-accent)',
-            color: 'var(--color-brand-accent)',
-            boxShadow: 'inset 0 0 0 1px rgba(62, 97, 255, 0.1)'
-        },
-        label: {
-            opacity: isOpen ? 1 : 0,
-            transform: isOpen ? 'none' : 'translateX(-10px)',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            display: isOpen ? 'inline-block' : 'none'
-        },
+            backgroundColor: isActive ? 'var(--theme-bg-subtle)' : 'transparent',
+            border: '1px solid',
+            borderColor: isActive ? 'var(--theme-border-bright)' : 'transparent',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            position: 'relative'
+        }),
+        iconBox: (isActive) => ({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            color: isActive ? 'var(--glass-accent-light)' : 'inherit',
+            transition: 'all 0.2s'
+        }),
         footer: {
-            padding: '16px',
+            padding: '24px 16px',
             borderTop: '1px solid var(--theme-border)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '12px'
         },
-        themeToggle: {
+        themeBtn: {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 18px',
-            borderRadius: '14px',
+            padding: '14px 18px',
+            borderRadius: '16px',
             backgroundColor: 'var(--theme-bg-subtle)',
             border: '1px solid var(--theme-border)',
             cursor: 'pointer',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.2s ease',
             color: 'var(--theme-text-primary)'
-        },
-        themeToggleInner: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            fontSize: '0.85rem',
-            fontWeight: '700',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-        },
-        switchTrack: {
-            width: '40px',
-            height: '22px',
-            borderRadius: '20px',
-            backgroundColor: theme === THEME_MODES.DARK ? 'var(--color-brand-accent)' : '#CBD5E1',
-            padding: '2px',
-            position: 'relative',
-            transition: 'all 0.3s ease'
-        },
-        switchThumb: {
-            width: '18px',
-            height: '18px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            position: 'absolute',
-            left: theme === THEME_MODES.DARK ? '20px' : '2px',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         },
         logoutBtn: {
             width: '100%',
@@ -217,172 +203,170 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             justifyContent: isOpen ? 'flex-start' : 'center',
             gap: '16px',
             padding: '14px 18px',
-            borderRadius: '14px',
+            borderRadius: '16px',
             color: '#EF4444',
-            backgroundColor: theme === THEME_MODES.LIGHT ? 'rgba(239, 68, 68, 0.05)' : 'rgba(244, 63, 94, 0.05)',
-            border: 'none',
+            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+            border: '1px solid rgba(239, 68, 68, 0.1)',
             cursor: 'pointer',
             fontSize: '0.925rem',
-            fontWeight: '600',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            fontWeight: '800',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         }
     };
 
     return (
-        <aside style={styles.sidebar} className="sidebar-container">
+        <aside style={styles.sidebar} className="sidebar-glass">
             <div style={styles.header}>
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    style={styles.toggleBtn}
-                    className="sidebar-toggle-btn"
-                    aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-                >
-                    {isOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
-
-                <div style={styles.logoContainer}>
-                    <div style={{ width: isOpen ? '200px' : '56px', height: isOpen ? '56px' : '56px', background: '#fff', borderRadius: '14px', overflow: 'hidden', transition: 'all 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src={logoImg} alt="CareerLink" style={{ width: '180%', height: '180%', objectFit: 'contain' }} />
+                <div style={styles.logoSection} className="sidebar-id-hub">
+                    <div 
+                        style={styles.logoWrapper} 
+                        className="logo-gem-container btn-scale"
+                        onClick={() => navigate(ROUTES.EMPLOYER_DASHBOARD)}
+                    >
+                        <img src={logoImg} alt="CareerLink" style={styles.logoImg} />
+                        <span style={styles.brandName}>Career<span style={{ color: '#3E61FF' }}>Link</span></span>
                     </div>
-                    <span style={styles.orgName}>
-                        {user?.organization_name || 'Employer Portal'}
-                    </span>
+                    <div style={styles.identityContainer}>
+                        <h3 style={styles.identityName}>{user?.companyName}</h3>
+                    </div>
                 </div>
             </div>
 
             <nav style={styles.nav}>
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        end={item.path === ROUTES.EMPLOYER_DASHBOARD}
-                        style={({ isActive }) => ({
-                            ...styles.navLink,
-                            ...(isActive ? styles.activeLink : {})
-                        })}
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                        title={!isOpen ? item.label : ''}
-                    >
-                        <span className="icon-wrapper" style={{ display: 'flex' }}>
-                            {item.icon}
-                        </span>
-                        <span style={styles.label}>{item.label}</span>
-                        {!isOpen && <div className="link-tooltip">{item.label}</div>}
-                    </NavLink>
-                ))}
+                {navItems.map((item) => {
+                    const isActive = location.pathname === item.path || (item.path === ROUTES.EMPLOYER_DASHBOARD && location.pathname === '/dashboard/employer');
+                    return (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            style={styles.navItem(isActive)}
+                            className={({ isActive }) => `sidebar-link-glass ${isActive ? 'active' : ''}`}
+                        >
+                            <div style={styles.iconBox(isActive)} className="glass-icon-wrapper">
+                                {item.icon}
+                            </div>
+                            {isOpen && <span style={{ transition: 'opacity 0.2s' }}>{item.label}</span>}
+                            {!isOpen && <div className="glass-tooltip">{item.label}</div>}
+                        </NavLink>
+                    );
+                })}
             </nav>
 
             <div style={styles.footer}>
                 <button
                     onClick={() => toggleTheme(theme === THEME_MODES.LIGHT ? THEME_MODES.DARK : THEME_MODES.LIGHT)}
-                    style={styles.themeToggle}
-                    className="theme-toggle-switch"
-                    title={theme === THEME_MODES.LIGHT ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                    style={styles.themeBtn}
+                    className="glass-theme-btn"
                 >
-                    <div style={styles.themeToggleInner}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {theme === THEME_MODES.LIGHT ? <Sun size={18} /> : <Moon size={18} />}
-                        <span style={styles.label}>{theme === THEME_MODES.LIGHT ? 'Light Mode' : 'Dark Mode'}</span>
+                        {isOpen && <span style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{theme === THEME_MODES.LIGHT ? 'Light Mode' : 'Dark Mode'}</span>}
                     </div>
                     {isOpen && (
-                        <div style={styles.switchTrack}>
-                            <div style={styles.switchThumb}></div>
+                        <div style={{ width: '36px', height: '20px', borderRadius: '20px', background: theme === THEME_MODES.DARK ? 'var(--glass-accent-light)' : '#E2E8F0', padding: '2px', position: 'relative' }}>
+                            <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'white', position: 'absolute', right: theme === THEME_MODES.DARK ? '2px' : 'auto', left: theme === THEME_MODES.LIGHT ? '2px' : 'auto', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} />
                         </div>
                     )}
-                    {!isOpen && <div className="link-tooltip">{theme === THEME_MODES.LIGHT ? 'Switch to Dark' : 'Switch to Light'}</div>}
                 </button>
 
                 <button
                     onClick={handleLogout}
                     style={styles.logoutBtn}
-                    className="sidebar-logout-btn"
-                    title={!isOpen ? "Logout" : ""}
+                    className="glass-logout-btn"
                 >
-                    <span className="icon-wrapper" style={{ display: 'flex' }}>
-                        <LogOut size={20} strokeWidth={2.5} />
-                    </span>
-                    <span style={styles.label}>Logout</span>
-                    {!isOpen && <div className="link-tooltip">Logout</div>}
+                    <LogOut size={18} strokeWidth={2.5} />
+                    {isOpen && <span>Logout</span>}
+                    {!isOpen && <div className="glass-tooltip">Logout</div>}
                 </button>
             </div>
 
             <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(5px); }
-                    to { opacity: 1; transform: translateY(0); }
+                .sidebar-glass {
+                    box-shadow: 20px 0 60px rgba(0,0,0,0.1);
                 }
-                
-                .sidebar-toggle-btn:hover {
-                    background-color: rgba(255,255,255,0.12) !important;
-                    transform: scale(1.05);
+
+                .sidebar-id-hub {
+                    cursor: pointer;
+                    transition: all 0.3s ease;
                 }
-                
-                .sidebar-link:hover {
-                    background-color: rgba(255,255,255,0.04);
-                    color: white;
+
+                .sidebar-id-hub:hover .logo-gem-container {
+                    background: rgba(62, 97, 255, 0.08);
+                    border-color: rgba(62, 97, 255, 0.2);
+                    transform: translateY(-2px);
+                }
+
+                .sidebar-link-glass:hover {
+                    background: var(--theme-sidebar-accent);
+                    color: var(--theme-text-primary);
                     transform: translateX(4px);
                 }
 
-                .sidebar-link.active:hover {
-                    background-color: rgba(62, 97, 255, 0.15);
-                    color: var(--color-brand-accent);
-                    transform: none;
-                }
-
-                .sidebar-link.active::before {
+                .sidebar-link-glass.active::before {
                     content: '';
                     position: absolute;
-                    left: 0;
-                    top: 25%;
-                    height: 50%;
+                    left: -16px;
+                    top: 20%;
+                    height: 60%;
                     width: 4px;
-                    background: var(--color-brand-accent);
+                    background: var(--glass-accent-light);
                     border-radius: 0 4px 4px 0;
-                    box-shadow: 2px 0 10px rgba(62, 97, 255, 0.5);
+                    box-shadow: 0 0 15px var(--glass-accent-light);
                 }
 
-                .sidebar-logout-btn:hover {
-                    background-color: rgba(244, 63, 94, 0.15) !important;
-                    color: #FB7185;
+                .glass-icon-wrapper {
+                    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+
+                .sidebar-link-glass:hover .glass-icon-wrapper {
+                    transform: scale(1.1) rotate(-5deg);
+                }
+
+                .glass-theme-btn:hover {
+                    background: var(--theme-sidebar-accent);
+                    border-color: var(--theme-border-bright);
+                }
+
+                .glass-logout-btn:hover {
+                    background: rgba(239, 68, 68, 0.1) !important;
                     transform: scale(1.02);
                 }
 
-                .link-tooltip {
+                .glass-tooltip {
                     position: absolute;
                     left: 100%;
                     margin-left: 20px;
-                    padding: 8px 12px;
-                    background: #1e293b;
+                    padding: 8px 14px;
+                    background: rgba(15, 23, 42, 0.9);
+                    backdrop-filter: blur(8px);
                     color: white;
-                    border-radius: 8px;
-                    font-size: 0.8rem;
-                    font-weight: 500;
+                    border-radius: 12px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
                     white-space: nowrap;
                     opacity: 0;
                     visibility: hidden;
                     transition: all 0.2s;
-                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+                    border: 1px solid rgba(255,255,255,0.1);
                     z-index: 1002;
                 }
 
-                .sidebar-link:hover .link-tooltip,
-                .sidebar-logout-btn:hover .link-tooltip {
+                .sidebar-link-glass:hover .glass-tooltip,
+                .glass-logout-btn:hover .glass-tooltip {
                     opacity: 1;
                     visibility: visible;
-                    margin-left: 12px;
+                    transform: translateX(-8px);
                 }
 
-                .icon-wrapper {
-                    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                }
-
-                .sidebar-link:hover .icon-wrapper {
-                    transform: scale(1.15);
+                @keyframes reveal {
+                    from { opacity: 0; transform: translateY(5px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
 
                 @media (max-width: 1023px) {
-                    .sidebar-container {
-                        width: ${isOpen ? '280px' : '0px'} !important;
-                        box-shadow: ${isOpen ? '20px 0 50px rgba(0,0,0,0.3)' : 'none'};
+                    .sidebar-glass {
+                        width: ${isOpen ? '280px' : '0'} !important;
+                        border-right: ${isOpen ? '1px solid var(--theme-border)' : 'none'};
                     }
                 }
             `}</style>

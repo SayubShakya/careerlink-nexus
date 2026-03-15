@@ -25,9 +25,6 @@ export const ThemeProvider = ({ children }) => {
         if (savedTheme) return savedTheme;
 
         // Default based on role if no saved preference
-        if (user?.role === 'employer') {
-            return THEME_MODES.DARK;
-        }
         return THEME_MODES.LIGHT;
     });
 
@@ -37,12 +34,7 @@ export const ThemeProvider = ({ children }) => {
         if (savedTheme && savedTheme !== theme) {
             setTheme(savedTheme);
         } else if (!savedTheme) {
-            // Default based on role for new/unset users
-            if (user?.role === 'employer') {
-                setTheme(THEME_MODES.DARK);
-            } else {
-                setTheme(THEME_MODES.LIGHT);
-            }
+            setTheme(THEME_MODES.LIGHT);
         }
     }, [themeKey, user?.role]);
 

@@ -3,6 +3,44 @@ import '@/styles/ProfessionalGlass.css';
 import { Camera, MapPin, Globe, Building2, Save, AlertCircle, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { useGetCompanyProfile, useUpdateCompanyProfile } from '@/hooks/api/employer/useEmployer';
 
+// --- Mini Sky Scene (Shared from Dashboard) ---
+const PageHeroSky = ({ timeOfDay }) => (
+    <div className="dash-sky-scene">
+        {timeOfDay === 'night' && (
+            <>
+                {[...Array(20)].map((_, i) => (
+                    <div key={i} className="dash-star" style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                        width: `${2 + Math.random() * 2}px`,
+                        height: `${2 + Math.random() * 2}px`,
+                    }} />
+                ))}
+                <div className="dash-moon">
+                    <div className="dash-moon-crater" style={{ width: 8, height: 8, top: 8, left: 12 }} />
+                </div>
+            </>
+        )}
+        {timeOfDay === 'morning' && (
+            <>
+                <div className="dash-sun dash-morning-sun">
+                    <div className="dash-sun-ray" />
+                    <div className="dash-sun-ray" style={{ transform: 'rotate(60deg)' }} />
+                </div>
+                <div className="dash-cloud dash-cloud-1" />
+            </>
+        )}
+        {(timeOfDay === 'afternoon' || timeOfDay === 'evening') && (
+            <>
+                <div className={timeOfDay === 'afternoon' ? "dash-sun dash-afternoon-sun" : "dash-sunset-orb"} />
+                <div className="dash-cloud dash-cloud-1" />
+                <div className="dash-cloud dash-cloud-2" />
+            </>
+        )}
+    </div>
+);
+
 const CompanyProfile = () => {
     const { data: serverCompany, isLoading: isProfileLoading } = useGetCompanyProfile();
     const { mutate: updateProfile, isPending: isUpdating } = useUpdateCompanyProfile();
@@ -70,11 +108,16 @@ const CompanyProfile = () => {
         e.preventDefault();
 
         if (validateForm()) {
+            let processedWebsite = formData.website.trim();
+            if (processedWebsite && !/^https?:\/\//i.test(processedWebsite)) {
+                processedWebsite = `https://${processedWebsite}`;
+            }
+
             const data = new FormData();
             data.append('companyName', formData.companyName);
             data.append('description', formData.description);
             data.append('location', formData.location);
-            data.append('companyWebsite', formData.website);
+            data.append('companyWebsite', processedWebsite);
             if (logo) {
                 data.append('logo', logo);
             }
@@ -88,16 +131,30 @@ const CompanyProfile = () => {
         }
     };
 
+    const hour = new Date().getHours();
+    const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 17 ? 'afternoon' : hour >= 17 && hour < 20 ? 'evening' : 'night';
+
     const styles = {
         pageContainer: {
-            padding: '40px 32px',
-            maxWidth: '1200px',
+            padding: '60px 32px',
+            maxWidth: '1400px',
             margin: '0 auto',
             fontFamily: 'var(--font-body)',
+            position: 'relative',
+            zIndex: 2
         },
         headerHero: {
+            padding: '48px',
             marginBottom: '40px',
             position: 'relative',
+            overflow: 'hidden',
+            minHeight: '220px',
+            borderRadius: '24px',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            zIndex: 2
         },
         overline: {
             fontSize: '0.75rem',
@@ -124,7 +181,12 @@ const CompanyProfile = () => {
             lineHeight: '1.6'
         },
         glassPanel: {
-            padding: '50px',
+            padding: '60px',
+            background: 'var(--glass-surface)',
+            backdropFilter: 'blur(var(--glass-blur))',
+            borderRadius: '28px',
+            border: '1px solid var(--glass-border)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
             position: 'relative',
             overflow: 'hidden'
         },
@@ -193,13 +255,13 @@ const CompanyProfile = () => {
             overflow: 'hidden'
         },
         saveButton: {
-            background: 'var(--theme-bg-subtle)',
-            color: 'var(--theme-text-primary)',
-            padding: '16px 36px',
-            borderRadius: '14px',
-            border: '1px solid var(--theme-border)',
-            fontSize: '0.95rem',
-            fontWeight: '800',
+            background: 'var(--glass-accent)',
+            color: 'white',
+            padding: '18px 48px',
+            borderRadius: '16px',
+            border: 'none',
+            fontSize: '1rem',
+            fontWeight: '900',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -207,7 +269,9 @@ const CompanyProfile = () => {
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             marginTop: '16px',
             letterSpacing: '0.05em',
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
+            fontFamily: 'var(--font-display)',
+            boxShadow: '0 10px 25px -5px rgba(63, 81, 181, 0.4)'
         },
         statusBadge: {
             padding: '8px 16px',
@@ -227,21 +291,83 @@ const CompanyProfile = () => {
     };
 
     return (
-        <div className="glass-main">
+        <div className="glass-main" style={{ position: 'relative' }}>
+             {/* Ambient Background Glows */}
+            <div className="glow-effect" style={{ top: '10%', left: '-5%', background: '#60A5FA', width: '300px', height: '300px', opacity: 0.15 }} />
+            <div className="glow-effect" style={{ top: '50%', right: '-5%', background: '#3F51B5', width: '400px', height: '400px', opacity: 0.1 }} />
+
             <div style={styles.pageContainer}>
                 <div className="glass-reveal">
                     {/* Operational Hero Section */}
-                    <div style={styles.headerHero}>
-                        <div style={styles.statusBadge}>
-                            <div className="pulse-dot" style={{ background: '#10B981', boxShadow: '0 0 12px #10B981' }} />
-                            PROFILE ACTIVE
+                    <div style={styles.headerHero} className={`dash-hero-${timeOfDay}`}>
+                        <PageHeroSky timeOfDay={timeOfDay} />
+                        <div style={{ position: 'relative', zIndex: 2, display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ maxWidth: '650px' }}>
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    padding: '10px 18px',
+                                    background: 'rgba(255,255,255,0.15)',
+                                    border: '1px solid rgba(255,255,255,0.25)',
+                                    borderRadius: '14px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '900',
+                                    color: 'white',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.12em',
+                                    marginBottom: '20px',
+                                    backdropFilter: 'blur(16px)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}>
+                                    <Building2 size={14} fill="white" /> Operational Identity
+                                </div>
+                                <h1 style={{
+                                    fontSize: '3.6rem',
+                                    fontWeight: '950',
+                                    color: 'white',
+                                    letterSpacing: '-0.05em',
+                                    marginBottom: '12px',
+                                    lineHeight: '1',
+                                    textShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                                }}>
+                                    My Company.
+                                </h1>
+                                <p style={{
+                                    fontSize: '1.2rem',
+                                    color: 'rgba(255,255,255,0.75)',
+                                    fontWeight: '600',
+                                    maxWidth: '500px',
+                                    marginBottom: '0',
+                                    lineHeight: '1.5'
+                                }}>
+                                    Define your company's presence in the recruitment matrix.
+                                </p>
+                            </div>
+
+                            <div className="glass-panel" style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                backdropFilter: 'blur(24px)',
+                                border: '1px solid rgba(255,255,255,0.15)',
+                                borderRadius: '28px',
+                                padding: '32px 40px',
+                                textAlign: 'center',
+                                minWidth: '200px',
+                                boxShadow: '0 15px 35px rgba(0,0,0,0.2)'
+                            }}>
+                                <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: '700',
+                                    color: 'rgba(255,255,255,0.5)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.1em'
+                                }}>Status</span>
+                                <div style={{ fontSize: '1rem', fontWeight: '950', color: 'white', letterSpacing: '0.05em', margin: '4px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                    <div className="pulse-dot" style={{ background: '#10B981', boxShadow: '0 0 12px #10B981', width: '10px', height: '10px' }} />
+                                    LIVE
+                                </div>
+                            </div>
                         </div>
-                        <span style={styles.overline}>Company Settings</span>
-                        <h1 style={styles.title}>Company <span className="text-gradient-sapphire">Profile.</span></h1>
-                        <p style={styles.subtitle}>
-                            Manage your company profile and public brand.
-                            Your profile here defines how candidates perceive your company.
-                        </p>
                     </div>
 
                     {/* Primary Glass Panel */}
@@ -249,7 +375,7 @@ const CompanyProfile = () => {
                         {isProfileLoading ? (
                             <div style={{ padding: '80px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                 <Loader2 className="animate-spin" size={40} />
-                                <p style={{ marginTop: '16px', fontWeight: '600' }}>Synchronizing profile data…</p>
+                                <p style={{ marginTop: '16px', fontWeight: '600' }}>Getting your info...</p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit}>
@@ -270,7 +396,7 @@ const CompanyProfile = () => {
                                         <div className="icon-surface" style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>
                                             <Building2 size={32} />
                                         </div>
-                                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-muted)' }}>UPLOAD LOGO</span>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-muted)' }}>ADD LOGO</span>
                                     </div>
                                                 )}
                                                 <input
@@ -292,10 +418,10 @@ const CompanyProfile = () => {
                                                 <div style={{ position: 'relative' }}>
                                                     <input
                                                         type="text"
-                                                        name="companyName"
+                                                         name="companyName"
                                                         value={formData.companyName}
                                                         onChange={handleInputChange}
-                                                        placeholder="Enter legal company name"
+                                                        placeholder="Write your company's name"
                                                         style={{
                                                             ...styles.input,
                                                             width: '100%',
@@ -315,8 +441,7 @@ const CompanyProfile = () => {
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                             <div className="glass-reveal" style={{ animationDelay: '0.3s' }}>
-                                                <div style={styles.formGroup}>
-                                                    <label style={styles.label}>HEADQUARTERS *</label>
+                                                <div style={styles.formGroup}>                                                     <label style={styles.label}>Where is your company? *</label>
                                                     <div style={{ position: 'relative' }}>
                                                         <MapPin size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                                                         <input
@@ -324,7 +449,7 @@ const CompanyProfile = () => {
                                                             name="location"
                                                             value={formData.location}
                                                             onChange={handleInputChange}
-                                                            placeholder="City, Country"
+                                                            placeholder="Example: Kathmandu, Nepal"
                                                             style={{
                                                                 ...styles.input,
                                                                 paddingLeft: '48px',
@@ -332,22 +457,22 @@ const CompanyProfile = () => {
                                                                 boxSizing: 'border-box',
                                                                 borderColor: errors.location ? '#EF4444' : 'var(--glass-border)'
                                                             }}
+
                                                             className="glass-input"
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="glass-reveal" style={{ animationDelay: '0.4s' }}>
-                                                <div style={styles.formGroup}>
-                                                    <label style={styles.label}>WEBSITE URL</label>
+                                            <div className="glass-reveal" style={{ animationDelay: '0.4s' }}>                                                 <div style={styles.formGroup}>
+                                                    <label style={styles.label}>Website Link</label>
                                                     <div style={{ position: 'relative' }}>
                                                         <Globe size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                                                         <input
-                                                            type="url"
+                                                            type="text"
                                                             name="website"
                                                             value={formData.website}
                                                             onChange={handleInputChange}
-                                                            placeholder="https://company.com"
+                                                            placeholder="example.com (e.g. honeybee.com)"
                                                             style={{
                                                                 ...styles.input,
                                                                 paddingLeft: '48px',
@@ -363,12 +488,12 @@ const CompanyProfile = () => {
 
                                         <div className="glass-reveal" style={{ animationDelay: '0.5s' }}>
                                             <div style={styles.formGroup}>
-                                                <label style={styles.label}>COMPANY DESCRIPTION *</label>
+                                                <label style={styles.label}>About the company *</label>
                                                 <textarea
                                                     name="description"
                                                     value={formData.description}
                                                     onChange={handleInputChange}
-                                                    placeholder="Share your company's mission, values, and culture…"
+                                                    placeholder="Tell us what your company does and why it's a good place to work."
                                                     style={{
                                                         ...styles.textarea,
                                                         borderColor: errors.description ? '#EF4444' : 'var(--glass-border)'
@@ -386,9 +511,9 @@ const CompanyProfile = () => {
                                                 disabled={isUpdating}
                                             >
                                                 {isUpdating ? (
-                                                    <><Loader2 className="animate-spin" size={20} /> SAVING…</>
+                                                    <><Loader2 className="animate-spin" size={20} /> WAIT...</>
                                                 ) : (
-                                                    <><Save size={20} className="text-gradient-sapphire" /> SAVE CHANGES</>
+                                                    <><Save size={20} className="text-gradient-sapphire" /> SAVE</>
                                                 )}
                                             </button>
                                         </div>
@@ -419,31 +544,30 @@ const CompanyProfile = () => {
                     fontWeight: '800'
                 }}>
                     <CheckCircle2 size={24} />
-                    <span>Profile Saved Successfully</span>
+                    <span>All saved!</span>
                 </div>
             )}
 
             <style>{`
                 .glass-input:focus {
-                    background: rgba(255, 255, 255, 0.05) !important;
+                    background: var(--theme-bg-subtle) !important;
                     border-color: var(--glass-accent-light) !important;
-                    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important;
+                    box-shadow: 0 0 0 4px var(--glass-accent-glow) !important;
+                    transform: translateY(-1px);
                 }
 
                 .glass-logo-upload:hover {
                     border-color: var(--glass-accent-light) !important;
-                    background: rgba(59, 130, 246, 0.02) !important;
+                    background: rgba(255, 255, 255, 0.05) !important;
                     transform: translateY(-4px);
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
                 }
 
-                .btn-scale { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-                .btn-scale:hover { transform: scale(1.05) translateY(-2px); border-color: var(--glass-accent-light); filter: brightness(1.1); }
-                .btn-scale:active { transform: scale(0.95); }
+                .btn-scale { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+                .btn-scale:hover { transform: scale(1.02) translateY(-2px); filter: brightness(1.1); }
+                .btn-scale:active { transform: scale(0.98); }
 
                 .pulse-dot {
-                    width: 8px;
-                    height: 8px;
                     border-radius: 50%;
                     animation: pulse 2s infinite;
                 }
@@ -463,9 +587,18 @@ const CompanyProfile = () => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid var(--glass-border);
-                    color: white;
+                    background: var(--theme-bg-subtle);
+                    border: 1px solid var(--theme-border);
+                    color: var(--theme-text-primary);
+                }
+                
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                .animate-spin {
+                    animation: spin-slow 1s linear infinite;
                 }
 
                 @media (max-width: 900px) {

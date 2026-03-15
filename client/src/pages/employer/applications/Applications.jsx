@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGetEmployerApplications, useUpdateApplicationStatus } from '@/hooks/api/employer/useEmployer';
 import {
     Search,
@@ -30,6 +30,7 @@ import {
 
 import api from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
+import Pagination from '@/components/ui/Pagination';
 
 // Design System
 import '@/styles/ProfessionalGlass.css';
@@ -240,23 +241,23 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                 <div style={styles.content}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
                         <div className="glass-panel" style={{ padding: '24px' }}>
-                            <span style={styles.label}>Email Address</span>
+                            <span style={styles.label}>Email</span>
                             <div style={styles.value}>{candidate.email}</div>
                         </div>
                         <div className="glass-panel" style={{ padding: '24px' }}>
-                            <span style={styles.label}>Phone Protocol</span>
-                            <div style={styles.value}>{candidate.phone || 'System Not Set'}</div>
+                            <span style={styles.label}>Phone Number</span>
+                            <div style={styles.value}>{candidate.phone || 'Not added'}</div>
                         </div>
                         <div className="glass-panel" style={{ padding: '24px' }}>
-                            <span style={styles.label}>Applied On</span>
+                            <span style={styles.label}>Date Applied</span>
                             <div style={styles.value}>{candidate.appliedDate}</div>
                         </div>
                     </div>
 
                     <div style={styles.section}>
-                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>About Candidate</h3>
+                        <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>About them</h3>
                         <p style={{ color: 'var(--glass-text-secondary)', lineHeight: '1.8', fontSize: '1.1rem', fontWeight: '500', margin: 0 }}>
-                            {candidate.about || "No profile summary provided in the data matrix."}
+                            {candidate.about || "This person did not write any details."}
                         </p>
                     </div>
 
@@ -292,6 +293,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                     <div style={{ display: 'flex', gap: '16px' }}>
                         {candidate.status !== 'Shortlisted' && (
                             <button
+                                title="Add to shortlist"
                                 className="btn-scale"
                                 style={{ padding: '14px 32px', background: 'var(--glass-accent)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onShortlist(candidate.id); onClose(); }}
@@ -301,6 +303,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                         )}
                         {candidate.status !== 'Rejected' && (
                             <button
+                                title="Reject this application"
                                 className="btn-scale"
                                 style={{ padding: '14px 32px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onReject(candidate.id); onClose(); }}
@@ -348,6 +351,8 @@ const Applications = () => {
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [selectedApp, setSelectedApp] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, onConfirm: null, title: '', message: '' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
 
     // Derived Data
     const uniqueJobs = ['All Jobs', ...new Set(serverApps.map(app => app.jobTitle || app.JobListing?.title))];
@@ -362,6 +367,14 @@ const Applications = () => {
         return matchesSearch && matchesJob && matchesStatus;
     });
 
+    const totalPages = Math.ceil(filteredApps.length / ITEMS_PER_PAGE);
+    const paginatedApps = filteredApps.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, jobFilter, statusFilter]);
+
     const triggerAction = (id, newStatus) => {
         const app = serverApps.find(a => a.id === id);
         const name = app.name || app.JobSeeker?.fullname || 'the candidate';
@@ -369,8 +382,8 @@ const Applications = () => {
         if (newStatus === 'Rejected') {
             setConfirmModal({
                 isOpen: true,
-                title: 'Terminate Application',
-                message: `Are you sure you want to terminate the recruitment process for ${name}? The candidate will be notified of the decision.`,
+                title: 'Reject Application?',
+                message: `Are you sure you want to reject ${name}? They will be notified of your decision.`,
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else {
@@ -406,12 +419,14 @@ const Applications = () => {
             gap: '8px'
         },
         bannerOverline: {
-            fontSize: '0.8rem',
-            fontWeight: '800',
-            color: 'var(--glass-text-muted)',
+            fontSize: '0.65rem',
+            fontWeight: '900',
+            color: '#64748B',
             textTransform: 'uppercase',
-            letterSpacing: '0.3em',
-            fontFamily: 'var(--font-display)'
+            letterSpacing: '0.2em',
+            fontFamily: 'var(--font-display)',
+            marginBottom: '8px',
+            display: 'block'
         },
         bannerTitle: {
             fontSize: '3.5rem',
@@ -425,21 +440,38 @@ const Applications = () => {
         bannerSubtitle: {
             fontSize: '1.1rem',
             color: 'var(--glass-text-secondary)',
-            fontWeight: '500',
-            maxWidth: '500px',
-            marginTop: '8px'
+            fontWeight: '600',
+            maxWidth: '550px',
+            marginTop: '12px',
+            lineHeight: '1.6'
+        },
+        refreshBtn: {
+            padding: '10px 20px',
+            borderRadius: '12px',
+            background: 'var(--glass-surface)',
+            border: '1px solid var(--glass-border-bright)',
+            color: 'var(--theme-text-primary)',
+            fontSize: '0.8rem',
+            fontWeight: '800',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         },
         filterCard: {
             backgroundColor: 'var(--glass-surface)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            padding: '12px', // Tight horizontal panel
+            backdropFilter: 'blur(12px)',
+            borderRadius: '24px',
+            padding: '16px 20px',
             border: '1px solid var(--glass-border)',
             marginBottom: '32px',
             display: 'flex',
-            gap: '20px',
+            gap: '16px',
             flexWrap: 'wrap',
             alignItems: 'center',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)'
         },
         searchWrapper: {
             position: 'relative',
@@ -448,35 +480,37 @@ const Applications = () => {
         },
         searchInput: {
             width: '100%',
-            padding: '12px 16px 12px 56px',
-            borderRadius: '12px',
+            padding: '14px 16px 14px 52px',
+            borderRadius: '16px',
             border: '1px solid var(--theme-border)',
             backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '0.9rem',
             color: 'var(--theme-text-primary)',
             outline: 'none',
-            transition: 'all 0.3s ease',
-            fontWeight: '600',
-            fontFamily: 'var(--font-body)'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            fontWeight: '700',
+            fontFamily: 'var(--font-body)',
+            letterSpacing: '0.02em'
         },
         select: {
-            padding: '12px 24px',
-            borderRadius: '12px',
-            border: '1px solid var(--glass-border)',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            padding: '14px 44px 14px 20px',
+            borderRadius: '16px',
+            border: '1px solid var(--theme-border)',
+            backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '0.9rem',
-            color: 'white',
+            color: 'var(--theme-text-primary)',
             outline: 'none',
             cursor: 'pointer',
-            minWidth: '220px',
-            transition: 'all 0.3s ease',
+            minWidth: '200px',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             fontWeight: '700',
             appearance: 'none',
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%3C3B82F6\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%3C3B82F6\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right 16px center',
             backgroundSize: '16px',
-            fontFamily: 'var(--font-body)'
+            fontFamily: 'var(--font-body)',
+            letterSpacing: '0.01em'
         },
         tableWrapper: {
             backgroundColor: 'var(--glass-surface)',
@@ -530,7 +564,7 @@ const Applications = () => {
                     boxShadow: `0 0 12px ${color}11`
                 }}>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />
-                    {status}
+                    {status === 'Shortlisted' ? 'SHORTLIST' : (status === 'Accepted' ? 'HIRED' : (status === 'Pending' ? 'PENDING' : status.toUpperCase()))}
                 </span>
             );
         },
@@ -544,8 +578,9 @@ const Applications = () => {
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            backgroundColor: type === 'details' ? 'rgba(59, 130, 246, 0.1)' : (type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
-            color: type === 'details' ? '#60A5FA' : (type === 'success' ? '#34D399' : '#F87171')
+            backgroundColor: type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            color: type === 'success' ? '#34D399' : '#F87171',
+            textDecoration: 'none'
         }),
         emptyState: {
             textAlign: 'center',
@@ -594,56 +629,65 @@ const Applications = () => {
                 {/* Recruitment Operations Hero */}
                 <header style={styles.headerBanner} className="glass-reveal">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
-                        <div>
-                            <span style={styles.bannerOverline}>Applications</span>
-                            <h1 style={styles.bannerTitle}>
-                                Manage <span className="text-gradient-sapphire">Applications.</span>
+                        <div style={{ flex: 1 }}>
+                            <span style={styles.bannerOverline}>APPS</span>
+                            <h1 style={{
+                                fontSize: '4rem',
+                                fontWeight: '900',
+                                color: '#1E293B', // Dark bold color
+                                margin: 0,
+                                letterSpacing: '-0.04em',
+                                fontFamily: 'var(--font-display)',
+                                lineHeight: 1
+                            }}>
+                                Check <span className="text-gradient-sapphire">Candidates.</span>
                             </h1>
                             <p style={styles.bannerSubtitle}>
-                                Track, evaluate, and manage candidates in real time.
+                                See who has applied for your jobs here.
                             </p>
                         </div>
 
                         {/* Inventory Quick Stats */}
-                        <div style={{ display: 'flex', gap: '32px' }}>
+                        {/* Inventory Quick Stats */}
+                        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                             <div className="glass-panel" style={{
-                                padding: '16px 24px',
-                                position: 'relative',
-                                overflow: 'hidden',
+                                padding: '24px 32px',
+                                background: 'rgba(255, 255, 255, 0.7)',
                                 backdropFilter: 'blur(20px)',
-                                background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
-                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
-                                border: '1px solid var(--theme-border-bright)'
+                                border: '1px solid rgba(255, 255, 255, 0.8)',
+                                borderRadius: '24px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                                minWidth: '180px'
                             }}>
-                                <div style={{ position: 'relative', zIndex: 1 }}>
-                                    <div style={styles.statLabel}>Total Applications</div>
-                                    <div style={styles.statValue}>{serverApps.length}</div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    TOTAL APPLICATIONS
                                 </div>
-                                {/* Gloss Reflection */}
-                                <div style={{
-                                    position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
-                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                                    pointerEvents: 'none', zIndex: 0
-                                }} />
+                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0F172A', lineHeight: 1 }}>
+                                    {serverApps.length}
+                                </div>
                             </div>
                             <div className="glass-panel" style={{
-                                padding: '16px 24px',
-                                position: 'relative',
-                                overflow: 'hidden',
+                                padding: '24px 32px',
+                                background: 'rgba(255, 255, 255, 0.7)',
                                 backdropFilter: 'blur(20px)',
-                                background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
-                                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
-                                border: '1px solid var(--theme-border-bright)'
+                                border: '1px solid rgba(255, 255, 255, 0.8)',
+                                borderRadius: '24px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                                minWidth: '180px',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}>
-                                <div style={{ position: 'relative', zIndex: 1 }}>
-                                    <div style={styles.statLabel}>Shortlisted</div>
-                                    <div style={styles.statValue}>{serverApps.filter(a => a.status === 'Shortlisted').length}</div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    SHORTLISTED
                                 </div>
-                                {/* Gloss Reflection */}
+                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0F172A', lineHeight: 1 }}>
+                                    {serverApps.filter(a => a.status === 'Shortlisted').length}
+                                </div>
+                                {/* Subtle Right Glow */}
                                 <div style={{
-                                    position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
-                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                                    pointerEvents: 'none', zIndex: 0
+                                    position: 'absolute', top: 0, right: 0, bottom: 0, width: '40%',
+                                    background: 'linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1))',
+                                    pointerEvents: 'none'
                                 }} />
                             </div>
                         </div>
@@ -663,7 +707,7 @@ const Applications = () => {
                         <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                         <input
                             style={styles.searchInput}
-                            placeholder="SEARCH CANDIDATES..."
+                            placeholder="FIND SOMEONE..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -671,16 +715,20 @@ const Applications = () => {
                     <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ position: 'relative' }}>
                             <select style={styles.select} value={jobFilter} onChange={(e) => setJobFilter(e.target.value)}>
-                                {uniqueJobs.map(job => <option key={job} style={{ background: '#0F1217' }}>{job}</option>)}
+                                {uniqueJobs.map(job => (
+                                    <option key={job} style={{ background: '#0F1217', color: 'white' }}>
+                                        {job}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div style={{ position: 'relative' }}>
                             <select style={styles.select} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                                <option style={{ background: '#0F1217' }}>All Status</option>
-                                <option style={{ background: '#0F1217' }}>Pending</option>
-                                <option style={{ background: '#0F1217' }}>Shortlisted</option>
-                                <option style={{ background: '#0F1217' }}>Accepted</option>
-                                <option style={{ background: '#0F1217' }}>Rejected</option>
+                                <option style={{ background: '#0F1217', color: 'white' }}>All Status</option>
+                                <option style={{ background: '#0F1217', color: 'white' }} value="Pending">Pending</option>
+                                <option style={{ background: '#0F1217', color: 'white' }} value="Shortlisted">Shortlisted</option>
+                                <option style={{ background: '#0F1217', color: 'white' }} value="Accepted">Hired</option>
+                                <option style={{ background: '#0F1217', color: 'white' }} value="Rejected">Rejected</option>
                             </select>
                         </div>
                     </div>
@@ -711,7 +759,7 @@ const Applications = () => {
                                         </td>
                                     </tr>
                                 ) : filteredApps.length > 0 ? (
-                                    filteredApps.map((app, index) => {
+                                    paginatedApps.map((app, index) => {
                                         const candidateName = app.JobSeeker?.fullname || app.name || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || 'Unknown Candidate';
                                         const candidateEmail = app.email || app.JobSeeker?.email || 'N/A';
                                         const jobTitle = app.jobTitle || app.JobListing?.title || 'Unknown Position';
@@ -728,10 +776,47 @@ const Applications = () => {
                                             >
                                                 <td style={styles.td}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                                        <div className="glass-avatar-tile">
+                                                        <div 
+                                                            className="glass-avatar-tile" 
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => {
+                                                                const formattedApp = {
+                                                                    ...app,
+                                                                    name: candidateName,
+                                                                    email: candidateEmail,
+                                                                    jobTitle: jobTitle,
+                                                                    appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
+                                                                    skills: (app.CV?.content?.skills && Array.isArray(app.CV.content.skills)) ? app.CV.content.skills.map(s => s.name || s) : [],
+                                                                    education: (app.CV?.content?.education && Array.isArray(app.CV.content.education)) ? app.CV.content.education.map(e => `${e.degree || ''} at ${e.school || ''}`).join(', ') : 'N/A',
+                                                                    about: app.JobSeeker?.summary || app.about || '',
+                                                                    phone: app.JobSeeker?.phone || app.phone || '',
+                                                                    location: app.JobSeeker?.location || app.location || '',
+                                                                    coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
+                                                                };
+                                                                setSelectedApp(formattedApp);
+                                                            }}
+                                                        >
                                                             {candidateName.charAt(0)}
                                                         </div>
-                                                        <div>
+                                                        <div 
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => {
+                                                                const formattedApp = {
+                                                                    ...app,
+                                                                    name: candidateName,
+                                                                    email: candidateEmail,
+                                                                    jobTitle: jobTitle,
+                                                                    appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
+                                                                    skills: (app.CV?.content?.skills && Array.isArray(app.CV.content.skills)) ? app.CV.content.skills.map(s => s.name || s) : [],
+                                                                    education: (app.CV?.content?.education && Array.isArray(app.CV.content.education)) ? app.CV.content.education.map(e => `${e.degree || ''} at ${e.school || ''}`).join(', ') : 'N/A',
+                                                                    about: app.JobSeeker?.summary || app.about || '',
+                                                                    phone: app.JobSeeker?.phone || app.phone || '',
+                                                                    location: app.JobSeeker?.location || app.location || '',
+                                                                    coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
+                                                                };
+                                                                setSelectedApp(formattedApp);
+                                                            }}
+                                                        >
                                                             <div style={{ fontWeight: '800', color: 'var(--theme-text-primary)', fontSize: '1rem', letterSpacing: '-0.01em' }}>{candidateName}</div>
                                                             <div style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', fontWeight: '500' }}>{candidateEmail}</div>
                                                         </div>
@@ -763,29 +848,7 @@ const Applications = () => {
                                                 </td>
                                                 <td style={styles.td}>
                                                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                                        <button
-                                                            className="btn-scale"
-                                                            style={styles.actionBtn('details')}
-                                                            title="View Details"
-                                                            onClick={() => {
-                                                                const formattedApp = {
-                                                                    ...app,
-                                                                    name: candidateName,
-                                                                    email: candidateEmail,
-                                                                    jobTitle: jobTitle,
-                                                                    appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : app.appliedDate,
-                                                                    skills: (app.CV?.content?.skills && Array.isArray(app.CV.content.skills)) ? app.CV.content.skills.map(s => s.name || s) : [],
-                                                                    education: (app.CV?.content?.education && Array.isArray(app.CV.content.education)) ? app.CV.content.education.map(e => `${e.degree || ''} at ${e.school || ''}`).join(', ') : 'N/A',
-                                                                    about: app.JobSeeker?.summary || app.about || '',
-                                                                    phone: app.JobSeeker?.phone || app.phone || '',
-                                                                    location: app.JobSeeker?.location || app.location || '',
-                                                                    coverLetter: app.cover_letter || app.coverLetter || 'No cover letter provided.'
-                                                                };
-                                                                setSelectedApp(formattedApp);
-                                                            }}
-                                                        >
-                                                            <Eye size={18} />
-                                                        </button>
+                                                         {/* Removed Eye icon button per request - details now accessible via candidate name */}
 
                                                         {app.status !== 'Shortlisted' && (
                                                             <button
@@ -864,6 +927,13 @@ const Applications = () => {
                                 )}
                             </tbody>
                         </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                            totalItems={filteredApps.length}
+                            itemsPerPage={ITEMS_PER_PAGE}
+                        />
                     </div>
                 </div>
             </div>
@@ -879,12 +949,25 @@ const Applications = () => {
                 }
                 
                 select:focus, input:focus {
+                    background-color: var(--theme-bg-subtle) !important;
                     border-color: var(--glass-accent-light) !important;
-                    box-shadow: 0 0 0 1px var(--glass-accent-light) !important;
+                    box-shadow: 0 0 0 4px var(--glass-accent-glow) !important;
+                    transform: translateY(-1px);
                 }
 
-                .btn-scale { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-                .btn-scale:hover { transform: scale(1.08); }
+                select:hover, input:hover {
+                    border-color: rgba(62, 97, 255, 0.3);
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+
+                .glass-avatar-tile:hover {
+                    transform: scale(1.1) rotate(5deg);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                    border-color: var(--glass-accent-light) !important;
+                }
+
+                .btn-scale { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                .btn-scale:hover { transform: scale(1.08); filter: brightness(1.1); }
                 .btn-scale:active { transform: scale(0.92); }
             `}</style>
         </div>

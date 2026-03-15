@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import Pagination from '@/components/ui/Pagination';
 import '@/styles/ProfessionalGlass.css';
+import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
 import {
     Users,
     CheckCircle,
@@ -18,10 +20,49 @@ import {
     RefreshCw,
     TrendingUp,
     ChevronRight,
-    Search as SearchIcon
+    Search as SearchIcon,
+    BookOpen,
+    FileText,
+    ShieldCheck
 } from 'lucide-react';
 
-import { useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+// --- Mini Sky Scene (Shared from Dashboard) ---
+const PageHeroSky = ({ timeOfDay }) => (
+    <div className="dash-sky-scene">
+        {timeOfDay === 'night' && (
+            <>
+                {[...Array(20)].map((_, i) => (
+                    <div key={i} className="dash-star" style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                        width: `${2 + Math.random() * 2}px`,
+                        height: `${2 + Math.random() * 2}px`,
+                    }} />
+                ))}
+                <div className="dash-moon">
+                    <div className="dash-moon-crater" style={{ width: 8, height: 8, top: 8, left: 12 }} />
+                </div>
+            </>
+        )}
+        {timeOfDay === 'morning' && (
+            <>
+                <div className="dash-sun dash-morning-sun">
+                    <div className="dash-sun-ray" />
+                    <div className="dash-sun-ray" style={{ transform: 'rotate(60deg)' }} />
+                </div>
+                <div className="dash-cloud dash-cloud-1" />
+            </>
+        )}
+        {(timeOfDay === 'afternoon' || timeOfDay === 'evening') && (
+            <>
+                <div className={timeOfDay === 'afternoon' ? "dash-sun dash-afternoon-sun" : "dash-sunset-orb"} />
+                <div className="dash-cloud dash-cloud-1" />
+                <div className="dash-cloud dash-cloud-2" />
+            </>
+        )}
+    </div>
+);
 
 const History = () => {
     // API Hooks
@@ -31,6 +72,8 @@ const History = () => {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
 
     // Filter for processed candidates (non-Pending, i.e. not 'applied')
     const historyData = useMemo(() => {
@@ -63,6 +106,14 @@ const History = () => {
         return data;
     }, [filterStatus, historyData, searchTerm]);
 
+    const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+    const paginatedData = filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterStatus, searchTerm]);
+
     const handleViewDetails = (candidate) => {
         setSelectedCandidate(candidate);
         setIsModalOpen(true);
@@ -76,8 +127,15 @@ const History = () => {
             fontFamily: 'var(--font-body)',
         },
         headerHero: {
+            padding: '50px 64px',
             marginBottom: '40px',
             position: 'relative',
+            overflow: 'hidden',
+            borderRadius: '24px',
+            border: '1px solid var(--glass-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
         },
         title: {
             fontSize: '3.5rem',
@@ -88,11 +146,15 @@ const History = () => {
             letterSpacing: '-0.03em',
             lineHeight: '1.1'
         },
-        subtitle: {
-            color: 'var(--glass-text-secondary)',
+        bannerSubtitle: {
             fontSize: '1.1rem',
-            maxWidth: '600px',
-            lineHeight: '1.6'
+            color: 'var(--glass-text-secondary)',
+            fontWeight: '600',
+            maxWidth: '550px',
+            marginTop: '12px',
+            lineHeight: '1.6',
+            position: 'relative',
+            zIndex: 2
         },
         statsGrid: {
             display: 'grid',
@@ -100,61 +162,63 @@ const History = () => {
             gap: '24px',
             marginBottom: '40px'
         },
-        statCard: (isActive) => ({
-            background: 'linear-gradient(135deg, var(--theme-card), rgba(255, 255, 255, 0.02))',
-            padding: '28px',
+        statCard: (color) => ({
+            background: 'var(--glass-surface)',
+            padding: '28px 32px',
             borderRadius: '24px',
-            border: '1px solid var(--theme-border-bright)',
+            border: '1px solid var(--glass-border)',
             display: 'flex',
             alignItems: 'center',
-            gap: '20px',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            backdropFilter: 'blur(30px)',
-            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--theme-shadow)',
+            gap: '24px',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
             cursor: 'default',
             position: 'relative',
             overflow: 'hidden'
         }),
         statIcon: (color) => ({
-            width: '56px',
-            height: '56px',
+            width: '64px',
+            height: '64px',
             borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid var(--glass-border)',
+            background: 'var(--theme-bg-subtle)',
+            border: '1px solid var(--theme-border)',
             color: color,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 0 20px ${color}10`
+            boxShadow: `0 8px 20px ${color}15`
         }),
         statValue: {
-            fontSize: '2rem',
-            fontWeight: '800',
+            fontSize: '2.5rem',
+            fontWeight: '900',
             color: 'var(--theme-text-primary)',
             lineHeight: '1',
+            letterSpacing: '-0.02em',
             marginBottom: '4px',
             fontFamily: 'var(--font-display)',
-            textShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            textShadow: '0 4px 12px rgba(0,0,0,0.05)'
         },
         statLabel: {
-            fontSize: '0.85rem',
+            fontSize: '0.7rem',
             color: 'var(--glass-text-secondary)',
-            fontWeight: '700',
-            letterSpacing: '0.05em',
+            fontWeight: '900',
+            letterSpacing: '0.1em',
             textTransform: 'uppercase'
         },
         controlBar: {
             background: 'var(--glass-surface)',
-            padding: '12px',
-            borderRadius: '20px',
+            padding: '16px 20px',
+            borderRadius: '24px',
             border: '1px solid var(--glass-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '32px',
-            backdropFilter: 'blur(10px)',
-            gap: '20px',
-            flexWrap: 'wrap'
+            backdropFilter: 'blur(12px)',
+            gap: '16px',
+            flexWrap: 'wrap',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)'
         },
         tabs: {
             display: 'flex',
@@ -182,15 +246,17 @@ const History = () => {
         },
         searchInput: {
             width: '100%',
-            padding: '12px 16px 12px 48px',
-            borderRadius: '12px',
-            background: 'var(--theme-bg-subtle)',
+            padding: '14px 16px 14px 52px',
+            borderRadius: '16px',
             border: '1px solid var(--theme-border)',
-            color: 'var(--theme-text-primary)',
+            backgroundColor: 'var(--theme-bg-subtle)',
             fontSize: '0.9rem',
+            color: 'var(--theme-text-primary)',
             outline: 'none',
-            transition: 'all 0.3s ease',
-            fontFamily: 'var(--font-body)'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            fontWeight: '700',
+            fontFamily: 'var(--font-body)',
+            letterSpacing: '0.02em'
         },
         tableWrapper: {
             background: 'var(--glass-surface)',
@@ -225,9 +291,9 @@ const History = () => {
         },
         badge: (status) => {
             const configs = {
-                Accepted: { color: '#10B981', label: 'ACCEPTED' },
+                Accepted: { color: '#10B981', label: 'HIRED' },
                 Rejected: { color: '#EF4444', label: 'REJECTED' },
-                Shortlisted: { color: '#3B82F6', label: 'SHORTLISTED' }
+                Shortlisted: { color: '#3B82F6', label: 'SHORTLIST' }
             };
             const config = configs[status] || { color: 'var(--glass-text-muted)', label: status.toUpperCase() };
             return {
@@ -281,6 +347,9 @@ const History = () => {
         }
     };
 
+    const hour = new Date().getHours();
+    const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 17 ? 'afternoon' : hour >= 17 && hour < 20 ? 'evening' : 'night';
+
     return (
         <div className="glass-main" style={{ position: 'relative' }}>
             {/* Ambient Background Glows */}
@@ -290,23 +359,60 @@ const History = () => {
             <div style={styles.container}>
                 <div className="glass-reveal">
                     {/* Operational Hero Section */}
-                    <div style={styles.headerHero}>
-                        <h1 style={styles.title}>Hiring <span className="text-gradient-sapphire">History.</span></h1>
-                        <p style={styles.subtitle}>
-                            Track and review past candidate applications.
-                            Your organization's complete hiring history.
-                        </p>
-                    </div>
+                    <header style={styles.headerHero} className={`dash-hero-${timeOfDay} glass-panel`}>
+                        <PageHeroSky timeOfDay={timeOfDay} />
+                        <div style={{ position: 'relative', zIndex: 2 }}>
+                            <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '8px 16px',
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '12px',
+                                fontSize: '0.65rem',
+                                fontWeight: '900',
+                                color: 'white',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.15em',
+                                marginBottom: '16px',
+                                backdropFilter: 'blur(10px)'
+                            }}>
+                                <Clock size={14} fill="white" /> Operational History
+                            </div>
+                            <h1 style={{
+                                fontSize: '4rem',
+                                fontWeight: '900',
+                                color: 'white',
+                                margin: 0,
+                                letterSpacing: '-0.04em',
+                                fontFamily: 'var(--font-display)',
+                                lineHeight: 1
+                            }}>
+                                Past <span style={{ color: 'rgba(255,255,255,0.8)' }}>Decisions.</span>
+                            </h1>
+                            <p style={styles.bannerSubtitle}>
+                                See all the decisions you have made for your candidates.
+                            </p>
+                        </div>
+
+                         {/* Background Glow */}
+                        <div style={{
+                            position: 'absolute', bottom: '-80px', right: '-80px', width: '250px', height: '250px',
+                            background: 'radial-gradient(circle, var(--glass-accent) 0%, transparent 70%)',
+                            opacity: 0.15, filter: 'blur(50px)', pointerEvents: 'none'
+                        }} />
+                    </header>
 
                     {/* Summary Intelligence Stats */}
                     <div style={styles.statsGrid}>
                         {[
-                            { label: 'Total Applications', value: stats.total, icon: Users, color: 'var(--glass-accent-light)' },
-                            { label: 'Accepted', value: stats.accepted, icon: CheckCircle, color: '#10B981' },
-                            { label: 'Shortlisted', value: stats.shortlisted, icon: Clock, color: '#3B82F6' },
-                            { label: 'Rejected', value: stats.rejected, icon: XCircle, color: '#EF4444' }
+                            { label: 'Total', value: stats.total, icon: Users, color: 'var(--glass-accent-light)' },
+                            { label: 'Chosen', value: stats.accepted, icon: CheckCircle, color: '#10B981' },
+                            { label: 'Saved', value: stats.shortlisted, icon: Clock, color: '#3B82F6' },
+                            { label: 'Not Hired', value: stats.rejected, icon: XCircle, color: '#EF4444' }
                         ].map((item, idx) => (
-                            <div key={idx} style={{ ...styles.statCard(), animationDelay: `${idx * 0.1}s` }} className="glass-stat-card glass-reveal">
+                            <div key={idx} style={{ ...styles.statCard(item.color), animationDelay: `${idx * 0.1}s` }} className="glass-stat-card glass-reveal">
                                 <div style={styles.statIcon(item.color)}>
                                     <item.icon size={28} />
                                 </div>
@@ -317,11 +423,11 @@ const History = () => {
                                 {/* Gloss Reflection */}
                                 <div style={{
                                     position: 'absolute',
-                                    top: '-50%',
-                                    left: '-50%',
-                                    width: '200%',
-                                    height: '200%',
-                                    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
+                                    top: 0,
+                                    right: 0,
+                                    width: '100px',
+                                    height: '100px',
+                                    background: `radial-gradient(circle at center, ${item.color}10 0%, transparent 70%)`,
                                     pointerEvents: 'none',
                                     zIndex: 0
                                 }} />
@@ -333,14 +439,14 @@ const History = () => {
                     {/* Glass Control Bar */}
                     <div style={{ ...styles.controlBar, animationDelay: '0.4s' }} className="glass-reveal">
                         <div style={styles.tabs}>
-                            {['All', 'Accepted', 'Shortlisted', 'Rejected'].map(tab => (
+                            {[['All', 'All'], ['Accepted', 'Hired'], ['Shortlisted', 'Shortlist'], ['Rejected', 'Rejected']].map(([key, label]) => (
                                 <button
-                                    key={tab}
-                                    style={styles.tab(filterStatus === tab)}
-                                    onClick={() => setFilterStatus(tab)}
+                                    key={key}
+                                    style={styles.tab(filterStatus === key)}
+                                    onClick={() => setFilterStatus(key)}
                                     className="tab-hover"
                                 >
-                                    {tab}
+                                    {label}
                                 </button>
                             ))}
                         </div>
@@ -348,13 +454,14 @@ const History = () => {
                             <SearchIcon size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-accent-light)' }} />
                             <input
                                 type="text"
-                                placeholder="Search applications…"
+                                placeholder="Find someone..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={styles.searchInput}
                                 className="glass-input-focus"
                             />
                         </div>
+
                     </div>
 
                     {/* Hiring History Matrix */}
@@ -362,114 +469,129 @@ const History = () => {
                         {isLoading ? (
                             <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                 <RefreshCw size={48} className="animate-spin" opacity={0.3} style={{ margin: '0 auto 20px' }} />
-                                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>Loading History…</p>
+                                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>Looking back...</p>
                             </div>
                         ) : filteredData.length > 0 ? (
+                            <>
                             <table style={styles.table}>
                                 <thead>
                                     <tr>
-                                        <th style={styles.th}>Candidate</th>
-                                        <th style={styles.th}>Job Title</th>
-                                        <th style={styles.th}>Status</th>
-                                        <th style={styles.th}>Date Processed</th>
-                                        <th style={styles.th}>Actions</th>
+                                        <th style={styles.th}>Person</th>
+                                        <th style={styles.th}>Job Name</th>
+                                        <th style={styles.th}>Result</th>
+                                        <th style={styles.th}>Done On</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredData.map(item => (
-                                        <tr key={item.id} className="history-row">
-                                            <td style={styles.td}>
-                                                <div style={{ fontWeight: '800', fontSize: '1.05rem', color: 'white' }}>{item.JobSeeker?.fullname || 'Candidate'}</div>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>{item.JobSeeker?.email}</div>
-                                            </td>
-                                            <td style={styles.td}>
-                                                <div style={{ color: 'var(--glass-accent-light)', fontWeight: '700' }}>{item.JobListing?.title}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--glass-text-muted)' }}>ID: {typeof item.id === 'string' ? item.id.slice(0, 8) : item.id}</div>
-                                            </td>
-                                            <td style={styles.td}>
-                                                <span style={styles.badge(item.status)}>
-                                                    <div className="status-dot" style={{ background: 'currentColor' }} />
-                                                    {item.status}
-                                                </span>
-                                            </td>
-                                            <td style={styles.td}>
-                                                <div style={{ fontWeight: '600' }}>{item.updated_at ? new Date(item.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</div>
-                                            </td>
-                                            <td style={styles.td}>
-                                                <button
-                                                    style={styles.viewAction}
-                                                    onClick={() => handleViewDetails(item)}
-                                                    className="btn-scale"
-                                                >
-                                                    <Eye size={16} className="text-gradient-sapphire" />
-                                                    DETAILS
-                                                    <ChevronRight size={14} className="arrow-move" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {paginatedData.map(item => {
+                                        const candidateName = item.JobSeeker?.fullname || 'Unknown Candidate';
+                                        return (
+                                            <tr key={item.id} className="history-row">
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                        <div className="glass-avatar-tile" style={{ width: '40px', height: '40px', fontSize: '0.9rem' }}>
+                                                            {candidateName.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '800', fontSize: '1rem', color: 'var(--theme-text-primary)' }}>{candidateName}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>{item.JobSeeker?.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--theme-text-primary)', fontWeight: '700' }}>
+                                                        <Briefcase size={14} className="text-gradient-sapphire" />
+                                                        {item.JobListing?.title}
+                                                    </div>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <span style={styles.badge(item.status)}>
+                                                        <div className="status-dot" style={{ background: 'currentColor' }} />
+                                                        {item.status === 'Accepted' ? 'HIRED' : (item.status === 'Rejected' ? 'REJECTED' : (item.status === 'Shortlisted' ? 'SHORTLIST' : item.status.toUpperCase()))}
+                                                    </span>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ fontWeight: '700', color: 'var(--glass-text-secondary)', fontSize: '0.85rem' }}>
+                                                        {item.updated_at ? new Date(item.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                                totalItems={filteredData.length}
+                                itemsPerPage={ITEMS_PER_PAGE}
+                            />
+                            </>
                         ) : (
                             <div style={{ padding: '100px', textAlign: 'center', color: 'var(--glass-text-muted)' }}>
                                 <Clock size={60} opacity={0.1} style={{ margin: '0 auto 24px' }} />
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '8px' }}>No History Found</h3>
-                                <p style={{ maxWidth: '300px', margin: '0 auto' }}>No applications match your search. Try changing the filters.</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '8px' }}>Nothing here yet</h3>
+                                <p style={{ maxWidth: '300px', margin: '0 auto' }}>We could not find anything. Try looking for something else.</p>
                             </div>
                         )}
                     </div>
 
                     {/* Hiring Overview Analytics */}
                     <div style={{ ...styles.analyticsPanel, animationDelay: '0.6s' }} className="glass-reveal">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                            <div className="icon-surface" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
-                                <BarChart2 size={20} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+                            <div className="icon-surface" style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)' }}>
+                                <BarChart2 size={24} className="text-gradient-sapphire" />
                             </div>
-                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', letterSpacing: '0.02em' }}>Hiring Overview</h3>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.01em', color: 'var(--theme-text-primary)' }}>Efficiency Metrics</h3>
+                                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>Real-time overview of your recruitment funnel.</p>
+                            </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', marginBottom: '32px' }}>
                             <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
                                     <span style={styles.statLabel}>Success Rate</span>
-                                    <span style={styles.percentValue}>{stats.total ? Math.round((stats.accepted / stats.total) * 100) : 0}%</span>
+                                    <span style={styles.percentValue} className="text-gradient-sapphire">{stats.total ? Math.round((stats.accepted / stats.total) * 100) : 0}%</span>
                                 </div>
-                                <div style={{ height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
+                                <div style={{ height: '14px', background: 'var(--theme-bg-subtle)', borderRadius: '100px', overflow: 'hidden', padding: '2px', border: '1px solid var(--theme-border)' }}>
                                     <div
                                         className="progress-fill"
-                                        style={{ height: '100%', background: 'linear-gradient(90deg, #10B981, #34D399)', width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, borderRadius: '100px' }}
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #10B981, #34D399)', width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, borderRadius: '100px', boxShadow: '0 0 12px rgba(16, 185, 129, 0.3)' }}
                                     ></div>
                                 </div>
                             </div>
                             <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
-                                    <span style={styles.statLabel}>Shortlist Ratio</span>
-                                    <span style={styles.percentValue}>{stats.total ? Math.round((stats.shortlisted / stats.total) * 100) : 0}%</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
+                                    <span style={styles.statLabel}>Retention Rate</span>
+                                    <span style={styles.percentValue} className="text-gradient-sapphire">{stats.total ? Math.round((stats.shortlisted / stats.total) * 100) : 0}%</span>
                                 </div>
-                                <div style={{ height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
+                                <div style={{ height: '14px', background: 'var(--theme-bg-subtle)', borderRadius: '100px', overflow: 'hidden', padding: '2px', border: '1px solid var(--theme-border)' }}>
                                     <div
                                         className="progress-fill"
-                                        style={{ height: '100%', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, borderRadius: '100px' }}
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, borderRadius: '100px', boxShadow: '0 0 12px rgba(59, 130, 246, 0.3)' }}
                                     ></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={styles.progressTrack}>
-                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, backgroundColor: '#10B981' }}></div>
-                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, backgroundColor: '#3B82F6' }}></div>
-                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.rejected / stats.total) * 100 : 0}%`, backgroundColor: '#EF4444' }}></div>
+                        <div style={{ ...styles.progressTrack, background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', padding: '2px', height: '16px' }}>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.accepted / stats.total) * 100 : 0}%`, backgroundColor: '#10B981', boxShadow: '0 0 8px rgba(16, 185, 129, 0.2)' }}></div>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.shortlisted / stats.total) * 100 : 0}%`, backgroundColor: '#3B82F6', boxShadow: '0 0 8px rgba(59, 130, 246, 0.2)' }}></div>
+                            <div className="progress-fill" style={{ width: `${stats.total ? (stats.rejected / stats.total) * 100 : 0}%`, backgroundColor: '#EF4444', boxShadow: '0 0 8px rgba(239, 68, 68, 0.2)' }}></div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', marginTop: '24px' }}>
                             {[
-                                { color: '#10B981', label: 'Accepted' },
-                                { color: '#3B82F6', label: 'Shortlisted' },
-                                { color: '#EF4444', label: 'Rejected' }
+                                { color: '#10B981', label: 'Accepted Candidates', count: stats.accepted },
+                                { color: '#3B82F6', label: 'Shortlisted Pool', count: stats.shortlisted },
+                                { color: '#EF4444', label: 'Declined Profiles', count: stats.rejected }
                             ].map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '700', color: 'var(--glass-text-secondary)' }}>
-                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, boxShadow: `0 0 8px ${item.color}80` }} />
-                                    {item.label}
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>
+                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: item.color, boxShadow: `0 0 10px ${item.color}60` }} />
+                                    <span>{item.label}</span>
+                                    <span style={{ color: 'var(--glass-text-secondary)', marginLeft: '4px' }}>({item.count})</span>
                                 </div>
                             ))}
                         </div>
@@ -496,52 +618,56 @@ const History = () => {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
                             <div>
-                                <h2 style={{ margin: '0 0 8px', fontSize: '2rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobSeeker?.fullname}</h2>
-                                <span style={styles.badge(selectedCandidate.status)}>{selectedCandidate.status}</span>
+                                <h2 style={{ margin: '0 0 8px', fontSize: '2.5rem', fontWeight: '900', color: 'var(--theme-text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-display)' }}>{selectedCandidate.JobSeeker?.fullname}</h2>
+                                <span style={styles.badge(selectedCandidate.status)}>{selectedCandidate.status === 'Accepted' ? 'HIRED' : (selectedCandidate.status === 'Rejected' ? 'REJECTED' : (selectedCandidate.status === 'Shortlisted' ? 'SHORTLIST' : selectedCandidate.status.toUpperCase()))}</span>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', borderRadius: '10px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--theme-text-primary)' }}>
-                                <XCircle size={20} />
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', borderRadius: '14px', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--theme-text-primary)' }} className="btn-scale">
+                                <XCircle size={24} />
                             </button>
                         </div>
 
                         <div style={{ display: 'grid', gap: '24px' }}>
-                            <div className="icon-surface" style={{ padding: '20px', borderRadius: '16px', display: 'flex', gap: '16px' }}>
-                                <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--glass-accent-light)' }}>
-                                    <Briefcase size={22} />
+                            <div className="icon-surface" style={{ padding: '24px', borderRadius: '20px', display: 'flex', gap: '20px', background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)' }}>
+                                <div style={{ width: '56px', height: '56px', background: 'var(--glass-surface)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--glass-accent-light)', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+                                    <Briefcase size={28} />
                                 </div>
-                                <div>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Application For</div>
-                                    <div style={{ fontSize: '1rem', fontWeight: '700', color: 'white' }}>{selectedCandidate.JobListing?.title}</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--glass-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Assignment Portfolio</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobListing?.title}</div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '0 8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><Mail size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.email}</div>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><Mail size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobSeeker?.email}</div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><Phone size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.phone || 'N/A'}</div>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><Phone size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobSeeker?.phone || 'N/A'}</div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><MapPin size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{selectedCandidate.JobSeeker?.location || 'N/A'}</div>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><MapPin size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)' }}>{selectedCandidate.JobSeeker?.location || 'N/A'}</div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><TrendingUp size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{(selectedCandidate.CV?.content?.experience && selectedCandidate.CV.content.experience.length > 0) ? selectedCandidate.CV.content.experience[0].title : 'Experience Not Listed'}</div>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><TrendingUp size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(selectedCandidate.CV?.content?.experience && selectedCandidate.CV.content.experience.length > 0) ? selectedCandidate.CV.content.experience[0].title : 'Experience Not Listed'}</div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div className="icon-surface" style={{ width: '32px', height: '32px', borderRadius: '8px' }}><BookOpen size={14} /></div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--glass-text-secondary)' }}>{(selectedCandidate.CV?.content?.education && selectedCandidate.CV.content.education.length > 0) ? `${selectedCandidate.CV.content.education[0].degree} at ${selectedCandidate.CV.content.education[0].school}` : 'Education Not Listed'}</div>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><BookOpen size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(selectedCandidate.CV?.content?.education && selectedCandidate.CV.content.education.length > 0) ? `${selectedCandidate.CV.content.education[0].degree}` : 'Education Not Listed'}</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="icon-surface" style={{ width: '36px', height: '36px', borderRadius: '10px' }}><Calendar size={16} /></div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--theme-text-primary)' }}>{selectedCandidate.updated_at ? new Date(selectedCandidate.updated_at).toLocaleDateString() : 'N/A'}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
-                            <button onClick={() => setIsModalOpen(false)} style={{ padding: '16px 48px', borderRadius: '12px', background: 'var(--glass-accent)', color: 'white', border: '1px solid var(--glass-border-bright)', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} className="btn-scale">
-                                CLOSE
+                        <div style={{ marginTop: '48px', display: 'flex', justifyContent: 'center' }}>
+                            <button onClick={() => setIsModalOpen(false)} style={{ padding: '18px 64px', borderRadius: '16px', background: 'var(--glass-accent)', color: 'white', border: 'none', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', fontSize: '1rem', letterSpacing: '0.05em', boxShadow: '0 10px 25px rgba(63, 81, 181, 0.4)' }} className="btn-scale">
+                                CLOSE MODULE
                             </button>
                         </div>
                     </div>

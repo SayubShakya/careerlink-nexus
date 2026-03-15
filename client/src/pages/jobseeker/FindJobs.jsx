@@ -33,7 +33,6 @@ const FindJobs = () => {
         { label: 'Organizations', value: '220', icon: <Building2 size={20} /> },
     ];
 
-    const filterOptions = ['All Jobs', 'Jobs by Function', 'Jobs by Title', 'Jobs by Industry', 'Jobs by Location'];
 
     const topEmployers = [
         { name: 'IBerry', logo: '🍒' }, { name: 'IEC', logo: 'I' }, { name: 'Lumina', logo: 'L' },
@@ -102,9 +101,6 @@ const FindJobs = () => {
                 .fj-search-bar input { flex: 1; border: none; padding: 0 18px; font-size: 0.95rem; background: transparent; outline: none; color: var(--text-main); }
                 .fj-search-btn { background: var(--color-brand-accent); color: white; border: none; padding: 11px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: opacity 0.2s; }
                 .fj-search-btn:hover { opacity: 0.9; }
-                .fj-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-                .fj-pill { padding: 7px 16px; border-radius: 100px; font-size: 0.82rem; font-weight: 700; color: var(--color-brand-accent); background: rgba(62,97,255,0.08); border: 1px solid rgba(62,97,255,0.15); cursor: pointer; transition: all 0.25s; }
-                .fj-pill:hover { background: rgba(62,97,255,0.15); transform: translateY(-1px); }
 
                 /* ── TICKER ── */
                 .fj-ticker { background: var(--card-dashboard); border-top: 1px solid var(--border-dashboard); border-bottom: 1px solid var(--border-dashboard); padding: 18px 0; display: flex; align-items: center; overflow: hidden; }
@@ -191,14 +187,11 @@ const FindJobs = () => {
                         <div className="fj-search-bar">
                             <input
                                 type="text"
-                                placeholder="Search by job title or company..."
+                                placeholder="Search by job title"
                                 value={searchTerm}
                                 onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
                             <button className="fj-search-btn"><Search size={16} /> Search</button>
-                        </div>
-                        <div className="fj-pills">
-                            {filterOptions.map((f, i) => <div key={i} className="fj-pill">{f}</div>)}
                         </div>
                     </div>
                     <div className="fj-hero-right">

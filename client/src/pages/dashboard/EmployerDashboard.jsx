@@ -12,16 +12,18 @@ import {
     ArrowUpRight,
     Zap,
     ShieldCheck,
-    Layers
+    Layers,
+    Shield
 } from 'lucide-react';
-import { ROUTES } from '../../routes/routes';
+import { ROUTES } from '@/routes/routes';
 import { useGetEmployerStats, useGetEmployerApplications } from '@/hooks/api/employer/useEmployer';
+import { useGetMe } from '@/hooks/api/auth/useGetMe';
 
 // Design System
 import '@/styles/ProfessionalGlass.css';
 
 // --- Animated Counter Hook-like Component ---
-const GlassCounter = ({ value }) => {
+const GlassCounter = ({ value, prefix = "" }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -33,6 +35,7 @@ const GlassCounter = ({ value }) => {
         }
         let totalDuration = 1000;
         let increment = Math.ceil(end / (totalDuration / 16));
+        if (increment === 0) increment = 1;
         let timer = setInterval(() => {
             start += increment;
             if (start >= end) {
@@ -45,70 +48,124 @@ const GlassCounter = ({ value }) => {
         return () => clearInterval(timer);
     }, [value]);
 
-    return <span className="glass-number">{count}</span>;
+    return <span className="glass-number">{prefix}{count.toLocaleString()}</span>;
 };
 
-const StatCard = ({ label, value, icon, index }) => (
+const StatTrend = ({ value, label }) => (
+    <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 8px',
+        background: 'rgba(16, 185, 129, 0.1)',
+        borderRadius: '20px',
+        fontSize: '0.65rem',
+        fontWeight: '800',
+        color: '#10B981',
+        border: '1px solid rgba(16, 185, 129, 0.15)',
+        marginTop: '0'
+    }}>
+        <TrendingUp size={10} />
+        {value} {label}
+    </div>
+);
+
+const StatCard = ({ label, value, icon, index, trend }) => (
     <div
         className="glass-panel"
         style={{
-            padding: '28px',
+            padding: '24px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px',
+            justifyContent: 'space-between',
+            gap: '12px',
             animationDelay: `${index * 0.1}s`,
             position: 'relative',
-            overflow: 'hidden',
         }}
     >
-        {/* Deep Gloss Gradient Reflection */}
-        <div style={{
-            position: 'absolute',
-            top: '-50%',
-            left: '-50%',
-            width: '200%',
-            height: '200%',
-            background: 'radial-gradient(circle at center, rgba(96, 165, 250, 0.08) 0%, transparent 70%)',
-            pointerEvents: 'none',
-            zIndex: 0
-        }} />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.2), rgba(96, 165, 250, 0.05))',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: 'var(--theme-bg-subtle)',
+                border: '1px solid var(--theme-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--glass-accent-light)',
-                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.2)'
             }}>
                 {icon}
             </div>
-            <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-                {label}
-            </div>
+            {trend && <StatTrend value={trend.val} label={trend.label} />}
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1, marginTop: '8px' }}>
+        <div>
             <div style={{
-                fontSize: '3.5rem',
-                fontWeight: '800',
-                color: 'var(--glass-text-primary)',
-                lineHeight: '1',
-                textShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                fontSize: '2.4rem',
+                fontWeight: '900',
+                color: 'var(--theme-text-primary)',
+                lineHeight: '1.1',
                 fontFamily: 'var(--font-display)',
-                letterSpacing: '-0.03em'
+                letterSpacing: '-0.025em'
             }}>
                 <GlassCounter value={value} />
             </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--glass-accent-light)', fontWeight: '600', marginTop: '12px', letterSpacing: '0.05em', opacity: 0.8 }}>
-                Total {label}
+            <div style={{
+                fontSize: '0.72rem',
+                color: 'var(--glass-text-secondary)',
+                fontWeight: '800',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                marginTop: '4px'
+            }}>
+                {label}
             </div>
         </div>
+    </div>
+);
+
+/* ── Mini Sky Scene ── */
+const PageHeroSky = ({ timeOfDay }) => (
+    <div className="dash-sky-scene">
+        {timeOfDay === 'night' && (
+            <>
+                {[...Array(20)].map((_, i) => (
+                    <div key={i} className="dash-star" style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                        width: `${2 + Math.random() * 2}px`,
+                        height: `${2 + Math.random() * 2}px`,
+                    }} />
+                ))}
+                <div className="dash-moon">
+                    <div className="dash-moon-crater" style={{ width: 8, height: 8, top: 8, left: 12 }} />
+                </div>
+            </>
+        )}
+        {timeOfDay === 'morning' && (
+            <>
+                <div className="dash-sun dash-morning-sun">
+                    <div className="dash-sun-ray" />
+                    <div className="dash-sun-ray" style={{ transform: 'rotate(60deg)' }} />
+                </div>
+                <div className="dash-cloud dash-cloud-1" />
+            </>
+        )}
+        {timeOfDay === 'afternoon' && (
+            <>
+                <div className="dash-sun dash-afternoon-sun" />
+                <div className="dash-cloud dash-cloud-1" />
+                <div className="dash-cloud dash-cloud-2" />
+            </>
+        )}
+        {timeOfDay === 'evening' && (
+            <>
+                <div className="dash-sunset-orb" />
+                <div className="dash-cloud dash-cloud-3" />
+            </>
+        )}
     </div>
 );
 
@@ -131,12 +188,25 @@ const EmployerDashboard = () => {
         .slice(0, 5);
 
     const isLoading = isStatsLoading || isAppsLoading;
+    const { data: me } = useGetMe();
+
+    const hour = new Date().getHours();
+    const timeOfDay = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 17 ? 'afternoon' : hour >= 17 && hour < 20 ? 'evening' : 'night';
+
+    const getGreeting = () => {
+        if (timeOfDay === 'morning') return { text: 'Good morning!', icon: '☀️' };
+        if (timeOfDay === 'afternoon') return { text: 'Good afternoon!', icon: '🌤️' };
+        if (timeOfDay === 'evening') return { text: 'Good evening!', icon: '🌅' };
+        return { text: 'Good night!', icon: '🌙' };
+    };
+
+    const greeting = getGreeting();
 
     const statsConfig = [
-        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={22} /> },
-        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={22} /> },
-        { label: 'Applications', value: stats.totalApplications, icon: <Users size={22} /> },
-        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={22} /> },
+        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={20} />, trend: { val: 'Live', label: '' } },
+        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={20} />, trend: { val: '+2', label: 'this wk' } },
+        { label: 'Applications', value: stats.totalApplications, icon: <Users size={20} />, trend: { val: '+12', label: 'total' } },
+        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={20} />, trend: { val: 'Elite', label: '' } },
     ];
 
     return (
@@ -147,28 +217,46 @@ const EmployerDashboard = () => {
 
             <div className="glass-container glass-reveal">
 
-                {/* Authority Header */}
-                <header style={{ marginBottom: '56px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <div style={{ animationDelay: '0.05s' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                            <Layers size={18} className="text-gradient-sapphire" />
-                            <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--glass-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-                                Employer Dashboard
-                            </span>
+                {/* ───── HERO SECTION ───── */}
+                <div className={`glass-panel dash-hero-${timeOfDay}`} style={{
+                    padding: '48px',
+                    marginBottom: '40px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    minHeight: '220px',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+                }}>
+                    <PageHeroSky timeOfDay={timeOfDay} />
+                    <div style={{ position: 'relative', zIndex: 2, display: 'flex', width: '100%', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                        <div style={{ maxWidth: '800px' }}>
+                            <h1 style={{
+                                fontSize: '3.5rem',
+                                fontWeight: '900',
+                                color: 'white',
+                                letterSpacing: '-0.04em',
+                                marginBottom: '16px',
+                                lineHeight: '0.9',
+                                textShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                            }}>
+                                {greeting.text} <br />
+                                <span style={{ opacity: 0.85, fontSize: '0.8em' }}>Welcome back, {me?.companyName || me?.fullname || 'Employer'}</span>
+                            </h1>
+                            <p style={{
+                                fontSize: '1.2rem',
+                                color: 'rgba(255,255,255,0.75)',
+                                fontWeight: '500',
+                                maxWidth: '600px',
+                                margin: '0 auto',
+                                lineHeight: '1.5'
+                            }}>
+                                Your hiring process is looking {stats.totalApplications > 10 ? 'great' : 'good'} today.
+                            </p>
                         </div>
-                        <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--theme-text-primary)', letterSpacing: '-0.03em', lineHeight: '0.95' }}>
-                            Recruitment <br />
-                            <span className="text-gradient-sapphire">Dashboard</span>
-                        </h1>
                     </div>
-                    <div style={{ textAlign: 'right', animationDelay: '0.1s' }}>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', fontWeight: '600' }}>System Status</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)' }} />
-                            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--theme-text-primary)', textTransform: 'uppercase' }}>Secure / Active</span>
-                        </div>
-                    </div>
-                </header>
+                </div>
 
                 {/* Staggered Stats Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '60px' }}>
@@ -227,16 +315,32 @@ const EmployerDashboard = () => {
                                             <tr key={app.id} className="glass-row" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3F51B5, #1A237E)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: '800' }}>
-                                                            {(app.JobSeeker?.fullname?.[0] || app.JobSeeker?.firstName?.[0] || app.name?.[0] || 'U').toUpperCase()}
-                                                        </div>
-                                                        <div style={{ fontWeight: '700', color: 'var(--theme-text-primary)' }}>
-                                                            {app.JobSeeker?.fullname || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || app.name || 'Unknown Candidate'}
+                                                        <CandidateAvatar 
+                                                            name={app.JobSeeker?.fullname || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || app.name || 'U'}
+                                                            status={app.status}
+                                                        />
+                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <div style={{ fontWeight: '800', color: 'var(--theme-text-primary)', fontSize: '0.95rem' }}>
+                                                                {app.JobSeeker?.fullname || (app.JobSeeker ? `${app.JobSeeker.firstName || ''} ${app.JobSeeker.lastName || ''}`.trim() : '') || app.name || 'Unknown Candidate'}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.72rem', color: 'var(--theme-text-muted)', fontWeight: '600' }}>
+                                                                {app.JobSeeker?.email || 'email-syncing@nexus.com'}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td style={{ fontWeight: '600' }}>{app.jobTitle || app.JobListing?.title}</td>
-                                                <td style={{ fontWeight: '500' }}>{app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Syncing'}</td>
+                                                <td style={{ fontWeight: '700', color: 'var(--theme-text-primary)', fontSize: '0.9rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--glass-accent-light)' }} />
+                                                        {app.jobTitle || app.JobListing?.title}
+                                                    </div>
+                                                </td>
+                                                <td style={{ fontWeight: '600', color: 'var(--theme-text-secondary)', fontSize: '0.85rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <Clock size={12} style={{ opacity: 0.6 }} />
+                                                        {app.applied_at ? new Date(app.applied_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Syncing'}
+                                                    </div>
+                                                </td>
                                                 <td><StatusPill status={app.status} /></td>
                                             </tr>
                                         ))
@@ -248,29 +352,80 @@ const EmployerDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Industrial Actions */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-                        <div className="glass-panel" style={{ padding: '32px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                                <ShieldCheck size={20} className="text-gradient-sapphire" />
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'white' }}>Quick Actions</h3>
+                    {/* Intelligence & Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                        
+                        {/* Hiring Intelligence Card */}
+                        <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                            <div style={{ 
+                                padding: '24px', 
+                                background: 'linear-gradient(135deg, var(--theme-sidebar-accent), transparent)',
+                                borderBottom: '1px solid var(--theme-border)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                                    <ShieldCheck size={18} className="text-gradient-sapphire" />
+                                    <span style={{ fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--theme-text-muted)' }}>Stats</span>
+                                </div>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--theme-text-primary)', marginBottom: '4px' }}>How you are doing</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--theme-text-muted)', fontWeight: '500' }}>See how many people like your jobs.</p>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <OperationButton label="Post a Job" icon={<PlusCircle size={20} />} primary onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
-                                <OperationButton label="View Applications" icon={<Users size={20} />} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)} />
-                                <OperationButton label="Manage Jobs" icon={<Briefcase size={20} />} onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                            
+                            <div style={{ padding: '24px' }}>
+                                <div style={{ marginBottom: '24px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                        <span style={{ color: 'var(--theme-text-primary)' }}>Shortlist Progress</span>
+                                        <span style={{ color: 'var(--glass-accent-light)' }}>{Math.round((stats.shortlisted / (stats.totalApplications || 1)) * 100)}%</span>
+                                    </div>
+                                    <div style={{ width: '100%', height: '6px', background: 'var(--theme-bg-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ 
+                                            width: `${(stats.shortlisted / (stats.totalApplications || 1)) * 100}%`, 
+                                            height: '100%', 
+                                            background: 'linear-gradient(90deg, #3F51B5, #3E61FF)',
+                                            borderRadius: '3px'
+                                        }} />
+                                    </div>
+                                </div>
+
+                                <div className="glass-panel" style={{ padding: '16px', background: 'var(--theme-bg-subtle)', border: 'none', borderRadius: '16px', marginBottom: '20px' }}>
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--theme-text-secondary)', lineHeight: '1.6', fontWeight: '600', margin: '0' }}>
+                                        {stats.activeJobs > 0 
+                                            ? `You have ${stats.activeJobs} active listings. Reach quality candidates 30% faster with Premium.`
+                                            : "No active jobs. Start your recruitment journey by posting a new listing."}
+                                    </p>
+                                </div>
+
+                                {/* Mini Performance Chart Simulation */}
+                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '60px', padding: '0 8px' }}>
+                                    {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
+                                        <div key={i} style={{ 
+                                            flex: 1, 
+                                            height: `${h}%`, 
+                                            background: i === 6 ? 'var(--glass-accent-light)' : 'var(--theme-text-muted)', 
+                                            opacity: i === 6 ? 1 : 0.2,
+                                            borderRadius: '4px',
+                                            transition: 'height 1s ease-out',
+                                            animation: `growUp 1s ease-out ${i * 0.1}s forwards`
+                                        }} />
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.65rem', color: 'var(--theme-text-muted)', fontWeight: '700' }}>
+                                    <span>MON</span>
+                                    <span>SUN</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Analysis Insight */}
-                        <div className="glass-panel" style={{ padding: '28px', background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08), transparent)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                                <TrendingUp size={18} className="text-gradient-sapphire" />
-                                <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>Hiring Overview</h4>
+                         {/* Quick Actions */}
+                        <div className="glass-panel" style={{ padding: '32px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
+                                <LayoutDashboard size={20} className="text-gradient-sapphire" />
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--theme-text-primary)' }}>Quick Actions</h3>
                             </div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--glass-text-secondary)', lineHeight: '1.6', fontWeight: '500' }}>
-                                You have <strong>{stats.activeJobs} active job{stats.activeJobs !== 1 ? 's' : ''}</strong> with <strong>{stats.totalApplications} total application{stats.totalApplications !== 1 ? 's' : ''}</strong>. {stats.shortlisted > 0 ? `${stats.shortlisted} candidate${stats.shortlisted !== 1 ? 's have' : ' has'} been shortlisted.` : 'Review incoming applications to build your shortlist.'}
-                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                <OperationButton label="Post a Job" icon={<PlusCircle size={18} />} primary onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                                <OperationButton label="Candidate List" icon={<Users size={18} />} onClick={() => navigate(ROUTES.EMPLOYER_APPLICATIONS)} />
+                                <OperationButton label="My Jobs" icon={<Target size={18} />} onClick={() => navigate(ROUTES.JOB_MANAGEMENT)} />
+                            </div>
                         </div>
                     </div>
 
@@ -280,6 +435,7 @@ const EmployerDashboard = () => {
             <style>{`
                 .glass-btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06) !important; color: var(--glass-accent-light) !important; }
                 .op-btn:hover { transform: translateX(8px); border-color: var(--glass-border-bright) !important; }
+                @keyframes growUp { from { height: 0; } to { height: var(--final-height); } }
             `}</style>
         </div>
     );
@@ -295,7 +451,7 @@ const OperationButton = ({ label, icon, primary, onClick }) => (
             borderRadius: '16px',
             border: primary ? 'none' : '1px solid var(--glass-border)',
             background: primary ? 'linear-gradient(135deg, #3F51B5, #303F9F)' : 'rgba(255,255,255,0.02)',
-            color: 'white',
+            color: primary ? 'white' : 'var(--theme-text-primary)',
             fontWeight: '700',
             fontSize: '0.95rem',
             cursor: 'pointer',
@@ -342,8 +498,51 @@ const StatusPill = ({ status }) => {
             gap: '6px'
         }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: s.color }} />
-            {status || 'Pending'}
+            {status === 'Shortlisted' ? 'SHORTLIST' : (status === 'Accepted' ? 'HIRED' : (status === 'Pending' ? 'PENDING' : status.toUpperCase()))}
         </span>
+    );
+};
+
+const CandidateAvatar = ({ name, status }) => {
+    const getStatusColor = () => {
+        switch (status) {
+            case 'Accepted': return '#10B981';
+            case 'Shortlisted': return '#3B82F6';
+            case 'Interview': return '#F59E0B';
+            case 'Rejected': return '#EF4444';
+            default: return 'var(--glass-accent-light)';
+        }
+    };
+    
+    return (
+        <div style={{ position: 'relative' }}>
+            <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '12px', 
+                background: 'linear-gradient(135deg, #1A237E, #3F51B5)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: 'white', 
+                fontSize: '0.9rem', 
+                fontWeight: '900',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.2)' 
+            }}>
+                {(name?.[0] || 'U').toUpperCase()}
+            </div>
+            <div style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                background: getStatusColor(),
+                border: '2px solid var(--theme-card)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }} />
+        </div>
     );
 };
 

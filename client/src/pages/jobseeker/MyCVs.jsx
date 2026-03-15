@@ -158,11 +158,11 @@ const MyCVs = () => {
                 }
 
                 .hero-title {
-                    font-size: 3.8rem;
+                    font-size: 2.2rem;
                     font-weight: 950;
-                    letter-spacing: -0.05em;
+                    letter-spacing: -0.04em;
                     color: var(--text-main);
-                    line-height: 1.05;
+                    line-height: 1.2;
                     margin-bottom: 40px;
                 }
                 .hero-title span { color: var(--color-brand-accent); }
@@ -395,11 +395,11 @@ const MyCVs = () => {
 
                         <div className="stats-tray">
                             <div className="stat-card platform">
-                                <span className="lbl">Platform Vault</span>
+                                <span className="lbl">Made Here</span>
                                 <span className="val">{cvs.filter(c => c.type === 'platform').length}</span>
                             </div>
                             <div className="stat-card uploaded">
-                                <span className="lbl">External Uploads</span>
+                                <span className="lbl">Uploaded</span>
                                 <span className="val">{cvs.filter(c => c.type === 'uploaded').length}</span>
                             </div>
                         </div>
@@ -435,9 +435,9 @@ const MyCVs = () => {
             {/* MAIN CONTENT AREA */}
             <div className="vault-main">
                 <div className="filter-tabs">
-                    <div className={`tab-item ${activeFilter === 'All' ? 'active' : ''}`} onClick={() => setActiveFilter('All')}>All Assets</div>
-                    <div className={`tab-item ${activeFilter === 'platform' ? 'active' : ''}`} onClick={() => setActiveFilter('platform')}>Vault Built</div>
-                    <div className={`tab-item ${activeFilter === 'uploaded' ? 'active' : ''}`} onClick={() => setActiveFilter('uploaded')}>External PDFs</div>
+                    <div className={`tab-item ${activeFilter === 'All' ? 'active' : ''}`} onClick={() => setActiveFilter('All')}>All CVs</div>
+                    <div className={`tab-item ${activeFilter === 'platform' ? 'active' : ''}`} onClick={() => setActiveFilter('platform')}>Created Here</div>
+                    <div className={`tab-item ${activeFilter === 'uploaded' ? 'active' : ''}`} onClick={() => setActiveFilter('uploaded')}>Uploaded Files</div>
                 </div>
 
                 <div className="asset-grid">
@@ -445,7 +445,7 @@ const MyCVs = () => {
                         <div key={cv.id} className="asset-card">
                             <div className="card-header">
                                 <div className={`type-badge ${cv.type}`}>
-                                    {cv.type === 'platform' ? <><Layout size={12} /> Platform Built</> : <><HardDrive size={12} /> External PDF</>}
+                                    {cv.type === 'platform' ? <><Layout size={12} /> Created Here</> : <><HardDrive size={12} /> Uploaded</>}
                                 </div>
                                 <div style={{ color: '#E2E8F0', cursor: 'pointer' }}><MoreVertical size={20} /></div>
                             </div>

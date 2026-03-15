@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import EmployerSidebar from './EmployerSidebar';
-import Footer from '../Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/routes/routes';
 import { useTheme } from '@/hooks/useTheme';
@@ -12,16 +11,6 @@ const EmployerLayout = () => {
     const userRole = localStorage.getItem('role');
     const { theme } = useTheme();
     const location = useLocation();
-
-    // Pages where footer should be hidden
-    const hideFooterRoutes = [
-        ROUTES.EMPLOYER_DASHBOARD,
-        ROUTES.JOB_MANAGEMENT,
-        ROUTES.EMPLOYER_APPLICATIONS,
-        ROUTES.EMPLOYER_HISTORY
-    ];
-
-    const showFooter = !hideFooterRoutes.includes(location.pathname);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -62,7 +51,7 @@ const EmployerLayout = () => {
             flexGrow: 1,
             padding: '0',
             width: '100%',
-            marginBottom: showFooter ? '0' : '40px', // Extra padding at bottom if no footer
+            marginBottom: '40px', // Extra padding at bottom
         }
     };
 
@@ -80,8 +69,6 @@ const EmployerLayout = () => {
                 <main style={styles.content}>
                     <Outlet />
                 </main>
-
-                {showFooter && <Footer />}
             </div>
 
             <style>{`
