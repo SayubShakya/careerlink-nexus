@@ -181,65 +181,39 @@ const AdminEmployers = () => {
                 ) : current.length === 0 ? (
                     <div className="ep-empty-state"><div className="ep-empty-icon"><Building2 size={40} /></div><h3>No employers found</h3><p>Try adjusting your search criteria.</p></div>
                 ) : (
-                    <div className="ep-table-container">
-                        <table className="ep-custom-table">
-                            <thead>
-                                <tr>
-                                    <th>Company Info</th>
-                                    <th>Sector & Location</th>
-                                    <th>Activity & Status</th>
-                                    <th>Join Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {current.map((emp, i) => {
-                                    const compColor = getCompanyColor(emp.companyName);
-                                    return (
-                                        <tr key={emp.id} style={{ animationDelay: `${i * 0.04}s` }} className="ep-table-row">
-                                            <td>
-                                                <div className="ep-td-comp">
-                                                    <div className="ep-td-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}` }}>
-                                                        {(emp.companyName || '?')[0]}
-                                                    </div>
-                                                    <div className="ep-td-name-col">
-                                                        <span className="ep-td-name">{emp.companyName}</span>
-                                                        <span className="ep-td-email"><Mail size={10} style={{display:'inline', marginRight: 4}}/>{emp.email}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="ep-td-meta">
-                                                    <span className="ep-td-industry">{emp.industry || 'General Sector'}</span>
-                                                    <span className="ep-td-location"><MapPin size={12}/> {emp.location || 'Not specified'}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="ep-td-stats">
-                                                    <div className="ep-td-jobs-pill" onClick={() => setSelectedId(emp.id)}>
-                                                        <Briefcase size={12} /> {emp.jobCount || 0} jobs
-                                                    </div>
-                                                    <span className={`ep-td-status ${emp.is_verified ? 'verified' : 'active'}`}>
-                                                        <span className="ep-td-status-dot" />{emp.is_verified ? 'Verified' : 'Active'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className="ep-td-date">
-                                                    {emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div className="ep-td-actions">
-                                                    <button className="ep-btn-icon view" onClick={() => setSelectedId(emp.id)} title="View jobs"><ExternalLink size={14} /></button>
-                                                    <button className="ep-btn-icon delete" onClick={() => setDeleteId(emp.id)} title="Remove"><Trash2 size={14} /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                    <div className="ep-cards-grid">
+                        {current.map((emp, i) => {
+                            const compColor = getCompanyColor(emp.companyName);
+                            return (
+                                <div key={emp.id} className="ep-card" style={{ animationDelay: `${i * 0.04}s` }}>
+                                    <div className="ep-card-accent" style={{ background: compColor.grad }} />
+                                    <div className="ep-card-header">
+                                        <div className="ep-card-company">
+                                            <div className="ep-card-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}` }}>{(emp.companyName || '?')[0]}</div>
+                                            <div>
+                                                <div className="ep-card-name">{emp.companyName}</div>
+                                                <div className="ep-card-industry">{emp.industry || 'Industry not set'}</div>
+                                            </div>
+                                        </div>
+                                        <span className={`ep-card-status ${emp.is_verified ? 'verified' : 'active'}`}><span className="ep-card-status-dot" />{emp.is_verified ? 'Verified' : 'Active'}</span>
+                                    </div>
+                                    <div className="ep-card-info">
+                                        <div className="ep-card-info-item"><Mail size={13} className="ep-info-icon" /><span className="ep-info-text">{emp.email}</span></div>
+                                        <div className="ep-card-info-item"><MapPin size={13} className="ep-info-icon" /><span className="ep-info-text">{emp.location || 'Not specified'}</span></div>
+                                        {emp.companyWebsite && <div className="ep-card-info-item"><Globe size={13} className="ep-info-icon" /><span className="ep-info-text ep-link">{emp.companyWebsite}</span></div>}
+                                    </div>
+                                    <div className="ep-card-divider" />
+                                    <div className="ep-card-footer">
+                                        <div className="ep-card-jobs-pill" onClick={() => setSelectedId(emp.id)}><Briefcase size={13} /><span className="ep-jobs-count">{emp.jobCount || 0}</span><span>jobs</span></div>
+                                        <div className="ep-card-date"><Calendar size={12} />{emp.created_at ? new Date(emp.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</div>
+                                        <div className="ep-card-actions">
+                                            <button className="ep-btn-view" onClick={() => setSelectedId(emp.id)} title="View jobs"><ExternalLink size={14} /></button>
+                                            <button className="ep-btn-delete" onClick={() => setDeleteId(emp.id)} title="Remove"><Trash2 size={14} /></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 
@@ -348,47 +322,44 @@ const AdminEmployers = () => {
                 .ep-search-tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 8px; background: #EEF2FF; border: 1px solid #C7D2FE; font-size: 0.72rem; color: #4338CA; font-weight: 500; }
                 .ep-search-tag button { border: none; background: transparent; color: #6366F1; cursor: pointer; display: flex; }
 
-                /* ── TABLE ── */
-                .ep-table-container { background: white; border-radius: 18px; border: 1px solid #E5E7EB; overflow-x: auto; margin-bottom: 24px; animation: epFadeUp 0.4s ease both; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-                .ep-custom-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px; }
-                .ep-custom-table th { color: #64748B; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 18px 24px; text-align: left; border-bottom: 1px solid #E5E7EB; background: #F8FAFC; white-space: nowrap; }
-                .ep-custom-table th:first-child { border-top-left-radius: 18px; }
-                .ep-custom-table th:last-child { border-top-right-radius: 18px; }
-                
-                .ep-table-row { transition: all 0.25s ease; background: white; }
-                .ep-table-row:hover { background: #F8FAFC; }
-                .ep-table-row td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid #E5E7EB; }
-                .ep-table-row:last-child td { border-bottom: none; }
-                
-                .ep-td-comp { display: flex; align-items: center; gap: 14px; }
-                .ep-td-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
-                .ep-td-name-col { display: flex; flex-direction: column; gap: 4px; }
-                .ep-td-name { font-size: 0.98rem; font-weight: 650; color: #111827; letter-spacing: -0.01em; }
-                .ep-td-email { font-size: 0.75rem; color: #6B7280; }
-                
-                .ep-td-meta { display: flex; flex-direction: column; gap: 6px; }
-                .ep-td-industry { font-size: 0.85rem; font-weight: 600; color: #374151; }
-                .ep-td-location { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #9CA3AF; }
-                
-                .ep-td-stats { display: flex; align-items: center; gap: 12px; }
-                .ep-td-jobs-pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; background: #EEF2FF; color: #4F46E5; border: 1px solid #E0E7FF; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-                .ep-td-jobs-pill:hover { background: #E0E7FF; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(79, 70, 229, 0.1); }
-                
-                .ep-td-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 650; white-space: nowrap; }
-                .ep-td-status.verified { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
-                .ep-td-status.active { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
-                .ep-td-status-dot { width: 6px; height: 6px; border-radius: 50%; }
-                .ep-td-status.verified .ep-td-status-dot { background: #10B981; }
-                .ep-td-status.active .ep-td-status-dot { background: #6366F1; }
-                
-                .ep-td-date { display: inline-flex; padding: 5px 12px; background: #EEF2FF; border: 1px solid #E0E7FF; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #4F46E5; white-space: nowrap; }
+                /* ── GRID ── */
+                .ep-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+                .ep-card { background: white; border-radius: 18px; border: 1px solid #E5E7EB; overflow: hidden; transition: all 0.25s ease; animation: epFadeUp 0.4s ease both; position: relative; }
+                .ep-card:hover { border-color: #D1D5DB; box-shadow: 0 10px 30px rgba(0,0,0,0.07); transform: translateY(-4px); }
+                .ep-card-accent { height: 4px; width: 100%; transition: height 0.2s; }
+                .ep-card:hover .ep-card-accent { height: 5px; }
 
-                .ep-td-actions { display: flex; gap: 8px; }
-                .ep-btn-icon { width: 36px; height: 36px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-                .ep-btn-icon.view { background: #F0F9FF; color: #0284C7; border-color: #E0F2FE; }
-                .ep-btn-icon.view:hover { background: #E0F2FE; color: #0369A1; border-color: #BAE6FD; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15); }
-                .ep-btn-icon.delete { background: #FEF2F2; color: #EF4444; border-color: #FEE2E2; }
-                .ep-btn-icon.delete:hover { background: #FEE2E2; color: #DC2626; border-color: #FECACA; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); }
+                .ep-card-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 0; }
+                .ep-card-company { display: flex; align-items: center; gap: 12px; }
+                .ep-card-avatar { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; transition: transform 0.2s; flex-shrink: 0; }
+                .ep-card:hover .ep-card-avatar { transform: scale(1.08); }
+                .ep-card-name { font-size: 1rem; font-weight: 650; color: #111827; letter-spacing: -0.01em; }
+                .ep-card-industry { font-size: 0.72rem; color: #9CA3AF; margin-top: 2px; }
+
+                .ep-card-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
+                .ep-card-status.verified { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+                .ep-card-status.active { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+                .ep-card-status-dot { width: 5px; height: 5px; border-radius: 50%; }
+                .ep-card-status.verified .ep-card-status-dot { background: #10B981; }
+                .ep-card-status.active .ep-card-status-dot { background: #6366F1; }
+
+                .ep-card-info { padding: 16px 24px 0; display: flex; flex-direction: column; gap: 8px; }
+                .ep-card-info-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #4B5563; }
+                .ep-info-icon { color: #9CA3AF; flex-shrink: 0; }
+                .ep-info-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .ep-info-text.ep-link { color: #6366F1; }
+
+                .ep-card-divider { height: 1px; background: #F3F4F6; margin: 16px 24px 0; }
+                .ep-card-footer { display: flex; align-items: center; gap: 12px; padding: 14px 24px 20px; }
+                .ep-card-jobs-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 14px; border-radius: 8px; background: #EEF2FF; color: #4F46E5; border: 1px solid #E0E7FF; font-weight: 600; font-size: 0.72rem; cursor: pointer; transition: all 0.2s; }
+                .ep-card-jobs-pill:hover { background: #E0E7FF; transform: scale(1.03); }
+                .ep-card-date { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #9CA3AF; }
+                .ep-card-actions { margin-left: auto; display: flex; gap: 6px; }
+                
+                .ep-btn-view { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #E0E7FF; background: #EEF2FF; color: #6366F1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+                .ep-btn-view:hover { background: #6366F1; color: white; transform: scale(1.08); }
+                .ep-btn-delete { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #FEE2E2; background: #FEF2F2; color: #EF4444; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+                .ep-btn-delete:hover { background: #EF4444; color: white; transform: scale(1.08); }
 
                 /* ── PAGINATION ── */
                 .ep-pagination { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 20px 0; }

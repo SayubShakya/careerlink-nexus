@@ -285,16 +285,4 @@ const AdminJobSeekers = () => {
     );
 };
 
-const DetailField = ({ icon, label, value }) => (
-    <div className="js-item">
-        <div className="js-item-label">{icon} {label}</div>
-        <div className="js-item-val" title={value}>{value}</div>
-        <style>{`
-            .js-item { padding: 12px 14px; background: #F9FAFB; border-radius: 12px; border: 1px solid #F3F4F6; }
-            .js-item-label { font-size: 0.62rem; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
-            .js-item-val { font-size: 0.8rem; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        `}</style>
-    </div>
-);
-
 export default AdminJobSeekers;

@@ -225,36 +225,66 @@ const AdminJobs = () => {
                         <h3>No jobs found</h3><p>Try adjusting your search or filter criteria.</p>
                     </div>
                 ) : (
-                    <div className="jb-cards-grid">
-                        {current.map((job, i) => {
-                            const compColor = getCompanyColor(job.Employer?.companyName);
-                            const typeBadge = getJobTypeBadge(job.jobType);
-                            return (
-                                <div key={job.id} className="jb-card" style={{ animationDelay: `${i * 0.04}s` }} onClick={() => setSelectedJob(job)}>
-                                    <div className="jb-card-accent" style={{ background: compColor.grad }} />
-                                    <div className="jb-card-top">
-                                        <div className="jb-card-company">
-                                            <div className="jb-card-comp-avatar" style={{ background: compColor.grad }}>{(job.Employer?.companyName || '?')[0]}</div>
-                                            <span className="jb-card-comp-name">{job.Employer?.companyName || 'Unknown'}</span>
-                                        </div>
-                                        <span className={`jb-card-status ${job.is_active ? 'active' : 'inactive'}`}>
-                                            <span className="jb-card-status-dot" />{job.is_active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </div>
-                                    <h3 className="jb-card-title">{job.title}</h3>
-                                    <div className="jb-card-meta">
-                                        <span className="jb-card-meta-item"><MapPin size={13} /> {job.location || 'Not specified'}</span>
-                                        <span className="jb-card-type-badge" style={{ background: typeBadge.bg, color: typeBadge.color, borderColor: typeBadge.border }}>{typeBadge.label}</span>
-                                    </div>
-                                    {job.salary && <div className="jb-card-salary"><DollarSign size={13} /> {job.salary}</div>}
-                                    <div className="jb-card-divider" />
-                                    <div className="jb-card-footer">
-                                        <div className="jb-card-stat"><Eye size={14} /><span className="jb-card-stat-val">{job.views || 0}</span><span className="jb-card-stat-label">views</span></div>
-                                        <button className="jb-card-view-btn" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}>View <ArrowUpRight size={13} /></button>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                    <div className="jb-table-container">
+                        <table className="jb-custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Job & Company</th>
+                                    <th>Details</th>
+                                    <th>Comp & Status</th>
+                                    <th>Activity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {current.map((job, i) => {
+                                    const compColor = getCompanyColor(job.Employer?.companyName);
+                                    const typeBadge = getJobTypeBadge(job.jobType);
+                                    return (
+                                        <tr key={job.id} style={{ animationDelay: `${i * 0.04}s` }} className="jb-table-row" onClick={() => setSelectedJob(job)}>
+                                            <td>
+                                                <div className="jb-td-job">
+                                                    <div className="jb-td-comp-avatar" style={{ background: compColor.grad }}>
+                                                        {(job.Employer?.companyName || '?')[0]}
+                                                    </div>
+                                                    <div className="jb-td-job-info">
+                                                        <span className="jb-td-title">{job.title}</span>
+                                                        <span className="jb-td-comp-name">{job.Employer?.companyName || 'Unknown'}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="jb-td-meta">
+                                                    <span className="jb-td-type-badge" style={{ background: typeBadge.bg, color: typeBadge.color, borderColor: typeBadge.border }}>
+                                                        {typeBadge.label}
+                                                    </span>
+                                                    <span className="jb-td-location"><MapPin size={12}/> {job.location || 'Not specified'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="jb-td-comp-status">
+                                                    {job.salary ? <span className="jb-td-salary"><DollarSign size={12}/> {job.salary}</span> : <span className="jb-td-salary na">Not listed</span>}
+                                                    <span className={`jb-td-status ${job.is_active ? 'active' : 'inactive'}`}>
+                                                        <span className="jb-td-status-dot" />{job.is_active ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="jb-td-stats">
+                                                    <div className="jb-td-stat"><Eye size={13} /> <span>{job.views || 0} views</span></div>
+                                                    <div className="jb-td-stat"><UsersIcon size={13} /> <span>{job.totalApplications || 0} apps</span></div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button className="jb-btn-view" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }} title="View Details">
+                                                    <ArrowUpRight size={14} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
@@ -393,35 +423,51 @@ const AdminJobs = () => {
                 .jb-results-text strong { color: #111827; font-weight: 600; }
                 .jb-search-tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 12px; border-radius: 8px; background: #FFFBEB; border: 1px solid #FDE68A; font-size: 0.72rem; color: #92400E; font-weight: 500; }
                 .jb-search-tag button { border: none; background: transparent; color: #D97706; cursor: pointer; display: flex; padding: 2px; }
-                .jb-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
-                .jb-card { background: white; border-radius: 18px; border: 1px solid #E5E7EB; padding: 0; overflow: hidden; cursor: pointer; transition: all 0.25s ease; animation: jbFadeUp 0.4s ease both; position: relative; }
-                .jb-card:hover { border-color: #D1D5DB; box-shadow: 0 10px 30px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.03); transform: translateY(-4px); }
-                .jb-card-accent { height: 4px; width: 100%; transition: height 0.2s; }
-                .jb-card:hover .jb-card-accent { height: 5px; }
-                .jb-card-top { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px 0; }
-                .jb-card-company { display: flex; align-items: center; gap: 10px; }
-                .jb-card-comp-avatar { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.8rem; box-shadow: 0 3px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
-                .jb-card:hover .jb-card-comp-avatar { transform: scale(1.08); }
-                .jb-card-comp-name { font-size: 0.78rem; color: #6B7280; font-weight: 500; }
+                /* ── TABLE ── */
+                .jb-table-container { background: white; border-radius: 18px; border: 1px solid #E5E7EB; overflow-x: auto; margin-bottom: 24px; animation: jbFadeUp 0.4s ease both; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+                .jb-custom-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px; }
+                .jb-custom-table th { color: #64748B; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 18px 24px; text-align: left; border-bottom: 1px solid #E5E7EB; background: #F8FAFC; white-space: nowrap; }
+                .jb-custom-table th:first-child { border-top-left-radius: 18px; }
+                .jb-custom-table th:last-child { border-top-right-radius: 18px; }
+                
+                .jb-table-row { transition: all 0.25s ease; background: white; cursor: pointer; }
+                .jb-table-row:hover { background: #F8FAFC; }
+                .jb-table-row td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid #E5E7EB; }
+                .jb-table-row:last-child td { border-bottom: none; }
+                
+                .jb-td-job { display: flex; align-items: center; gap: 14px; }
+                .jb-td-comp-avatar { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+                .jb-td-job-info { display: flex; flex-direction: column; gap: 6px; }
+                .jb-td-title { font-size: 0.98rem; font-weight: 650; color: #111827; letter-spacing: -0.01em; }
+                .jb-td-comp-name { font-size: 0.75rem; color: #6B7280; font-weight: 500; }
+                
+                .jb-td-meta { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+                .jb-td-type-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 600; border: 1px solid; letter-spacing: 0.02em; white-space: nowrap; }
+                .jb-td-location { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #9CA3AF; white-space: nowrap; }
+                
+                .jb-td-comp-status { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+                .jb-td-salary { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; font-size: 0.78rem; color: #059669; font-weight: 600; background: #ECFDF5; border-radius: 8px; border: 1px solid #D1FAE5; }
+                .jb-td-salary.na { color: #6B7280; background: #F3F4F6; border-color: #E5E7EB; }
+                .jb-td-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 650; white-space: nowrap; }
+                .jb-td-status.active { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+                .jb-td-status.inactive { background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; }
+                .jb-td-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+                .jb-td-status.active .jb-td-status-dot { background: #10B981; }
+                .jb-td-status.inactive .jb-td-status-dot { background: #EF4444; }
+
+                .jb-td-stats { display: flex; flex-direction: column; gap: 6px; }
+                .jb-td-stat { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #6B7280; font-weight: 500; }
+                
+                .jb-btn-view { width: 36px; height: 36px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: #FFFBEB; color: #D97706; border-color: #FDE68A; }
+                .jb-btn-view:hover { background: #FDE68A; color: #92400E; border-color: #FCD34D; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15); }
+                
+                /* Maintained for modal backward-compatibility */
                 .jb-card-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
                 .jb-card-status.active { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
                 .jb-card-status.inactive { background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; }
                 .jb-card-status-dot { width: 5px; height: 5px; border-radius: 50%; }
                 .jb-card-status.active .jb-card-status-dot { background: #10B981; }
                 .jb-card-status.inactive .jb-card-status-dot { background: #EF4444; }
-                .jb-card-title { font-size: 1.02rem; font-weight: 650; color: #111827; padding: 12px 22px 8px; margin: 0; letter-spacing: -0.01em; line-height: 1.3; }
-                .jb-card:hover .jb-card-title { color: #1F2937; }
-                .jb-card-meta { display: flex; align-items: center; gap: 10px; padding: 0 22px 4px; flex-wrap: wrap; }
-                .jb-card-meta-item { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #9CA3AF; font-weight: 400; }
-                .jb-card-type-badge { padding: 3px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 600; border: 1px solid; letter-spacing: 0.02em; }
-                .jb-card-salary { display: flex; align-items: center; gap: 4px; padding: 4px 22px; font-size: 0.8rem; color: #059669; font-weight: 600; }
-                .jb-card-divider { height: 1px; background: #F3F4F6; margin: 12px 22px; }
-                .jb-card-footer { display: flex; align-items: center; gap: 16px; padding: 0 22px 18px; }
-                .jb-card-stat { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #9CA3AF; }
-                .jb-card-stat-val { font-weight: 700; color: #374151; }
-                .jb-card-stat-label { font-weight: 400; }
-                .jb-card-view-btn { margin-left: auto; display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 9px; border: 1px solid #E5E7EB; background: white; color: #374151; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-                .jb-card-view-btn:hover { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; border-color: transparent; box-shadow: 0 3px 10px rgba(245,158,11,0.25); }
                 .jb-empty-state { display: flex; flex-direction: column; align-items: center; padding: 80px 40px; background: white; border-radius: 18px; border: 1px solid #E5E7EB; animation: jbFadeUp 0.4s ease 0.12s both; }
                 .jb-empty-icon { color: #D1D5DB; margin-bottom: 16px; }
                 .jb-empty-state h3 { font-size: 1.05rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
