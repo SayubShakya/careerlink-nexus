@@ -234,13 +234,13 @@ const CompanyProfile = () => {
                     <div style={styles.headerHero}>
                         <div style={styles.statusBadge}>
                             <div className="pulse-dot" style={{ background: '#10B981', boxShadow: '0 0 12px #10B981' }} />
-                            IDENTITY ACTIVE
+                            PROFILE ACTIVE
                         </div>
-                        <span style={styles.overline}>Organization Control</span>
-                        <h1 style={styles.title}>Company <span className="text-gradient-sapphire">Identity.</span></h1>
+                        <span style={styles.overline}>Company Settings</span>
+                        <h1 style={styles.title}>Company <span className="text-gradient-sapphire">Profile.</span></h1>
                         <p style={styles.subtitle}>
-                            Manage your public brand presence and corporate metadata with industrial precision.
-                            Your identity here defines how talent perceives your organization.
+                            Manage your company profile and public brand.
+                            Your profile here defines how candidates perceive your company.
                         </p>
                     </div>
 
@@ -257,7 +257,7 @@ const CompanyProfile = () => {
                                     {/* Logo Section */}
                                     <div style={{ ...styles.logoColumn, animationDelay: '0.1s' }} className="glass-reveal">
                                         <div style={styles.formGroup}>
-                                            <label style={styles.label}>CORPORATE LOGO</label>
+                                            <label style={styles.label}>COMPANY LOGO</label>
                                             <div
                                                 style={styles.logoDropzone}
                                                 onClick={() => document.getElementById('logoInput').click()}
@@ -363,12 +363,12 @@ const CompanyProfile = () => {
 
                                         <div className="glass-reveal" style={{ animationDelay: '0.5s' }}>
                                             <div style={styles.formGroup}>
-                                                <label style={styles.label}>CORPORATE DESCRIPTION *</label>
+                                                <label style={styles.label}>COMPANY DESCRIPTION *</label>
                                                 <textarea
                                                     name="description"
                                                     value={formData.description}
                                                     onChange={handleInputChange}
-                                                    placeholder="Define your organization's mission and culture…"
+                                                    placeholder="Share your company's mission, values, and culture…"
                                                     style={{
                                                         ...styles.textarea,
                                                         borderColor: errors.description ? '#EF4444' : 'var(--glass-border)'
@@ -386,7 +386,7 @@ const CompanyProfile = () => {
                                                 disabled={isUpdating}
                                             >
                                                 {isUpdating ? (
-                                                    <><Loader2 className="animate-spin" size={20} /> SYNCING…</>
+                                                    <><Loader2 className="animate-spin" size={20} /> SAVING…</>
                                                 ) : (
                                                     <><Save size={20} className="text-gradient-sapphire" /> SAVE CHANGES</>
                                                 )}
@@ -419,7 +419,7 @@ const CompanyProfile = () => {
                     fontWeight: '800'
                 }}>
                     <CheckCircle2 size={24} />
-                    <span>Identity Synced Successfully</span>
+                    <span>Profile Saved Successfully</span>
                 </div>
             )}
 

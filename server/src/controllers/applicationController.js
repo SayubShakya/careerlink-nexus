@@ -133,25 +133,77 @@ exports.getAllApplications = catchAsync(async (req, res, next) => {
                 model: JobListing,
                 where: { employer_id: req.user.id }
             },
-            { model: JobSeeker, attributes: ['firstName', 'lastName', 'email'] },
+            { 
+                model: JobSeeker, 
+                attributes: ['firstName', 'lastName', 'email'],
+                include: [
+                    {
+                        model: Profile,
+                        attributes: ['phone', 'location', 'summary']
+                    }
+                ]
+            },
             { model: CV }
         ],
         order: [['applied_at', 'DESC']]
     });
 
+    // Map DB status values to display-friendly values for the frontend
+    const statusDisplayMap = {
+        'applied': 'Pending',
+        'reviewed': 'Reviewed',
+        'shortlisted': 'Shortlisted',
+        'interview_scheduled': 'Interview',
+        'rejected': 'Rejected',
+        'hired': 'Accepted'
+    };
+
+    const formattedApps = applications.map(app => {
+        const json = app.toJSON();
+        return {
+            ...json,
+            status: statusDisplayMap[json.status] || json.status,
+            JobSeeker: json.JobSeeker ? {
+                ...json.JobSeeker,
+                fullname: `${json.JobSeeker.firstName || ''} ${json.JobSeeker.lastName || ''}`.trim(),
+                phone: json.JobSeeker.Profile?.phone,
+                location: json.JobSeeker.Profile?.location,
+                summary: json.JobSeeker.Profile?.summary
+            } : null
+        };
+    });
+
     res.status(200).json({
         status: 'success',
-        results: applications.length,
-        data: { applications }
+        results: formattedApps.length,
+        data: { applications: formattedApps }
     });
 });
 
 // Employer updates application status (S4-04)
 exports.updateApplicationStatus = catchAsync(async (req, res, next) => {
-    const { status } = req.body;
+    let { status } = req.body;
 
-    if (!['applied', 'reviewed', 'shortlisted', 'interview_scheduled', 'rejected', 'hired'].includes(status)) {
-        return next(new AppError('Invalid status value.', 400));
+    // Map frontend status values to database enum values
+    const statusMap = {
+        'Pending': 'applied',
+        'Shortlisted': 'shortlisted',
+        'Rejected': 'rejected',
+        'Accepted': 'hired',
+        'Reviewed': 'reviewed',
+        'Interview': 'interview_scheduled',
+        // Also accept lowercase DB values directly
+        'applied': 'applied',
+        'reviewed': 'reviewed',
+        'shortlisted': 'shortlisted',
+        'interview_scheduled': 'interview_scheduled',
+        'rejected': 'rejected',
+        'hired': 'hired'
+    };
+
+    const dbStatus = statusMap[status];
+    if (!dbStatus) {
+        return next(new AppError(`Invalid status value: "${status}". Valid values are: Pending, Shortlisted, Rejected, Accepted, Reviewed, Interview.`, 400));
     }
 
     // Find application and ensure job belongs to employer
@@ -167,24 +219,35 @@ exports.updateApplicationStatus = catchAsync(async (req, res, next) => {
         return next(new AppError('Unauthorized to update this application.', 403));
     }
 
-    application.status = status;
+    application.status = dbStatus;
     await application.save();
+
+    // Map DB status back to display name for notifications
+    const displayStatusMap = {
+        'applied': 'Pending',
+        'reviewed': 'Reviewed',
+        'shortlisted': 'Shortlisted',
+        'interview_scheduled': 'Interview Scheduled',
+        'rejected': 'Rejected',
+        'hired': 'Accepted'
+    };
+    const displayStatus = displayStatusMap[dbStatus] || dbStatus;
 
     // Notify Seeker
     await sendNotification(
         application.job_seeker_id,
         'job_seeker',
         'Application Status Updated!',
-        `Your application for ${application.JobListing.title} is now ${status.toUpperCase()}.`,
+        `Your application for ${application.JobListing.title} is now ${displayStatus}.`,
         `/jobseeker/status`
     );
 
     // Send Email to Seeker
-    await sendStatusUpdate(application.JobSeeker.email, application.JobListing.title, status);
+    await sendStatusUpdate(application.JobSeeker.email, application.JobListing.title, displayStatus);
 
     res.status(200).json({
         status: 'success',
-        message: `Application status updated to ${status}`,
+        message: `Application status updated to ${displayStatus}`,
         data: { application }
     });
 });
