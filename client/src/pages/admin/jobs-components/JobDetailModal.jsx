@@ -1,94 +1,114 @@
 import React from 'react';
-import { X, MapPin, Layers, DollarSign, Calendar, Eye, Users as UsersIcon, TrendingUp, Globe, Briefcase, Trash2, Ban } from 'lucide-react';
-import { getCompanyColor, formatDate } from './JobUtils';
-import JobSkyScene from './JobSkyScene';
+import { 
+    MoveLeft, Eye, Calendar, MapPin, Building2, Users as UsersIcon, 
+    Briefcase, GraduationCap, DollarSign, Globe, Heart, Share2, Trash2, Ban 
+} from 'lucide-react';
+import { formatDate } from './JobUtils';
 
-const JobDetailModal = ({ job, onClose, timeOfDay }) => {
+const JobDetailModal = ({ job, onClose }) => {
     if (!job) return null;
-    const comp = getCompanyColor(job.Employer?.companyName);
 
     return (
-        <div className="jb-modal-overlay" onClick={onClose}>
-            <div className="jb-modal-window" onClick={e => e.stopPropagation()}>
-                <div className="jb-mw-header" style={{ background: comp.grad }}>
-                    <JobSkyScene timeOfDay={timeOfDay} />
-                    <div className="jb-mw-header-blur" />
-                    <div className="jb-mw-header-content">
-                        <div className="jb-mw-comp">
-                            <div className="jb-mw-avatar">{(job.Employer?.companyName || '?')[0]}</div>
-                            <div className="jb-mw-comp-text">
-                                <h4 className="jb-mw-comp-name">{job.Employer?.companyName || 'Hiring Boss'}</h4>
-                                <span className="jb-mw-comp-email">{job.Employer?.email}</span>
+        <div className="jb-modal-overlay">
+            <div className="jb-modal-window">
+                {/* Back Button */}
+                <button className="jb-back-link" onClick={onClose}>
+                    <MoveLeft size={18} /> Back to Jobs
+                </button>
+
+                {/* Main Header Card */}
+                <div className="jb-detail-header-card">
+                    <div className="jb-dhc-top">
+                        <div className="jb-dhc-avatar">
+                            {(job.Employer?.companyName || '?')[0]}
+                        </div>
+                        <div className="jb-dhc-info">
+                            <h2 className="jb-dhc-title">{job.title}</h2>
+                            <div className="jb-dhc-meta-row">
+                                <div className="jb-dhc-meta-item"><Building2 /> {job.Employer?.companyName || 'Hiring Boss'}</div>
+                                <div className="jb-dhc-meta-item"><MapPin /> {job.location || 'On-site'}</div>
+                                <div className="jb-dhc-meta-item"><UsersIcon /> Vacancy: 1</div>
+                            </div>
+                            <div className="jb-dhc-meta-row">
+                                <div className="jb-dhc-meta-item views">Views: {job.views || 0}</div>
+                                <div className="jb-dhc-meta-item">• Published on: {formatDate(job.createdAt || job.created_at)}</div>
                             </div>
                         </div>
-                        <button className="jb-mw-close" onClick={onClose}><X size={20} /></button>
+                        <div className="jb-dhc-actions">
+                            <button className="jb-dhc-circle-btn"><Heart size={20} /></button>
+                            <button className="jb-dhc-circle-btn"><Share2 size={20} /></button>
+                        </div>
+                    </div>
+
+                    <div className="jb-dhc-tags">
+                        <div className="jb-tag-pill"><Briefcase /> Job Type: {job.jobType || 'N/A'}</div>
+                        <div className="jb-tag-pill"><UsersIcon /> Experience: Entry Level</div>
+                        <div className="jb-tag-pill"><DollarSign /> {job.salary || 'Negotiable'}</div>
+                        <div className="jb-tag-pill"><GraduationCap /> BSc in Computer Science</div>
+                        <div className="jb-tag-pill"><Globe /> Official Website</div>
                     </div>
                 </div>
-                <div className="jb-mw-body">
-                    <div className="jb-mw-title-area">
-                        <h2 className="jb-mw-title">{job.title}</h2>
-                        <div className={`jb-pc-status ${job.is_active ? 'active' : 'paused'}`}>
-                            <div className="jb-pc-status-dot" />
-                            {job.is_active ? 'Active Now' : 'Stopped for Now'}
-                        </div>
-                    </div>
 
-                    <div className="jb-mw-grid">
-                        <div className="jb-mw-item"><MapPin size={18} /><div><label>Location</label><span>{job.location || 'Remote'}</span></div></div>
-                        <div className="jb-mw-item"><Layers size={18} /><div><label>Job Category</label><span>{job.jobType || 'Unknown'}</span></div></div>
-                        <div className="jb-mw-item"><DollarSign size={18} /><div><label>Salary</label><span>{job.salary || 'Ask Boss'}</span></div></div>
-                        <div className="jb-mw-item"><Calendar size={18} /><div><label>Launch Date</label><span>{formatDate(job.createdAt || job.created_at)}</span></div></div>
-                    </div>
-
-                    <div className="jb-mw-analytics">
-                        <div className="jb-mw-stat shadow-indigo">
-                            <div className="jb-mws-icon"><Eye size={24} /></div>
-                            <div className="jb-mws-vals"><b>{(job.views || 0).toLocaleString()}</b><span>Total Clicks</span></div>
-                        </div>
-                        <div className="jb-mw-stat shadow-pink">
-                            <div className="jb-mws-icon"><UsersIcon size={24} /></div>
-                            <div className="jb-mws-vals"><b>{(job.totalApplications || 0).toLocaleString()}</b><span>Applied</span></div>
-                        </div>
-                        <div className="jb-mw-stat shadow-emerald">
-                            <div className="jb-mws-icon"><TrendingUp size={24} /></div>
-                            <div className="jb-mws-vals"><b>{job.views ? `${Math.round(((job.totalApplications || 0) / job.views) * 100)}%` : '0%'}</b><span>How Many Applied</span></div>
-                        </div>
-                    </div>
-
-                    <div className="jb-mw-details">
-                        <div className="jb-mw-divider" />
-                        <div className="jb-mw-section-row">
-                            <div className="jb-mw-content-main">
-                                <div className="jb-mw-block">
-                                    <h5><Globe size={16} /> About This Job</h5>
-                                    <div className="jb-mw-text-box">
-                                        <p>{job.description || 'No story about this job.'}</p>
-                                    </div>
-                                </div>
-
-                                {job.requirements && (
-                                    <div className="jb-mw-block">
-                                        <h5><Briefcase size={16} /> What You Need</h5>
-                                        <div className="jb-mw-text-box requirements">
-                                            <p>{job.requirements}</p>
-                                        </div>
-                                    </div>
-                                )}
+                {/* Two Column Grid */}
+                <div className="jb-detail-grid">
+                    <div className="jb-detail-main">
+                        <div className="jb-detail-box">
+                            <div className="jb-detail-section">
+                                <h3>Job Description</h3>
+                                <p>{job.description || 'No description provided.'}</p>
                             </div>
 
-                            <div className="jb-mw-sidebar">
-                                <div className="jb-mw-side-card">
-                                    <h5>Options</h5>
-                                    <button className="jb-mw-side-btn"><Trash2 size={14} /> Delete Job</button>
-                                    <button className="jb-mw-side-btn warning"><Ban size={14} /> Stop Job</button>
-                                </div>
+                            <div className="jb-detail-section">
+                                <h3>Key Responsibilities:</h3>
+                                <p>{job.requirements || 'Daily tasks and ownership details go here.'}</p>
+                            </div>
+
+                            <div className="jb-detail-section">
+                                <h3>Qualifications & Skills:</h3>
+                                <p>Experience with relevant tools, attention to detail, and industry knowledge.</p>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="jb-mw-footer">
-                    <span className="jb-mw-footer-note">Job ID: {job.id}</span>
-                    <button className="jb-mw-btn-primary" onClick={onClose}>Got it, Close!</button>
+
+                    <div className="jb-detail-side">
+                        {/* Action Box */}
+                        <div className="jb-sidebar-box">
+                            <div className="jb-sb-accent-bar" />
+                            <div className="jb-sb-content">
+                                <h4 className="jb-sb-title">Management Actions</h4>
+                                <p className="jb-sb-text">
+                                    This job has <b>{job.totalApplications || 0}</b> total applications. You can manage the listing status below.
+                                </p>
+                                <button className="jb-sb-btn-main" onClick={() => {/* TODO: Stop logic */}}>
+                                    Stop This Job
+                                </button>
+                                <div className="jb-sb-date-footer"> Apply Before: <span>4/1/2026</span></div>
+                            </div>
+                        </div>
+
+                        {/* About Box */}
+                        <div className="jb-sidebar-box">
+                            <div className="jb-sb-content">
+                                <h4 className="jb-sb-title">About the Organization</h4>
+                                <div className="jb-sb-org">
+                                    <div className="jb-sb-org-avatar">{(job.Employer?.companyName || '?')[0]}</div>
+                                    <div className="jb-sb-org-name">{job.Employer?.companyName}</div>
+                                </div>
+                                <p className="jb-sb-text" style={{ marginTop: '16px', marginBottom: 0 }}>
+                                    {job.Employer?.description || 'A growing company looking for great talent.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Admin Cleanup */}
+                        <div className="jb-sidebar-box" style={{ borderColor: '#FEE2E2' }}>
+                            <div className="jb-sb-content" style={{ padding: '16px' }}>
+                                <button className="jb-sb-btn-main" style={{ background: '#EF4444' }} onClick={() => {/* TODO: Delete logic */}}>
+                                    <Trash2 size={16} style={{ marginRight: '8px' }} /> Delete Permanently
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
