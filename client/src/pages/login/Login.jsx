@@ -28,6 +28,7 @@ const Login = () => {
                 localStorage.setItem("userToken", token);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("role", data.role);
+                localStorage.setItem("loginTimestamp", Date.now().toString());
 
                 toast.success('Login successful!');
                 window.location.href = data.role === 'job_seeker' ? ROUTES.JOBSEEKER_DASHBOARD : ROUTES.EMPLOYER_DASHBOARD;

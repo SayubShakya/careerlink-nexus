@@ -34,6 +34,9 @@ const usePostLogin = () => {
                 localStorage.setItem("role", role);
             }
 
+            // Store login timestamp for session expiry tracking (1 hour auto-logout)
+            localStorage.setItem("loginTimestamp", Date.now().toString());
+
             toast.success("Login successful!");
 
             // Redirect based on role

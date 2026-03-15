@@ -20,6 +20,7 @@ const usePostLogout = () => {
                 localStorage.removeItem("userToken");
                 localStorage.removeItem("user");
                 localStorage.removeItem("role");
+                localStorage.removeItem("loginTimestamp");
                 queryClient.clear();
             }
         },
