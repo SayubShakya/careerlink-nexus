@@ -291,14 +291,24 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                 {/* Footer Actions */}
                 <div style={{ padding: '32px 50px', borderTop: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '16px' }}>
-                        {candidate.status !== 'Shortlisted' && (
+                        {candidate.status !== 'Accepted' && (
+                            <button
+                                title="Finalize hiring"
+                                className="btn-scale"
+                                style={{ padding: '14px 32px', background: '#10B981', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)', boxShadow: '0 8px 20px -4px rgba(16, 185, 129, 0.4)' }}
+                                onClick={() => { onAccept(candidate.id); onClose(); }}
+                            >
+                                <ShieldCheck size={20} /> HIRE CANDIDATE
+                            </button>
+                        )}
+                        {candidate.status !== 'Shortlisted' && candidate.status !== 'Accepted' && (
                             <button
                                 title="Add to shortlist"
                                 className="btn-scale"
                                 style={{ padding: '14px 32px', background: 'var(--glass-accent)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                                 onClick={() => { onShortlist(candidate.id); onClose(); }}
                             >
-                                <ShieldCheck size={20} /> SHORTLIST
+                                <Zap size={20} /> SHORTLIST
                             </button>
                         )}
                         {candidate.status !== 'Rejected' && (
@@ -311,6 +321,15 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                                 <XCircle size={20} /> REJECT
                             </button>
                         )}
+                        
+                        <button
+                            title="Send Email"
+                            className="btn-scale"
+                            style={{ padding: '14px 32px', background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
+                            onClick={() => window.location.href = `mailto:${candidate.email}?subject=Regarding your application for ${candidate.jobTitle}`}
+                        >
+                            <Mail size={20} /> EMAIL
+                        </button>
                     </div>
                     <button
                         onClick={onClose}
@@ -324,10 +343,13 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
     );
 };
 
+import { useLocation } from 'react-router-dom';
+
 const Applications = () => {
     // API Hooks
     const { data: serverApps = [], isLoading } = useGetEmployerApplications();
     const { mutate: updateAppStatus } = useUpdateApplicationStatus();
+    const location = useLocation();
     
     const handleViewCV = async (cvId) => {
         if (!cvId) {
@@ -347,7 +369,7 @@ const Applications = () => {
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
-    const [jobFilter, setJobFilter] = useState('All Jobs');
+    const [jobFilter, setJobFilter] = useState(location.state?.filterJob || 'All Jobs');
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [selectedApp, setSelectedApp] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, onConfirm: null, title: '', message: '' });
@@ -384,6 +406,13 @@ const Applications = () => {
                 isOpen: true,
                 title: 'Reject Application?',
                 message: `Are you sure you want to reject ${name}? They will be notified of your decision.`,
+                onConfirm: () => updateStatus(id, newStatus)
+            });
+        } else if (newStatus === 'Accepted') {
+            setConfirmModal({
+                isOpen: true,
+                title: 'Confirm Hiring?',
+                message: `Are you sure you want to hire ${name}? This will mark their application as successful.`,
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else {
@@ -620,6 +649,7 @@ const Applications = () => {
                     candidate={selectedApp}
                     onShortlist={(id, status = 'Shortlisted') => updateStatus(id, status)}
                     onReject={(id) => triggerAction(id, 'Rejected')}
+                    onAccept={(id) => triggerAction(id, 'Accepted')}
                 />
                 <ConfirmationModal
                     {...confirmModal}

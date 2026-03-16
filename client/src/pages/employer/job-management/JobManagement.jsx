@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '@/components/ui/Pagination';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
 import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
 import toast from 'react-hot-toast';
@@ -195,7 +195,8 @@ const JobManagement = () => {
     const { mutate: deleteJobMutation, isPending: isDeleting } = useDeleteJob();
 
     // UI State
-    const [isFormExpanded, setIsFormExpanded] = useState(false);
+    const { state } = useLocation();
+    const [isFormExpanded, setIsFormExpanded] = useState(state?.expandForm || false);
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
 
@@ -402,7 +403,7 @@ const JobManagement = () => {
     };
 
     const viewApplications = (job) => {
-        navigate(ROUTES.EMPLOYER_APPLICATIONS);
+        navigate(ROUTES.EMPLOYER_APPLICATIONS, { state: { filterJob: job.title } });
     };
 
     const styles = {
@@ -861,6 +862,29 @@ const JobManagement = () => {
                                         value={formData.qualifications}
                                         onChange={handleInputChange}
                                         placeholder="What kind of school or skills should they have?"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={styles.grid}>
+                                <div className="form-group">
+                                    <label style={styles.label}>Education Requirements</label>
+                                    <textarea
+                                        style={{ ...styles.textarea, minHeight: '120px' }}
+                                        name="education"
+                                        value={formData.education}
+                                        onChange={handleInputChange}
+                                        placeholder="What kind of degree or training do they need?"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label style={styles.label}>Additional Specifications</label>
+                                    <textarea
+                                        style={{ ...styles.textarea, minHeight: '120px' }}
+                                        name="specification"
+                                        value={formData.specification}
+                                        onChange={handleInputChange}
+                                        placeholder="Any other specific requirements or perks?"
                                     />
                                 </div>
                             </div>

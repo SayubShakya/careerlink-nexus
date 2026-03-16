@@ -11,7 +11,8 @@ import {
     BarChart3,
     Sun,
     Moon,
-    ShieldCheck
+    ShieldCheck,
+    PlusCircle as PostIcon
 } from 'lucide-react';
 import { ROUTES } from '@/routes/routes';
 import { useGetMe } from '@/hooks/api/auth/useGetMe';
@@ -76,11 +77,11 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             overflow: 'hidden',
         },
         header: {
-            padding: isOpen ? '32px 24px' : '32px 0',
+            padding: isOpen ? '20px 24px 8px' : '20px 0',
             display: 'flex',
             flexDirection: 'column',
             alignItems: isOpen ? 'flex-start' : 'center',
-            gap: '24px',
+            gap: '8px',
             transition: 'padding 0.4s'
         },
         toggleBtn: {
@@ -91,18 +92,18 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: isOpen ? 'flex-start' : 'center',
-            padding: isOpen ? '0 12px' : '0',
+            padding: '0',
             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         },
         logoWrapper: {
-            width: isOpen ? '100%' : '64px',
+            width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: isOpen ? 'flex-start' : 'center',
             transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            marginBottom: '8px',
-            padding: isOpen ? '0 12px' : '0',
-            gap: '8px',
+            marginBottom: '4px',
+            padding: '0',
+            gap: '12px',
             cursor: 'pointer',
             userSelect: 'none',
             background: 'none',
@@ -110,86 +111,90 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             boxShadow: 'none'
         },
         logoImg: {
-            width: isOpen ? '44px' : '32px',
-            height: isOpen ? '44px' : '32px',
+            width: isOpen ? '36px' : '32px',
+            height: isOpen ? '36px' : '32px',
             objectFit: 'contain',
             filter: theme === THEME_MODES.DARK ? 'brightness(1.1) drop-shadow(0 0 12px rgba(62, 97, 255, 0.4))' : 'none',
             transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         },
         brandName: {
             display: isOpen ? 'block' : 'none',
-            fontSize: '1.55rem',
-            fontWeight: '950',
-            letterSpacing: '-0.04em',
+            fontSize: '1.5rem',
+            fontWeight: '900',
+            letterSpacing: '-0.03em',
             fontFamily: 'var(--font-display)',
             color: 'var(--theme-text-primary)',
             whiteSpace: 'nowrap',
             lineHeight: '1',
-            paddingTop: '2px'
+            paddingTop: '1px'
         },
         identityContainer: {
             display: isOpen ? 'flex' : 'none',
             flexDirection: 'column',
             gap: '0',
-            paddingLeft: '52px', // Perfectly aligned with 'CareerLink'
-            marginBottom: '32px'
+            paddingLeft: '48px', // Perfectly aligned with 'Career' text (36px icon + 12px gap)
+            marginBottom: '12px'
         },
         identityName: {
-            fontSize: '0.85rem',
-            fontWeight: '700',
+            fontSize: '0.75rem',
+            fontWeight: '600',
             color: 'var(--theme-text-muted)',
             margin: 0,
             textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            opacity: 0.8
+            letterSpacing: '0.1em',
+            opacity: 0.5,
+            maxWidth: '160px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
         },
         nav: {
             flexGrow: 1,
-            padding: '24px 16px',
+            padding: '4px 16px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '4px'
         },
         navItem: (isActive) => ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: isOpen ? 'flex-start' : 'center',
-            gap: '16px',
-            padding: '14px 18px',
-            borderRadius: '16px',
+            gap: '10px',
+            padding: '8px 14px',
+            borderRadius: '10px',
             color: isActive ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
             textDecoration: 'none',
-            fontWeight: '700',
-            fontSize: '0.925rem',
+            fontWeight: '600',
+            fontSize: '0.875rem',
             backgroundColor: isActive ? 'var(--theme-bg-subtle)' : 'transparent',
             border: '1px solid',
             borderColor: isActive ? 'var(--theme-border-bright)' : 'transparent',
-            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.15s ease',
             position: 'relative'
         }),
         iconBox: (isActive) => ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '24px',
-            height: '24px',
+            width: '20px',
+            height: '20px',
             color: isActive ? 'var(--glass-accent-light)' : 'inherit',
             transition: 'all 0.2s'
         }),
         footer: {
-            padding: '24px 16px',
+            padding: '16px',
             borderTop: '1px solid var(--theme-border)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: '8px'
         },
         themeBtn: {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '14px 18px',
-            borderRadius: '16px',
+            padding: '12px 16px',
+            borderRadius: '12px',
             backgroundColor: 'var(--theme-bg-subtle)',
             border: '1px solid var(--theme-border)',
             cursor: 'pointer',
@@ -201,9 +206,9 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: isOpen ? 'flex-start' : 'center',
-            gap: '16px',
-            padding: '14px 18px',
-            borderRadius: '16px',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '12px',
             color: '#EF4444',
             backgroundColor: 'rgba(239, 68, 68, 0.05)',
             border: '1px solid rgba(239, 68, 68, 0.1)',
@@ -224,7 +229,7 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                         onClick={() => navigate(ROUTES.EMPLOYER_DASHBOARD)}
                     >
                         <img src={logoImg} alt="CareerLink" style={styles.logoImg} />
-                        <span style={styles.brandName}>Career<span style={{ color: '#3E61FF' }}>Link</span></span>
+                        <span style={styles.brandName}>Career<span style={{ color: 'var(--color-brand-accent)' }}>Link</span></span>
                     </div>
                     <div style={styles.identityContainer}>
                         <h3 style={styles.identityName}>{user?.companyName}</h3>
@@ -255,6 +260,35 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                         </NavLink>
                     );
                 })}
+
+                {/* Quick Action - Post Job */}
+                <div style={{ padding: '24px 0 12px', marginTop: 'auto' }}>
+                    <button
+                        onClick={() => navigate(ROUTES.JOB_MANAGEMENT, { state: { expandForm: true } })}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: isOpen ? 'flex-start' : 'center',
+                            gap: '12px',
+                            padding: '12px 14px',
+                            borderRadius: '12px',
+                            background: 'var(--glass-accent)',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: '800',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: '0 8px 16px -4px rgba(63, 81, 181, 0.3)'
+                        }}
+                        className="btn-scale sidebar-post-btn"
+                    >
+                        <PostIcon size={18} />
+                        {isOpen && <span>Post a Job</span>}
+                        {!isOpen && <div className="glass-tooltip" style={{ background: 'var(--glass-accent)' }}>Post a Job</div>}
+                    </button>
+                </div>
             </nav>
 
             <div style={styles.footer}>
@@ -304,15 +338,15 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 .sidebar-link-glass:hover {
                     background: var(--theme-sidebar-accent);
                     color: var(--theme-text-primary);
-                    transform: translateX(4px);
+                    padding-left: 20px !important;
                 }
 
                 .sidebar-link-glass.active::before {
                     content: '';
                     position: absolute;
-                    left: -16px;
-                    top: 20%;
-                    height: 60%;
+                    left: 0;
+                    top: 15%;
+                    height: 70%;
                     width: 4px;
                     background: var(--glass-accent-light);
                     border-radius: 0 4px 4px 0;
@@ -366,6 +400,12 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                 @keyframes reveal {
                     from { opacity: 0; transform: translateY(5px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+
+                .sidebar-post-btn:hover {
+                    box-shadow: 0 12px 24px -6px rgba(63, 81, 181, 0.5);
+                    transform: scale(1.02) translateY(-1px);
+                    filter: brightness(1.1);
                 }
 
                 @media (max-width: 1023px) {
