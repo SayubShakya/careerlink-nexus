@@ -95,7 +95,8 @@ export const useGetAppliedJobs = () => {
         queryFn: async () => {
             const response = await api.get(API_ENDPOINTS.PROFILE.MY_APPLICATIONS);
             return response.data.data.applications;
-        }
+        },
+        refetchInterval: 2000, // Refresh every 2 seconds for faster updates
     });
 };
 

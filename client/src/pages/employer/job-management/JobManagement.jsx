@@ -807,11 +807,11 @@ const JobManagement = () => {
                                             value={formData.jobType}
                                             onChange={handleInputChange}
                                         >
-                                            <option style={{ background: '#0F1217' }}>Full-time</option>
-                                            <option style={{ background: '#0F1217' }}>Part-time</option>
-                                            <option style={{ background: '#0F1217' }}>Contract</option>
-                                            <option style={{ background: '#0F1217' }}>Internship</option>
-                                            <option style={{ background: '#0F1217' }}>Freelance</option>
+                                            <option style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Full-time</option>
+                                            <option style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Part-time</option>
+                                            <option style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Contract</option>
+                                            <option style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Internship</option>
+                                            <option style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Freelance</option>
                                         </select>
                                     </div>
                                 </div>
@@ -822,7 +822,12 @@ const JobManagement = () => {
                                         <Calendar size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                         <input
                                             type="date"
-                                            style={{ ...styles.input, paddingRight: '48px', borderColor: errors.deadline ? '#ef4444' : 'var(--glass-border)' }}
+                                            style={{ 
+                                                ...styles.input, 
+                                                paddingRight: '48px', 
+                                                borderColor: errors.deadline ? '#ef4444' : 'var(--glass-border)',
+                                                colorScheme: 'dark light' // Helps browser color-picker match theme
+                                            }}
                                             name="deadline"
                                             value={formData.deadline}
                                             onChange={handleInputChange}
@@ -1008,9 +1013,9 @@ const JobManagement = () => {
                                         fontWeight: '600'
                                     }}
                                 >
-                                    <option value="All">All Status</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Closed">Closed</option>
+                                    <option value="All" style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>All Status</option>
+                                    <option value="Active" style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Active</option>
+                                    <option value="Closed" style={{ background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)' }}>Closed</option>
                                 </select>
                             </div>
                         </div>
@@ -1237,10 +1242,19 @@ const JobManagement = () => {
                     transform: translateY(-1px);
                 }
 
+                input[type="date"], select {
+                    color-scheme: light dark;
+                }
+
                 ::-webkit-calendar-picker-indicator {
-                    filter: invert(1);
                     cursor: pointer;
-                    opacity: 0.5;
+                    opacity: 1 !important;
+                    filter: invert(0) brightness(0) !important; /* Force true black in light theme */
+                }
+
+                .dark-theme ::-webkit-calendar-picker-indicator {
+                    filter: invert(1) brightness(1) !important; /* Force true white in dark theme */
+                    opacity: 0.9 !important;
                 }
 
                 ::-webkit-calendar-picker-indicator:hover {

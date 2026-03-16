@@ -12,7 +12,8 @@ export const useGetEmployerApplications = () => {
         queryFn: async () => {
             const response = await api.get(API_ENDPOINTS.EMPLOYER.APPLICATIONS);
             return response.data.data.applications;
-        }
+        },
+        refetchInterval: 1000, // Sync every 5 seconds
     });
 };
 
