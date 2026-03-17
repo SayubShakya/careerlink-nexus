@@ -3,19 +3,17 @@ const path = require('path');
 const fs = require('fs');
 const AppError = require('../utils/AppError');
 
-// Ensure upload directory exists
-const uploadDir = 'uploads/avatars';
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('./cloudinary');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `avatar-${req.user.id}-${uniqueSuffix}${path.extname(file.originalname)}`);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'nexus_avatars',
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+        public_id: (req, file) => {
+            return `avatar-${req.user.id}-${Date.now()}`;
+        }
     }
 });
 

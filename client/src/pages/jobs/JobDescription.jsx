@@ -180,7 +180,7 @@ const JobDescription = () => {
                     <div className="header-main">
                         <div className="company-logo-large">
                             {jobData.Employer?.logo ? (
-                                <img src={`http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                                <img src={jobData.Employer.logo.startsWith('http') ? jobData.Employer.logo : `http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
                             ) : (
                                 jobData.logo || jobData.company?.charAt(0) || jobData.Employer?.name?.charAt(0) || 'J'
                             )}
@@ -350,7 +350,7 @@ const JobDescription = () => {
                             <div className="org-profile-mini">
                                 <div className="org-logo-mini">
                                     {jobData.Employer?.logo ? (
-                                        <img src={`http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                                        <img src={jobData.Employer.logo.startsWith('http') ? jobData.Employer.logo : `http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
                                     ) : (
                                         jobData.logo || jobData.company?.charAt(0) || jobData.Employer?.name?.charAt(0) || 'O'
                                     )}

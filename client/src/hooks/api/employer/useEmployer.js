@@ -13,7 +13,7 @@ export const useGetEmployerApplications = () => {
             const response = await api.get(API_ENDPOINTS.EMPLOYER.APPLICATIONS);
             return response.data.data.applications;
         },
-        refetchInterval: 1000, // Sync every 5 seconds
+        refetchInterval: 30000, // Refresh every 30 seconds
     });
 };
 
@@ -97,7 +97,7 @@ export const useUpdateCompanyProfile = () => {
         onSuccess: () => {
             toast.success("Company profile updated successfully!");
             queryClient.invalidateQueries({ queryKey: ["employer", "profile"] });
-            queryClient.invalidateQueries(["auth", "me"]);
+            queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
         }
     });
 };

@@ -3,7 +3,7 @@
  * In production, replace this with Nodemailer/SendGrid/AWS SES
  */
 
-exports.sendEmail = async (to, subject, text, html) => {
+const sendEmail = async (to, subject, text) => {
     console.log(`📧 [MOCK EMAIL] To: ${to}`);
     console.log(`📌 Subject: ${subject}`);
     console.log(`📝 Content: ${text}`);
@@ -11,14 +11,16 @@ exports.sendEmail = async (to, subject, text, html) => {
     return true;
 };
 
-exports.sendApplicationConfirmation = async (userEmail, jobTitle) => {
+const sendApplicationConfirmation = async (userEmail, jobTitle) => {
     const subject = `Application Received: ${jobTitle}`;
     const text = `Hi, thank you for applying for the position of ${jobTitle}. We have received your application and will review it shortly.`;
-    return this.sendEmail(userEmail, subject, text);
+    return sendEmail(userEmail, subject, text);
 };
 
-exports.sendStatusUpdate = async (userEmail, jobTitle, status) => {
+const sendStatusUpdate = async (userEmail, jobTitle, status) => {
     const subject = `Update on your application for ${jobTitle}`;
     const text = `Hi, our hiring team has updated your application status for ${jobTitle} to: ${status.toUpperCase()}.`;
-    return this.sendEmail(userEmail, subject, text);
+    return sendEmail(userEmail, subject, text);
 };
+
+module.exports = { sendEmail, sendApplicationConfirmation, sendStatusUpdate };

@@ -21,10 +21,10 @@ export const usePostApplyJob = () => {
         },
         onSuccess: () => {
             toast.success("Application submitted successfully!");
-            queryClient.invalidateQueries(["jobs"]);
-            queryClient.invalidateQueries(["applied-jobs"]);
-            queryClient.invalidateQueries(["jobseeker", "stats"]);
-            queryClient.invalidateQueries(["employer", "applications"]);
+            queryClient.invalidateQueries({ queryKey: ["jobs"] });
+            queryClient.invalidateQueries({ queryKey: ["applied-jobs"] });
+            queryClient.invalidateQueries({ queryKey: ["jobseeker", "stats"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "applications"] });
         }
     });
 };

@@ -1,5 +1,6 @@
 # Agent
 .agent/
+.agents/
 
 # Dependencies
 node_modules/
@@ -46,5 +47,20 @@ Desktop.ini
 
 # Project Specific
 server/uploads/
+server/temp/
+client/dist/
+client/dist-ssr/
 client/.eslintcache
 
+# Vite config caches
+*.tsbuildinfo
+.vite/
+
+# MacOS & Windows
+.DS_Store
+Thumbs.db
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db

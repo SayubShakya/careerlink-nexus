@@ -1,6 +1,6 @@
+require('dotenv').config();
 
 const app = require('./src/app');
-require('dotenv').config();
 require('./src/config/db'); // Initialize DB pool
 
 const syncDatabase = require('./src/sync'); // Database Sync

@@ -104,7 +104,6 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         const user = await JobSeeker.findByPk(cv.user_id);
         const pdfBuffer = await pdfGenerator.generateCV(cv, user);
 
-        console.log(`DEBUG: Generating PDF for CV ID: ${cv.id}, Title: ${cv.title}`);
 
         res.set({
             'Content-Type': 'application/pdf',

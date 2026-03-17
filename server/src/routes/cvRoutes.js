@@ -108,10 +108,6 @@ const router = express.Router();
  */
 
 // Protect all routes
-router.use((req, res, next) => {
-    console.log(`DEBUG: Entering CV routes - ${req.method} ${req.url}`);
-    next();
-});
 router.use(authMiddleware.protect);
 
 // Allow employers and admins to download CVs, but restrict other operations to job_seekers

@@ -3,28 +3,25 @@ const path = require('path');
 const fs = require('fs');
 const AppError = require('./AppError');
 
-// Generic storage configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let dest = 'uploads/';
-        if (file.fieldname === 'profile_picture' || file.fieldname === 'avatar') {
-            dest += 'profiles';
-        } else if (file.fieldname === 'logo') {
-            dest += 'logos';
-        } else if (file.fieldname === 'file') {
-            dest += 'cvs';
-        } else {
-            dest += 'others';
-        }
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('./cloudinary');
 
-        if (!fs.existsSync(dest)) {
-            fs.mkdirSync(dest, { recursive: true });
+// Generic storage configuration for Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: (req, file) => {
+            if (file.fieldname === 'profile_picture' || file.fieldname === 'avatar') return 'nexus_profiles';
+            if (file.fieldname === 'logo') return 'nexus_logos';
+            if (file.fieldname === 'file') return 'nexus_cvs';
+            return 'nexus_others';
+        },
+        // Cloudinary auto-detects resource_type based on the file content.
+        resource_type: 'auto',
+        // Optional: keeping original filename might not be fully required since Cloudinary assigns random suffix anyway.
+        public_id: (req, file) => {
+            return `${file.fieldname}-${req.user?.id || 'guest'}-${Date.now()}`;
         }
-        cb(null, dest);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `${file.fieldname}-${req.user.id || 'guest'}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
 });
 

@@ -34,8 +34,8 @@ export const usePutUpdateProfile = () => {
         },
         onSuccess: (data) => {
             toast.success("Profile updated successfully!");
-            queryClient.invalidateQueries(["profile"]);
-            queryClient.invalidateQueries(["auth", "me"]);
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
+            queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
             // Update local storage if needed
             if (data?.data?.user) {
                 localStorage.setItem("user", JSON.stringify(data.data.user));

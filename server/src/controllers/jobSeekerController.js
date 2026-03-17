@@ -109,7 +109,6 @@ exports.getFullProfile = catchAsync(async (req, res, next) => {
 // Get Stats for Job Seeker Dashboard
 exports.getStats = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
-    console.log(`[Stats] Fetching stats for user: ${userId}`);
 
     const appliedCount = await Application.count({ where: { job_seeker_id: userId } });
     const cvCount = await CV.count({ where: { user_id: userId } });
@@ -123,7 +122,6 @@ exports.getStats = catchAsync(async (req, res, next) => {
         where: { job_seeker_id: userId, status: 'interview_scheduled' }
     });
 
-    console.log(`[Stats] applied=${appliedCount}, cvs=${cvCount}, reviewing=${reviewingCount}, interviews=${interviewCount}`);
 
     res.status(200).json({
         status: 'success',
