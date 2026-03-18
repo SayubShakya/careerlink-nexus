@@ -89,7 +89,7 @@ const AdminJobSeekers = () => {
                     <PageHeroSky timeOfDay={timeOfDay} />
                     <div className="js-hero-content">
                         <div className="js-hero-left">
-                            <span className="js-hero-badge"><Users size={12} /> Talent Management</span>
+                            <span className="js-hero-badge"><Users size={12} /> Job Seeker Management</span>
                             <h1 className="js-hero-title">Job Seekers</h1>
                             <p className="js-hero-desc">Explore and manage the talent pool of registered users.</p>
                         </div>

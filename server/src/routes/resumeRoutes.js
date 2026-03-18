@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 router.use(authMiddleware.restrictTo('job_seeker'));
 
-router.post('/upload', upload.single('resume'), resumeController.uploadResume);
+router.post('/upload', upload.uploadCV.single('resume'), resumeController.uploadResume);
 router.get('/', resumeController.getMyResumes);
 router.get('/:id/download', resumeController.downloadResume);
 router.delete('/:id', resumeController.deleteResume);

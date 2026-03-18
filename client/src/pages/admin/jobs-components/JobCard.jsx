@@ -11,8 +11,21 @@ const JobCard = ({ job, index, onSelect }) => {
         <div className="jb-premium-card" style={{ animationDelay: `${index * 0.05}s` }} onClick={() => onSelect(job)}>
             <div className="jb-pc-header">
                 <div className="jb-pc-company">
-                    <div className="jb-pc-avatar" style={{ background: comp.grad, boxShadow: `0 8px 16px -4px ${comp.shadow}` }}>
-                        {(job.Employer?.companyName || '?')[0]}
+                    <div className="jb-pc-avatar" style={{ background: comp.grad, boxShadow: `0 8px 16px -4px ${comp.shadow}`, overflow: 'hidden', position: 'relative' }}>
+                        {job.Employer?.profile_picture || job.Employer?.logo ? (
+                            <>
+                                <img 
+                                    src={(job.Employer.profile_picture || job.Employer.logo).startsWith('http') ? (job.Employer.profile_picture || job.Employer.logo) : `http://localhost:5000/uploads/${(job.Employer.profile_picture || job.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} 
+                                    alt="Logo" 
+                                    className="jb-pc-avatar-img"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1, background: 'white' }} 
+                                    onError={e => { e.target.style.display = 'none'; }}
+                                />
+                                <div className="jb-pc-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(job.Employer?.companyName || '?')[0]}</div>
+                            </>
+                        ) : (
+                            (job.Employer?.companyName || '?')[0]
+                        )}
                     </div>
                     <div className="jb-pc-company-info">
                         <span className="jb-pc-comp-name">{job.Employer?.companyName || 'Unknown Boss'}</span>

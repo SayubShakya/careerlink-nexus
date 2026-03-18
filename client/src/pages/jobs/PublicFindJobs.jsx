@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
+import { useGetJobs } from '@/hooks/api/jobs/useJobs';
 import {
     Search,
     Briefcase,
@@ -8,24 +9,37 @@ import {
     SearchCheck,
     ChevronRight,
     ChevronLeft,
-    Star
+    Star,
+    MapPin,
+    DollarSign,
+    Loader2
 } from 'lucide-react';
 
 import bannerHuman from '@/assets/images/banner-human2.png';
 
-import { ROUTES } from '@/routes/routes';
-
 const PublicFindJobs = () => {
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    
+    // Initial states from search params
+    const initialSearch = searchParams.get('q') || '';
+    const initialLocation = searchParams.get('l') || '';
+    
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [locationTerm, setLocationTerm] = useState(initialLocation);
     const [jobType, setJobType] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const jobsPerPage = 10;
 
-    const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { data: serverJobs = [], isLoading } = useGetJobs({
+        search: searchTerm,
+        type: jobType === 'All' ? undefined : jobType,
+        location: locationTerm
+    });
 
     const stats = [
-        { label: 'Live Jobs', value: '350', icon: <Briefcase size={20} /> },
+        { label: 'Live Jobs', value: serverJobs.length || '350', icon: <Briefcase size={20} /> },
         { label: 'Vacancies', value: '932', icon: <SearchCheck size={20} /> },
         { label: 'Organizations', value: '220', icon: <Building2 size={20} /> },
     ];
@@ -33,67 +47,27 @@ const PublicFindJobs = () => {
     const filterOptions = ['All Jobs', 'Jobs by Function', 'Jobs by Title', 'Jobs by Industry', 'Jobs by Location'];
 
     const topEmployers = [
-        { name: 'IBerry', logo: '🍒' }, { name: 'IEC', logo: 'I' }, { name: 'Lumina', logo: 'L' },
-        { name: 'Standard', logo: 'S' }, { name: 'Global', logo: 'G' }, { name: 'Rapti', logo: 'R' },
-        { name: 'Audit', logo: 'A' }, { name: 'Agro', logo: 'Ag' },
+        { name: 'Leapfrog', logo: '🐸' }, { name: 'eSewa', logo: '💳' }, { name: 'Khalti', logo: '📱' },
+        { name: 'Daraz', logo: '📦' }, { name: 'Nabil Bank', logo: '🏦' }, { name: 'Pathao', logo: '🏍️' },
+        { name: 'Foodmandu', logo: '🍕' }, { name: 'F1Soft', logo: '💻' },
     ];
-
-    // Expanded data for 20+ individual jobs
-    const allIndividualJobs = [
-        { id: 1, company: 'Google', role: 'Senior UX Designer', loc: 'Mountain View, CA', pay: '$180k', type: 'Full-time', logo: 'G' },
-        { id: 2, company: 'Meta', role: 'Staff Software Engineer', loc: 'Remote', pay: '$210k', type: 'Remote', logo: 'M' },
-        { id: 3, company: 'Amazon', role: 'Solutions Architect', loc: 'Seattle, WA', pay: '$190k', type: 'Full-time', logo: 'A' },
-        { id: 4, company: 'Netflix', role: 'Systems Engineer', loc: 'Los Gatos, CA', pay: '$220k', type: 'Full-time', logo: 'N' },
-        { id: 5, company: 'Apple', role: 'Product Manager', loc: 'Cupertino, CA', pay: '$175k', type: 'Hybrid', logo: 'A' },
-        { id: 6, company: 'NVIDIA', role: 'AI Researcher', loc: 'Santa Clara, CA', pay: '$230k', type: 'Full-time', logo: 'N' },
-        { id: 7, company: 'Microsoft', role: 'Azure Consultant', loc: 'Remote', pay: '$165k', type: 'Remote', logo: 'M' },
-        { id: 8, company: 'Tesla', role: 'Mechanical Engineer', loc: 'Austin, TX', pay: '$150k', type: 'On-site', logo: 'T' },
-        { id: 9, company: 'Spotify', role: 'Backend Developer', loc: 'Stockholm', pay: '$140k', type: 'Remote', logo: 'S' },
-        { id: 10, company: 'Adobe', role: 'Creative Director', loc: 'San Jose, CA', pay: '$195k', type: 'Hybrid', logo: 'A' },
-        { id: 11, company: 'Palantir', role: 'Forward Deployed Engineer', loc: 'Denver, CO', pay: '$185k', type: 'Full-time', logo: 'P' },
-        { id: 12, company: 'Cloudflare', role: 'Security Architect', loc: 'San Francisco, CA', pay: '$205k', type: 'Remote', logo: 'C' },
-        { id: 13, company: 'Docker', role: 'Platform Engineer', loc: 'Austin, TX', pay: '$170k', type: 'Full-time', logo: 'D' },
-        { id: 14, company: 'Stripe', role: 'Product Analyst', loc: 'Remote', pay: '$160k', type: 'Remote', logo: 'S' },
-        { id: 15, company: 'Airbnb', role: 'Experience Designer', loc: 'San Francisco, CA', pay: '$180k', type: 'Full-time', logo: 'A' },
-        { id: 16, company: 'Uber', role: 'Data Scientist', loc: 'Amsterdam', pay: '$170k', type: 'Hybrid', logo: 'U' },
-        { id: 17, company: 'Salesforce', role: 'Customer Success Lead', loc: 'Chicago, IL', pay: '$155k', type: 'Full-time', logo: 'S' },
-        { id: 18, company: 'Intel', role: 'Hardware Engineer', loc: 'Portland, OR', pay: '$165k', type: 'On-site', logo: 'I' },
-        { id: 19, company: 'Slack', role: 'Mobile Developer', loc: 'Remote', pay: '$175k', type: 'Remote', logo: 'S' },
-        { id: 20, company: 'Zoom', role: 'Network Specialist', loc: 'San Jose, CA', pay: '$160k', type: 'Hybrid', logo: 'Z' },
-    ];
-
-    const companyData = [
-        { company: 'International Pre-School', roles: ['Montessori Teacher'], logoChar: 'A' },
-        { company: 'Build up Nepal', roles: ['Social Mobilizer / Sales Officer'], logoChar: 'B' },
-        { company: 'RAPA Advisors', roles: ['Content Writer', 'SEO Executive'], logoChar: 'R' },
-        { company: 'Valley View School', roles: ['Vice Principal'], logoChar: 'V' },
-        { company: 'Global School of Science', roles: ['Vice Principal (VP)'], logoChar: 'G' },
-        { company: 'Trust Nepal Overseas', roles: ['Compliance Officer'], logoChar: 'T' },
-        { company: 'RV Group', roles: ['Sr. Civil Project Manager', 'Sales and Marketing Officer'], logoChar: 'RV' },
-        { company: 'The Metaphor Consultancy', roles: ['Study Abroad Counselor'], logoChar: 'M' },
-        { company: 'Endeavor Nepal', roles: ['System and Network...'], logoChar: 'E' },
-        { company: 'Future Hub Asia Pacific', roles: ['Counselor'], logoChar: 'F' },
-        { company: 'Simjung', roles: ['Full Stack Developer (AI-...)'], logoChar: 'S' },
-        { company: 'Mountain River Films', roles: ['Social Media Manager'], logoChar: 'M' },
-    ];
-
-    // Pagination Logic for Individual Jobs
-    const filteredIndividualJobs = allIndividualJobs.filter(job => {
-        const matchesSearch = job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesType = jobType === 'All' ||
-            job.type.toLowerCase().replace('-', ' ').includes(jobType.toLowerCase());
-        return matchesSearch && matchesType;
-    });
-
-    const indexOfLastJob = currentPage * jobsPerPage;
-    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-    const currentJobs = filteredIndividualJobs.slice(indexOfFirstJob, indexOfLastJob);
-    const totalPages = Math.ceil(filteredIndividualJobs.length / jobsPerPage);
 
     const handleJobClick = (jobId) => {
-        navigate(isAuthenticated ? `/jobseeker/jobs/${jobId}` : `/jobs/${jobId}`);
+        navigate(isAuthenticated() ? `/jobseeker/jobs/${jobId}` : `/jobs/${jobId}`);
     };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setCurrentPage(1);
+        // Update URL params
+        const newParams = new URLSearchParams();
+        if (searchTerm) newParams.append('q', searchTerm);
+        if (locationTerm) newParams.append('l', locationTerm);
+        setSearchParams(newParams);
+    };
+
+    const totalPages = Math.ceil(serverJobs.length / jobsPerPage);
+    const currentJobs = serverJobs.slice((currentPage - 1) * jobsPerPage, currentPage * jobsPerPage);
 
     return (
         <div className="find-jobs-container">
@@ -113,9 +87,12 @@ const PublicFindJobs = () => {
                 .stat-text .val { font-size: 1.4rem; font-weight: 800; color: var(--text-main); display: block; }
                 .stat-text .lbl { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
-                .search-bar { background: var(--card-dashboard); border: 1px solid var(--border-dashboard); border-radius: 12px; padding: 6px; display: flex; max-width: 600px; box-shadow: var(--shadow-premium); }
-                .search-bar input { flex: 1; border: none; padding: 0 20px; font-size: 1rem; outline: none; background: transparent; color: var(--text-main); }
-                .search-btn { background: var(--color-brand-accent); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+                .search-bar-wrap { background: var(--card-dashboard); border: 1px solid var(--border-dashboard); border-radius: 12px; padding: 6px; display: flex; max-width: 800px; box-shadow: var(--shadow-premium); }
+                .search-bar-wrap form { display: flex; width: 100%; gap: 10px; }
+                .search-input-group { flex: 1; display: flex; align-items: center; gap: 10px; padding: 0 15px; }
+                .search-input-group input { flex: 1; border: none; font-size: 0.95rem; outline: none; background: transparent; color: var(--text-main); height: 44px; }
+                .search-divider { width: 1px; height: 30px; background: var(--border-dashboard); margin: 0 5px; }
+                .search-btn { background: var(--color-brand-accent); color: white; border: none; padding: 0 24px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
 
                 .filter-pills { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
                 .pill { 
@@ -129,106 +106,40 @@ const PublicFindJobs = () => {
                     border: 1px solid rgba(62, 97, 255, 0.15);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                .pill:hover { 
-                    background: rgba(62, 97, 255, 0.15); 
-                    border-color: var(--color-brand-accent);
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(62, 97, 255, 0.2);
-                }
+                .pill:hover { background: rgba(62, 97, 255, 0.15); border-color: var(--color-brand-accent); transform: translateY(-2px); }
 
-                .top-employers-bar { 
-                    background: var(--card-dashboard); 
-                    border-top: 1px solid var(--border-dashboard); 
-                    border-bottom: 1px solid var(--border-dashboard); 
-                    padding: 20px 0; 
-                    display: flex; 
-                    align-items: center; 
-                    gap: 40px;
-                    overflow: hidden;
-                    position: relative;
-                }
-                .bar-label { 
-                    font-weight: 800; 
-                    font-size: 0.85rem; 
-                    color: var(--text-light); 
-                    text-transform: uppercase; 
-                    letter-spacing: 0.05em;
-                    white-space: nowrap;
-                    padding-left: 80px;
-                    z-index: 2;
-                    background: var(--card-dashboard);
-                    position: relative;
-                    box-shadow: 10px 0 20px var(--card-dashboard);
-                }
-                .marqee-wrapper {
-                    display: flex;
-                    flex: 1;
-                    overflow: hidden;
-                    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-                }
-                .logos-scroll { 
-                    display: flex; 
-                    gap: 40px; 
-                    align-items: center;
-                    animation: scroll 30s linear infinite;
-                    padding-right: 40px; /* gap compensation */
-                }
-                .logos-scroll:hover {
-                    animation-play-state: paused;
-                }
-                @keyframes scroll {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-33.33%); }
-                }
-                .employer-logo { 
-                    font-weight: 900; 
-                    color: var(--text-muted); 
-                    opacity: 0.6;
-                    font-size: 1rem;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    padding: 8px 16px;
-                    border-radius: 8px;
-                    white-space: nowrap;
-                }
-                .employer-logo:hover {
-                    opacity: 1;
-                    color: var(--color-brand-accent);
-                    background: rgba(62, 97, 255, 0.08);
-                    transform: translateY(-2px);
-                }
+                .top-employers-bar { background: var(--card-dashboard); border-top: 1px solid var(--border-dashboard); border-bottom: 1px solid var(--border-dashboard); padding: 20px 0; display: flex; align-items: center; overflow: hidden; }
+                .bar-label { font-weight: 800; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; padding-left: 80px; background: var(--card-dashboard); position: relative; z-index: 2; box-shadow: 10px 0 20px var(--card-dashboard); }
+                .marqee-wrapper { flex: 1; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+                .logos-scroll { display: flex; gap: 40px; align-items: center; animation: scroll 30s linear infinite; }
+                @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }
+                .employer-logo { font-weight: 900; color: var(--text-muted); opacity: 0.6; font-size: 1rem; cursor: pointer; white-space: nowrap; padding: 8px 16px; transition: 0.3s; }
+                .employer-logo:hover { opacity: 1; color: var(--color-brand-accent); }
 
-                .jobs-content { padding: 40px 80px; }
+                .jobs-content { padding: 40px 80px; max-width: 1400px; margin: 0 auto; }
                 .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-                .view-toggles { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.03); padding: 4px; border-radius: 12px; border: 1px solid var(--border-dashboard); }
-                .filter-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.2s; white-space: nowrap; }
+                .view-toggles { display: flex; gap: 8px; background: rgba(0,0,0,0.03); padding: 4px; border-radius: 12px; border: 1px solid var(--border-dashboard); }
+                .filter-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.2s; }
                 .filter-tab.active { background: white; color: var(--color-brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-                .filter-tab:hover:not(.active) { color: var(--color-brand-accent); background: rgba(62,97,255,0.05); }
 
-                /* GRID LAYOUTS */
-                .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-                .company-card { background: var(--card-dashboard); border: 1px solid var(--border-dashboard); border-radius: 12px; padding: 24px; transition: 0.2s; }
-                .company-card:hover { border-color: var(--color-brand-accent); transform: translateY(-2px); }
-                .company-icon { width: 48px; height: 48px; background: var(--bg-dashboard); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--text-main); border: 1px solid var(--border-dashboard); }
-                .roles-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-                .role-link { display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-                .role-dot { width: 5px; height: 5px; background: var(--color-brand-accent); border-radius: 50%; }
-
-                /* INDIVIDUAL JOB CARD */
-                .job-item-card { background: var(--card-dashboard); border: 1px solid var(--border-dashboard); border-radius: 16px; padding: 24px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-                .job-item-card:hover { border-color: var(--color-brand-accent); box-shadow: var(--shadow-premium); }
+                .job-item-card { background: var(--card-dashboard); border: 1px solid var(--border-dashboard); border-radius: 16px; padding: 24px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; cursor: pointer; margin-bottom: 16px; }
+                .job-item-card:hover { border-color: var(--color-brand-accent); box-shadow: var(--shadow-premium); transform: translateY(-2px); }
                 .job-main-info { display: flex; gap: 20px; align-items: center; }
-                .job-badge { width: 56px; height: 56px; background: var(--bg-dashboard); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dashboard); font-weight: 900; font-size: 1.2rem; }
-                .job-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
-                .job-meta { display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+                .job-badge { width: 56px; height: 56px; background: var(--bg-dashboard); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dashboard); font-weight: 900; font-size: 1.2rem; overflow: hidden; }
+                .job-logo-img { width: 100%; height: 100%; object-fit: contain; }
+                .job-title { font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+                .job-meta { display: flex; gap: 16px; font-size: 0.88rem; color: var(--text-muted); font-weight: 600; flex-wrap: wrap; }
                 .meta-item { display: flex; align-items: center; gap: 6px; }
-                .apply-btn { background: var(--color-brand-accent); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+                .apply-btn { background: var(--color-brand-accent); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; gap: 8px; align-items: center; transition: 0.2s; }
+                .apply-btn:hover { background: #3551d1; }
 
-                /* PAGINATION */
                 .pagination-tray { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 48px; }
                 .page-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border-dashboard); background: var(--card-dashboard); font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
                 .page-btn.active { background: var(--color-brand-accent); color: white; border-color: var(--color-brand-accent); }
                 .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+                .loading-container { display: flex; flex-direction: column; align-items: center; padding: 100px 0; }
+                .empty-state { text-align: center; padding: 100px 0; background: var(--card-dashboard); border-radius: 20px; border: 1px dashed var(--border-dashboard); }
             `}</style>
 
             <div className="hero-section">
@@ -248,21 +159,31 @@ const PublicFindJobs = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="search-bar">
-                            <input
-                                type="text"
-                                placeholder="Job title or keyword..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <button className="search-btn">
-                                <Search size={18} /> Find Jobs
-                            </button>
-                        </div>
-                        <div className="filter-pills">
-                            {filterOptions.map((filter, i) => (
-                                <div key={i} className="pill">{filter}</div>
-                            ))}
+                        <div className="search-bar-wrap">
+                            <form onSubmit={handleSearch}>
+                                <div className="search-input-group">
+                                    <Search size={20} className="text-muted" />
+                                    <input
+                                        type="text"
+                                        placeholder="Job title or keyword..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="search-divider"></div>
+                                <div className="search-input-group">
+                                    <MapPin size={20} className="text-muted" />
+                                    <input
+                                        type="text"
+                                        placeholder="Location..."
+                                        value={locationTerm}
+                                        onChange={(e) => setLocationTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button type="submit" className="search-btn">
+                                    Find Jobs
+                                </button>
+                            </form>
                         </div>
                     </div>
                     <div className="hero-right">
@@ -275,7 +196,6 @@ const PublicFindJobs = () => {
                 <div className="bar-label">Top Employers</div>
                 <div className="marqee-wrapper">
                     <div className="logos-scroll">
-                        {/* Duplicate lists for seamless infinite scroll */}
                         {[...topEmployers, ...topEmployers, ...topEmployers].map((emp, i) => (
                             <div key={i} className="employer-logo">{emp.logo} {emp.name}</div>
                         ))}
@@ -284,12 +204,12 @@ const PublicFindJobs = () => {
             </div>
 
             <div className="jobs-content">
-                <div className="content-header" style={{ marginBottom: '32px' }}>
+                <div className="content-header">
                     <div className="header-title" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Star size={22} fill="#EAB308" color="#EAB308" /> Browse Opportunities
                     </div>
                     <div className="view-toggles">
-                        {['All', 'Full Time', 'Part-Time', 'Remote', 'On-site'].map(type => (
+                        {['All', 'Full-time', 'Part-time', 'Remote', 'Contract'].map(type => (
                             <button
                                 key={type}
                                 className={`filter-tab ${jobType === type ? 'active' : ''}`}
@@ -301,28 +221,58 @@ const PublicFindJobs = () => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {currentJobs.map((job) => (
-                        <div key={job.id} className="job-item-card" onClick={() => handleJobClick(job.id)} style={{ cursor: 'pointer' }}>
-                            <div className="job-main-info">
-                                <div className="job-badge">{job.logo}</div>
-                                <div>
-                                    <div className="job-title">{job.role}</div>
-                                    <div className="job-meta">
-                                        <span className="meta-item">{job.company}</span>
-                                        <span>•</span>
-                                        <span className="meta-item">{job.loc}</span>
-                                        <span>•</span>
-                                        <span className="meta-item">{job.pay}</span>
+                {isLoading ? (
+                    <div className="loading-container">
+                        <Loader2 size={48} className="animate-spin" color="var(--color-brand-accent)" />
+                        <p style={{ marginTop: 20, fontWeight: 600, color: 'var(--text-muted)' }}>Loading jobs...</p>
+                    </div>
+                ) : currentJobs.length > 0 ? (
+                    <div className="jobs-list">
+                        {currentJobs.map((job) => (
+                            <div key={job.id} className="job-item-card" onClick={() => handleJobClick(job.id)}>
+                                <div className="job-main-info">
+                                    <div className="job-badge">
+                                        {job.Employer?.logo ? (
+                                            <img
+                                                src={job.Employer.logo.startsWith('http') ? job.Employer.logo : `/uploads/${job.Employer.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
+                                                alt={job.company}
+                                                className="job-logo-img"
+                                                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = job.company?.charAt(0) || 'J'; }}
+                                            />
+                                        ) : (
+                                            job.company?.charAt(0) || 'J'
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className="job-title">{job.title}</div>
+                                        <div className="job-meta">
+                                            <span className="meta-item"><Building2 size={14} /> {job.company}</span>
+                                            <span className="meta-item"><MapPin size={14} /> {job.location}</span>
+                                            <span className="meta-item"><DollarSign size={14} /> {job.salary}</span>
+                                            <span className="meta-item"><Briefcase size={14} /> {job.type}</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <button className="apply-btn" onClick={(e) => { e.stopPropagation(); handleJobClick(job.id); }}>
+                                    View Details <ChevronRight size={18} />
+                                </button>
                             </div>
-                            <button className="apply-btn" onClick={(e) => { e.stopPropagation(); handleJobClick(job.id); }}>
-                                View Details <ChevronRight size={18} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state">
+                        <SearchCheck size={64} color="var(--text-muted)" style={{ margin: '0 auto 20px' }} />
+                        <h3>No jobs found</h3>
+                        <p style={{ color: 'var(--text-muted)' }}>Try adjusting your search filters or searching for something else.</p>
+                        <button
+                            className="apply-btn"
+                            style={{ margin: '20px auto 0' }}
+                            onClick={() => { setSearchTerm(''); setLocationTerm(''); setJobType('All'); }}
+                        >
+                            Clear All Filters
+                        </button>
+                    </div>
+                )}
 
                 {totalPages > 1 && (
                     <div className="pagination-tray">

@@ -117,7 +117,7 @@ const allUsers = authMiddleware.restrictTo('job_seeker', 'employer', 'admin');
 router.get('/', seekerOnly, cvController.getAllCVs);
 router.post('/', seekerOnly, cvController.createPlatformCV);
 
-router.post('/upload', seekerOnly, upload.single('file'), cvController.uploadCV);
+router.post('/upload', seekerOnly, upload.uploadCV.single('file'), cvController.uploadCV);
 
 router.get('/:id', seekerOnly, cvController.getCV);
 router.delete('/:id', seekerOnly, cvController.deleteCV);

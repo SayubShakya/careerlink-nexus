@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
     Search, Briefcase, Building2, ChevronRight, SearchCheck, Star,
@@ -22,9 +22,15 @@ function colorForName(name) {
 
 const FindJobs = () => {
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams] = useSearchParams();
+    const initialSearch = searchParams.get('q') || '';
+    const initialLocation = searchParams.get('l') || '';
+
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
+    const [locationTerm, setLocationTerm] = useState(initialLocation);
     const [jobType, setJobType] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
+    const [expandedGroups, setExpandedGroups] = useState(new Set());
     const CARDS_PER_PAGE = 20;
 
     const stats = [
@@ -35,14 +41,15 @@ const FindJobs = () => {
 
 
     const topEmployers = [
-        { name: 'IBerry', logo: '🍒' }, { name: 'IEC', logo: 'I' }, { name: 'Lumina', logo: 'L' },
-        { name: 'Standard', logo: 'S' }, { name: 'Global', logo: 'G' }, { name: 'Rapti', logo: 'R' },
-        { name: 'Audit', logo: 'A' }, { name: 'Agro', logo: 'Ag' },
+        { name: 'eSewa', logo: '💳' }, { name: 'Daraz', logo: '📦' }, { name: 'Khalti', logo: '📱' },
+        { name: 'Nabil Bank', logo: '🏦' }, { name: 'Pathao', logo: '🏍️' }, { name: 'Foodmandu', logo: '🍕' },
+        { name: 'Leapfrog', logo: '🐸' }, { name: 'F1Soft', logo: '💻' },
     ];
 
     const { data: serverJobs = [], isLoading } = useGetJobs({
         search: searchTerm,
-        type: jobType === 'All' ? undefined : jobType
+        type: jobType === 'All' ? undefined : jobType,
+        location: locationTerm
     });
     const { data: savedJobs = [] } = useGetSavedJobs();
     const { mutate: saveJob } = useSaveJob();
@@ -67,7 +74,7 @@ const FindJobs = () => {
         serverJobs.forEach(job => {
             const key = job.Employer?.id || job.company || 'unknown';
             const name = job.Employer?.name || job.company || 'Unknown Company';
-            const logo = job.Employer?.logo || null;
+            const logo = job.Employer?.profile_picture || job.Employer?.logo || null;
             if (!map.has(key)) map.set(key, { key, name, logo, jobs: [] });
             map.get(key).jobs.push(job);
         });
@@ -140,7 +147,8 @@ const FindJobs = () => {
                 .fj-role-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-brand-accent); flex-shrink: 0; margin-top: 6px; }
                 .fj-role-link { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); line-height: 1.4; transition: color 0.18s; }
                 .fj-card:hover .fj-role-link { color: var(--color-brand-accent); }
-                .fj-more-badge { font-size: 0.75rem; font-weight: 700; color: var(--color-brand-accent); background: rgba(62,97,255,0.08); border: 1px solid rgba(62,97,255,0.15); border-radius: 100px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; align-self: flex-start; }
+                .fj-more-badge { font-size: 0.75rem; font-weight: 700; color: var(--color-brand-accent); background: rgba(62,97,255,0.08); border: 1px solid rgba(62,97,255,0.15); border-radius: 100px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; align-self: flex-start; cursor: pointer; transition: 0.2s; }
+                .fj-more-badge:hover { background: rgba(62,97,255,0.15); }
 
                 /* ── LOADING ── */
                 .fj-skeleton-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -166,6 +174,27 @@ const FindJobs = () => {
                 .fj-page-btn:hover:not(:disabled):not(.active) { border-color: var(--color-brand-accent); color: var(--color-brand-accent); }
                 .fj-page-btn.active { background: var(--color-brand-accent); color: white; border-color: var(--color-brand-accent); }
                 .fj-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+                /* ── DARK THEME OVERRIDES ── */
+                .dark-theme .fj-root { background: var(--theme-bg, #020617); }
+                .dark-theme .fj-hero { background: var(--theme-bg-subtle, #0B1120); border-bottom-color: rgba(255,255,255,0.06); }
+                .dark-theme .fj-hero-title { color: #F8FAFC; }
+                .dark-theme .fj-stat-icon { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+                .dark-theme .fj-stat-val { color: #F8FAFC; }
+                .dark-theme .fj-search-bar { background: #0F172A; border-color: rgba(255,255,255,0.1); }
+                .dark-theme .fj-search-bar input { color: #F8FAFC; }
+                .dark-theme .fj-ticker { background: #0F172A; border-color: rgba(255,255,255,0.06); }
+                .dark-theme .fj-ticker-label { background: #0F172A; color: #94A3B8; box-shadow: 12px 0 18px #0F172A; }
+                .dark-theme .fj-ticker-item { color: #94A3B8; }
+                .dark-theme .fj-section-title { color: #F8FAFC; }
+                .dark-theme .fj-card { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.08); }
+                .dark-theme .fj-card:hover { border-color: var(--color-brand-accent); }
+                .dark-theme .fj-company-name { color: #F8FAFC; }
+                .dark-theme .fj-role-link { color: #94A3B8; }
+                .dark-theme .fj-logo-wrap { background: #020617; border-color: rgba(255,255,255,0.08); }
+                .dark-theme .fj-page-btn { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.08); color: #94A3B8; }
+                .dark-theme .fj-page-info { color: #94A3B8; }
+                .dark-theme .fj-page-info strong { color: #F8FAFC; }
             `}</style>
 
             {/* ── HERO ── */}
@@ -257,30 +286,28 @@ const FindJobs = () => {
                         {pagedGroups.map(group => {
                             const color = colorForName(group.name);
                             const initial = group.name.charAt(0).toUpperCase();
-                            const visibleJobs = group.jobs.slice(0, 4);
-                            const remainingCount = group.jobs.length - visibleJobs.length;
+                            const isExpanded = expandedGroups.has(group.key);
+                            const visibleJobs = isExpanded ? group.jobs : group.jobs.slice(0, 4);
+                            const remainingCount = group.jobs.length - 4;
 
                             return (
                                 <div key={group.key} className="fj-card">
                                     <div className="fj-card-head">
                                         <div className="fj-logo-wrap">
                                             {group.logo ? (
-                                                <img
-                                                    src={group.logo.startsWith('http') ? group.logo : `http://localhost:5000/uploads/${group.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
-                                                    alt={group.name}
-                                                    className="fj-logo-img"
-                                                    onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                                                />
-                                            ) : null}
-                                            <div
-                                                className="fj-logo-init"
-                                                style={{
-                                                    background: color,
-                                                    display: group.logo ? 'none' : 'flex',
-                                                }}
-                                            >
-                                                {initial}
-                                            </div>
+                                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                                    <img
+                                                        src={group.logo.startsWith('http') ? group.logo : `/uploads/${group.logo.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
+                                                        alt={group.name}
+                                                        className="fj-logo-img"
+                                                        style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'white' }}
+                                                        onError={e => { e.target.style.display = 'none'; }}
+                                                    />
+                                                    <div className="fj-logo-init" style={{ background: color, width: '100%', height: '100%', display: 'flex' }}>{initial}</div>
+                                                </div>
+                                            ) : (
+                                                <div className="fj-logo-init" style={{ background: color, display: 'flex' }}>{initial}</div>
+                                            )}
                                         </div>
                                         <div>
                                             <div className="fj-company-name">{group.name}</div>
@@ -298,9 +325,34 @@ const FindJobs = () => {
                                                 <span className="fj-role-link">{job.title}</span>
                                             </div>
                                         ))}
-                                        {remainingCount > 0 && (
-                                            <div className="fj-more-badge">
+                                        {!isExpanded && remainingCount > 0 && (
+                                            <div 
+                                                className="fj-more-badge"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setExpandedGroups(prev => {
+                                                        const next = new Set(prev);
+                                                        next.add(group.key);
+                                                        return next;
+                                                    });
+                                                }}
+                                            >
                                                 +{remainingCount} more <ChevronRight size={11} />
+                                            </div>
+                                        )}
+                                        {isExpanded && remainingCount > 0 && (
+                                            <div 
+                                                className="fj-more-badge"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setExpandedGroups(prev => {
+                                                        const next = new Set(prev);
+                                                        next.delete(group.key);
+                                                        return next;
+                                                    });
+                                                }}
+                                            >
+                                                Show less
                                             </div>
                                         )}
                                     </div>

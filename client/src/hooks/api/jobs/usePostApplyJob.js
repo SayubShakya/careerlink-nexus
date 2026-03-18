@@ -25,6 +25,7 @@ export const usePostApplyJob = () => {
             queryClient.invalidateQueries({ queryKey: ["applied-jobs"] });
             queryClient.invalidateQueries({ queryKey: ["jobseeker", "stats"] });
             queryClient.invalidateQueries({ queryKey: ["employer", "applications"] });
+            queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] });
         }
     });
 };

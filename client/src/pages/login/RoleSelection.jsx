@@ -107,7 +107,7 @@ const RoleSelection = () => {
                 ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true }
                 : { companyName: `${name}'s Org`, companyWebsite: 'https://example.com', email, password: googleId, is_sso: true };
 
-            const response = await axios.post(`http://localhost:5000${endpoint}`, payload);
+            const response = await axios.post(endpoint, payload);
 
             toast.success('Account created successfully!');
             navigate(ROUTES.LOGIN, { state: { message: 'Registration successful! Please log in.' } });

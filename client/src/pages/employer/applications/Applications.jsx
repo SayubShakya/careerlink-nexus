@@ -39,6 +39,28 @@ import '@/styles/ProfessionalGlass.css';
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 'warning' }) => {
     if (!isOpen) return null;
 
+    let iconColor = '#F59E0B';
+    let iconBg = 'rgba(239, 172, 68, 0.1)';
+    let iconBorder = 'rgba(239, 172, 68, 0.2)';
+    let btnBg = 'var(--glass-accent)';
+    let btnShadow = 'rgba(63, 81, 181, 0.4)';
+    let Icon = AlertTriangle;
+
+    if (type === 'danger') {
+        iconColor = '#EF4444';
+        iconBg = 'rgba(239, 68, 68, 0.1)';
+        iconBorder = 'rgba(239, 68, 68, 0.2)';
+        btnBg = '#DC2626';
+        btnShadow = 'rgba(220, 38, 38, 0.4)';
+    } else if (type === 'success') {
+        iconColor = '#10B981';
+        iconBg = 'rgba(16, 185, 129, 0.1)';
+        iconBorder = 'rgba(16, 185, 129, 0.2)';
+        btnBg = '#10B981';
+        btnShadow = 'rgba(16, 185, 129, 0.4)';
+        Icon = ShieldCheck;
+    }
+
     return (
         <div style={{
             position: 'fixed',
@@ -54,13 +76,13 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
             <div
                 className="glass-panel"
                 style={{
-                    backgroundColor: 'rgba(10, 12, 16, 0.95)',
+                    backgroundColor: '#FFFFFF',
                     borderRadius: '24px',
                     padding: '48px 40px',
                     width: '90%',
                     maxWidth: '520px',
-                    border: '1px solid var(--glass-border-bright)',
-                    boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.8)',
+                    border: '1px solid #E2E8F0',
+                    boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.2)',
                     position: 'relative',
                     zIndex: 3001,
                     textAlign: 'center',
@@ -73,23 +95,23 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                         width: '72px',
                         height: '72px',
                         borderRadius: '20px',
-                        backgroundColor: type === 'warning' ? 'rgba(239, 172, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        color: type === 'warning' ? '#F59E0B' : '#EF4444',
-                        border: `1px solid ${type === 'warning' ? 'rgba(239, 172, 68, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
+                        backgroundColor: iconBg,
+                        color: iconColor,
+                        border: `1px solid ${iconBorder}`
                     }}>
-                        <AlertTriangle size={36} />
+                        <Icon size={36} />
                     </div>
                 </div>
                 <h3 style={{
                     fontSize: '2rem',
                     fontWeight: '800',
-                    color: 'var(--theme-text-primary)',
+                    color: '#0F172A',
                     marginBottom: '16px',
                     fontFamily: 'var(--font-display)',
                     letterSpacing: '-0.02em'
                 }}>{title}</h3>
                 <p style={{
-                    color: 'var(--theme-text-secondary)',
+                    color: '#475569',
                     marginBottom: '40px',
                     lineHeight: '1.7',
                     fontSize: '1.05rem',
@@ -102,9 +124,9 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                         style={{
                             padding: '14px 28px',
                             borderRadius: '14px',
-                            border: '1px solid var(--theme-border)',
-                            background: 'transparent',
-                            color: 'var(--theme-text-primary)',
+                            border: '1px solid #E2E8F0',
+                            background: '#F8FAFC',
+                            color: '#0F172A',
                             fontWeight: '700',
                             cursor: 'pointer',
                             fontFamily: 'var(--font-display)'
@@ -119,12 +141,12 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, type = 
                             padding: '14px 40px',
                             borderRadius: '14px',
                             border: 'none',
-                            background: type === 'warning' ? 'var(--glass-accent)' : '#DC2626',
+                            background: btnBg,
                             color: 'white',
                             fontWeight: '800',
                             cursor: 'pointer',
                             fontFamily: 'var(--font-display)',
-                            boxShadow: `0 8px 20px -4px ${type === 'warning' ? 'rgba(63, 81, 181, 0.4)' : 'rgba(220, 38, 38, 0.4)'}`
+                            boxShadow: `0 8px 20px -4px ${btnShadow}`
                         }}
                     >
                         CONFIRM
@@ -152,14 +174,14 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
             animation: 'glassEntrance 0.3s ease-out'
         },
         modal: {
-            backgroundColor: 'var(--glass-bg)',
+            backgroundColor: 'var(--theme-bg-primary)',
             borderRadius: '28px',
             width: '95%',
             maxWidth: '1000px',
             maxHeight: '90vh',
             overflowY: 'auto',
-            border: '1px solid var(--glass-border-bright)',
-            boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.6)',
+            border: '1px solid var(--theme-border)',
+            boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.15)',
             position: 'relative',
             animation: 'glassEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
             scrollbarWidth: 'none',
@@ -167,8 +189,8 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
         },
         header: {
             padding: '60px 50px',
-            background: 'linear-gradient(135deg, rgba(10, 12, 16, 0.8) 0%, rgba(63, 81, 181, 0.1) 100%)',
-            borderBottom: '1px solid var(--glass-border)',
+            background: 'var(--theme-bg-subtle)',
+            borderBottom: '1px solid var(--theme-border)',
             display: 'flex',
             gap: '40px',
             alignItems: 'center',
@@ -179,10 +201,10 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
             padding: '50px'
         },
         section: {
-            background: 'rgba(255, 255, 255, 0.02)',
+            background: 'var(--theme-bg-subtle)',
             borderRadius: '20px',
             padding: '32px',
-            border: '1px solid var(--glass-border)',
+            border: '1px solid var(--theme-border)',
             marginBottom: '32px'
         },
         label: {
@@ -197,7 +219,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
         value: {
             fontSize: '1.1rem',
             fontWeight: '600',
-            color: 'white'
+            color: 'var(--theme-text-primary)'
         }
     };
 
@@ -240,15 +262,15 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
 
                 <div style={styles.content}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
-                        <div className="glass-panel" style={{ padding: '24px' }}>
+                        <div className="glass-panel" style={{ padding: '24px', background: 'var(--theme-bg-subtle)', borderColor: 'var(--theme-border)' }}>
                             <span style={styles.label}>Email</span>
                             <div style={styles.value}>{candidate.email}</div>
                         </div>
-                        <div className="glass-panel" style={{ padding: '24px' }}>
+                        <div className="glass-panel" style={{ padding: '24px', background: 'var(--theme-bg-subtle)', borderColor: 'var(--theme-border)' }}>
                             <span style={styles.label}>Phone Number</span>
                             <div style={styles.value}>{candidate.phone || 'Not added'}</div>
                         </div>
-                        <div className="glass-panel" style={{ padding: '24px' }}>
+                        <div className="glass-panel" style={{ padding: '24px', background: 'var(--theme-bg-subtle)', borderColor: 'var(--theme-border)' }}>
                             <span style={styles.label}>Date Applied</span>
                             <div style={styles.value}>{candidate.appliedDate}</div>
                         </div>
@@ -277,7 +299,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
                         <div style={styles.section}>
                             <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Education</h3>
-                            <div style={{ color: 'white', fontWeight: '600' }}>{candidate.education}</div>
+                            <div style={{ color: 'var(--theme-text-primary)', fontWeight: '600' }}>{candidate.education}</div>
                         </div>
                         <div style={styles.section}>
                             <h3 style={{ ...styles.label, fontSize: '0.85rem', color: 'var(--glass-accent-light)' }}>Cover Letter</h3>
@@ -289,7 +311,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                 </div>
 
                 {/* Footer Actions */}
-                <div style={{ padding: '32px 50px', borderTop: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '32px 50px', borderTop: '1px solid var(--theme-border)', background: 'var(--theme-bg-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '16px' }}>
                         {candidate.status !== 'Accepted' && (
                             <button
@@ -325,7 +347,7 @@ const CandidateModal = ({ isOpen, onClose, candidate, onShortlist, onReject }) =
                         <button
                             title="Send Email"
                             className="btn-scale"
-                            style={{ padding: '14px 32px', background: 'var(--theme-bg-subtle)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
+                            style={{ padding: '14px 32px', background: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-display)' }}
                             onClick={() => window.location.href = `mailto:${candidate.email}?subject=Regarding your application for ${candidate.jobTitle}`}
                         >
                             <Mail size={20} /> EMAIL
@@ -363,7 +385,12 @@ const Applications = () => {
             window.open(url, '_blank');
         } catch (err) {
             console.error('View failed:', err);
-            alert('Failed to view CV. Please try again.');
+            const serverMsg = err.response?.data?.message || err.message;
+            if (serverMsg && serverMsg.includes('File not found on server')) {
+                alert("This CV is missing from your local device storage because it was uploaded locally on another developer's machine before Cloudinary was implemented. Please test with a newly submitted application to verify Cloud CV viewing works.");
+            } else {
+                alert(`Failed to view CV: ${serverMsg}`);
+            }
         }
     };
 
@@ -406,6 +433,7 @@ const Applications = () => {
                 isOpen: true,
                 title: 'Reject Application?',
                 message: `Are you sure you want to reject ${name}? They will be notified of your decision.`,
+                type: 'danger',
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else if (newStatus === 'Accepted') {
@@ -413,6 +441,7 @@ const Applications = () => {
                 isOpen: true,
                 title: 'Confirm Hiring?',
                 message: `Are you sure you want to hire ${name}? This will mark their application as successful.`,
+                type: 'success',
                 onConfirm: () => updateStatus(id, newStatus)
             });
         } else {
@@ -664,7 +693,7 @@ const Applications = () => {
                             <h1 style={{
                                 fontSize: '4rem',
                                 fontWeight: '900',
-                                color: '#1E293B', // Dark bold color
+                                color: 'var(--theme-text-primary)',
                                 margin: 0,
                                 letterSpacing: '-0.04em',
                                 fontFamily: 'var(--font-display)',
@@ -682,35 +711,35 @@ const Applications = () => {
                         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                             <div className="glass-panel" style={{
                                 padding: '24px 32px',
-                                background: 'rgba(255, 255, 255, 0.7)',
+                                background: 'var(--glass-surface)',
                                 backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.8)',
+                                border: '1px solid var(--glass-border-bright)',
                                 borderRadius: '24px',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
                                 minWidth: '180px'
                             }}>
-                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--glass-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                     TOTAL APPLICATIONS
                                 </div>
-                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0F172A', lineHeight: 1 }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--theme-text-primary)', lineHeight: 1 }}>
                                     {serverApps.length}
                                 </div>
                             </div>
                             <div className="glass-panel" style={{
                                 padding: '24px 32px',
-                                background: 'rgba(255, 255, 255, 0.7)',
+                                background: 'var(--glass-surface)',
                                 backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.8)',
+                                border: '1px solid var(--glass-border-bright)',
                                 borderRadius: '24px',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
                                 minWidth: '180px',
                                 position: 'relative',
                                 overflow: 'hidden'
                             }}>
-                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--glass-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                     SHORTLISTED
                                 </div>
-                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#0F172A', lineHeight: 1 }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--theme-text-primary)', lineHeight: 1 }}>
                                     {serverApps.filter(a => a.status === 'Shortlisted').length}
                                 </div>
                                 {/* Subtle Right Glow */}

@@ -97,29 +97,112 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
     });
 
     if (!cv) {
+        console.error(`[downloadCV] CV not found. ID: ${req.params.id}, Role: ${req.role}`);
         return next(new AppError('No CV found with that ID or unauthorized', 404));
     }
 
+    console.log(`[downloadCV] CV found: id=${cv.id}, type=${cv.type}, file_path=${cv.file_path}`);
+
+    // CASE 1: Platform-generated CVs — generate PDF on-the-fly
     if (cv.type === 'platform') {
         const user = await JobSeeker.findByPk(cv.user_id);
         const pdfBuffer = await pdfGenerator.generateCV(cv, user);
 
-
         res.set({
             'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${cv.title.replace(/\s+/g, '_')}.pdf"`,
+            'Content-Disposition': `inline; filename="${cv.title.replace(/\s+/g, '_')}.pdf"`,
             'Content-Length': pdfBuffer.length,
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'Surrogate-Control': 'no-store'
+            'Cache-Control': 'no-store'
         });
         return res.send(pdfBuffer);
     }
 
+    // CASE 2: Uploaded CV with Cloudinary URL
+    if (cv.file_path && cv.file_path.startsWith('http')) {
+        try {
+            // First try direct fetch (works for 'raw' resource_type uploads)
+            let response = await fetch(cv.file_path);
+            
+            // If direct URL fails (401/403), try generating a signed URL via Cloudinary SDK
+            if (!response.ok) {
+                console.log(`[downloadCV] Direct fetch failed (${response.status}), trying Cloudinary signed URL...`);
+                const cloudinary = require('../utils/cloudinary');
+                
+                // Extract public_id from the Cloudinary URL
+                // URL format: https://res.cloudinary.com/{cloud}/image/upload/v{ver}/{folder}/{public_id}.{ext}
+                // or: https://res.cloudinary.com/{cloud}/raw/upload/v{ver}/{folder}/{public_id}.{ext}
+                const urlParts = cv.file_path.split('/upload/');
+                if (urlParts.length === 2) {
+                    let pathAfterUpload = urlParts[1];
+                    // Remove version prefix (v1234567890/)
+                    pathAfterUpload = pathAfterUpload.replace(/^v\d+\//, '');
+                    // Remove file extension for public_id
+                    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, '');
+                    
+                    // Determine resource type from URL
+                    const resourceType = cv.file_path.includes('/raw/upload/') ? 'raw' : 'image';
+                    
+                    const signedUrl = cloudinary.url(publicId, {
+                        resource_type: resourceType,
+                        type: 'authenticated',
+                        sign_url: true,
+                        secure: true
+                    });
+                    
+                    console.log(`[downloadCV] Trying signed URL: ${signedUrl}`);
+                    response = await fetch(signedUrl);
+                }
+                
+                // If signed URL also fails, try with 'raw' resource type
+                if (!response.ok) {
+                    console.log(`[downloadCV] Signed URL failed (${response.status}), trying raw resource type...`);
+                    const urlParts2 = cv.file_path.split('/upload/');
+                    if (urlParts2.length === 2) {
+                        let pathAfterUpload = urlParts2[1].replace(/^v\d+\//, '');
+                        const publicId = pathAfterUpload.replace(/\.[^/.]+$/, '');
+                        
+                        // Try as raw/upload instead of image/upload
+                        const rawUrl = cv.file_path.replace('/image/upload/', '/raw/upload/');
+                        console.log(`[downloadCV] Trying raw URL: ${rawUrl}`);
+                        response = await fetch(rawUrl);
+                    }
+                }
+                
+                if (!response.ok) {
+                    console.error(`[downloadCV] All fetch attempts failed. Last status: ${response.status}`);
+                    return next(new AppError('Failed to fetch CV from cloud storage. The file may need to be re-uploaded.', 500));
+                }
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            
+            const contentType = response.headers.get('content-type') || 'application/pdf';
+            const filename = cv.title ? cv.title.replace(/[^a-zA-Z0-9.\-_]/g, '_') : 'cv';
+            
+            console.log(`[downloadCV] Serving remote CV. Size: ${buffer.length}, Type: ${contentType}`);
+            res.set({
+                'Content-Type': contentType.includes('pdf') ? 'application/pdf' : contentType,
+                'Content-Disposition': `inline; filename="${filename}.pdf"`,
+                'Content-Length': buffer.length,
+                'Cache-Control': 'no-store'
+            });
+            return res.send(buffer);
+        } catch (error) {
+            console.error('[downloadCV] Remote fetch error:', error.message);
+            return next(new AppError('Failed to retrieve CV from cloud storage', 500));
+        }
+    }
+
+    // CASE 3: Local file path
+    if (!cv.file_path) {
+        return next(new AppError('CV file path is missing', 404));
+    }
+
     const filePath = path.join(__dirname, '../../', cv.file_path);
     if (!fs.existsSync(filePath)) {
-        return next(new AppError('File not found on server', 404));
+        console.error(`[downloadCV] Local file missing: ${filePath}`);
+        return next(new AppError('CV file not found on server. It may have been uploaded on a different machine. Please ask the candidate to re-upload their CV.', 404));
     }
 
     res.download(filePath, cv.title);

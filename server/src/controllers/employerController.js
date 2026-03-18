@@ -3,6 +3,7 @@ const Employer = require('../models/Employer');
 const Notification = require('../models/Notification');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const sequelize = require('../config/sequelize');
 
 // Get current employer profile
 exports.getMe = catchAsync(async (req, res, next) => {
@@ -122,10 +123,24 @@ exports.getMyJobs = catchAsync(async (req, res, next) => {
         order: [['created_at', 'DESC']]
     });
 
+    // Count applicants for each job manually to ensure 100% accuracy across SQL dialects
+    const jobsWithCounts = await Promise.all(jobs.map(async (job) => {
+        const count = await Application.count({ 
+            where: { job_id: job.id } 
+        });
+        
+        console.log(`[DEBUG] Job ID: ${job.id}, Title: ${job.title}, Applicant Count: ${count}`);
+        
+        return {
+            ...job.toJSON(),
+            applicants: count
+        };
+    }));
+
     res.status(200).json({
         status: 'success',
         data: {
-            jobs
+            jobs: jobsWithCounts
         }
     });
 });

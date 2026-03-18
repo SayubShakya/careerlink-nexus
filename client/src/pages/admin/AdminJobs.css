@@ -1,10 +1,10 @@
 :root {
-  --jb-bg: #F8FAFC;
-  --jb-card-bg: #FFFFFF;
-  --jb-text-main: #0F172A;
-  --jb-text-muted: #64748B;
-  --jb-accent: #3E61FF;
-  --jb-border: #E2E8F0;
+  --jb-bg: var(--theme-bg, #F8FAFC);
+  --jb-card-bg: var(--theme-card, #FFFFFF);
+  --jb-text-main: var(--theme-text-primary, #0F172A);
+  --jb-text-muted: var(--theme-text-secondary, #64748B);
+  --jb-accent: var(--color-brand-accent, #3E61FF);
+  --jb-border: var(--theme-border, #E2E8F0);
 }
 
 .jb-page { padding: 24px 32px; background: var(--jb-bg); min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; }
@@ -200,5 +200,7 @@
 .jb-cloud-3 { width: 100px; height: 24px; bottom: 20%; right: 30%; animation: drift 50s linear infinite; }
 @keyframes drift { from { transform: translateX(200px); } to { transform: translateX(-1000px); } }
 @keyframes jbPopIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes jbFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* ── ANIMATIONS ── */
 @keyframes jbFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .jb-premium-card, .jb-stat-pill, .jb-hero { animation: jbFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }

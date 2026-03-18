@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { ROUTES } from './routes';
 import Home from '../pages/Home';
-import Jobs from '../pages/jobs/Jobs';
 import ContactUs from '../pages/contact-us/ContactUs';
 import ProfileSetup from '../pages/profile/ProfileSetup';
 import Login from '../pages/login/Login';

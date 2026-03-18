@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, Sparkles, Building2, Users } from 'lucide-react';
 import './Hero.css';
 
 const Hero = ({ userType, setUserType }) => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [location, setLocation] = useState('');
 
     const handleSearch = (e) => {
         e.preventDefault();
-        console.log(`Searching as ${userType}:`, searchQuery, location);
+        const params = new URLSearchParams();
+        if (searchQuery) params.append('q', searchQuery);
+        if (location) params.append('l', location);
+        
+        const path = userType === 'jobseeker' ? '/find-jobs' : '/jobs'; 
+        navigate(`${path}?${params.toString()}`);
     };
 
     return (

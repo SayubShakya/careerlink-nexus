@@ -66,7 +66,12 @@ const CompanyProfile = () => {
                 website: serverCompany.companyWebsite || '',
             });
             if (serverCompany.profile_picture) {
-                setLogoPreview(serverCompany.profile_picture.startsWith('http') ? serverCompany.profile_picture : `http://localhost:5000/uploads/${serverCompany.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/'));
+                const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace('/api', '');
+                const fullBaseUrl = baseUrl.startsWith('http') ? baseUrl : window.location.origin + baseUrl;
+                setLogoPreview(serverCompany.profile_picture.startsWith('http') ? 
+                    serverCompany.profile_picture : 
+                    `${fullBaseUrl}/uploads/${serverCompany.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/([^:]\/)\/+/g, "$1").replace(/\\/g, '/')
+                );
             }
         }
     }, [serverCompany]);

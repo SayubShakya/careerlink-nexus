@@ -104,7 +104,7 @@ const JobDescription = () => {
     }
 
     const jobData = serverJobData;
-    console.log(serverJobData, "serverJobData")
+
 
     const handleApplyClick = () => {
         if (!isLoggedIn) {

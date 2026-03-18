@@ -338,9 +338,9 @@ const JobSeekerDashboard = () => {
                             currentItems.map((app) => (
                                 <div key={app.id} className="pipeline-item" onClick={() => navigate(`/jobseeker/jobs/${app.JobListing?.id}?status=${app.status}`)} style={{ cursor: 'pointer' }}>
                                     <div className="item-info">
-                                        <div className="company-badge">
-                                            {app.JobListing?.Employer?.logo ? (
-                                                <img src={app.JobListing.Employer.logo.startsWith('http') ? app.JobListing.Employer.logo : `http://localhost:5000/uploads/${app.JobListing.Employer.logo.replace(/^(\/?uploads\/|\/)/, '')}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                                        <div className="company-badge" style={{ overflow: 'hidden' }}>
+                                            {(app.JobListing?.Employer?.profile_picture || app.JobListing?.Employer?.logo) ? (
+                                                <img src={(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).startsWith('http') ? (app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo) : `http://localhost:5000/uploads/${(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
                                             ) : (
                                                 app.JobListing?.Employer?.name?.charAt(0) || app.JobListing?.company?.charAt(0) || 'J'
                                             )}

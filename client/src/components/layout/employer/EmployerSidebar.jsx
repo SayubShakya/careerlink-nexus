@@ -110,29 +110,42 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
             border: 'none',
             boxShadow: 'none'
         },
+        logoIconBox: {
+            width: isOpen ? '42px' : '42px',
+            height: isOpen ? '42px' : '42px',
+            borderRadius: '12px',
+            background: theme === THEME_MODES.DARK ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            flexShrink: 0,
+            border: '1px solid var(--theme-border)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        },
         logoImg: {
-            width: isOpen ? '36px' : '32px',
-            height: isOpen ? '36px' : '32px',
+            width: '160%',
+            height: '160%',
             objectFit: 'contain',
             filter: theme === THEME_MODES.DARK ? 'brightness(1.1) drop-shadow(0 0 12px rgba(62, 97, 255, 0.4))' : 'none',
-            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         },
         brandName: {
             display: isOpen ? 'block' : 'none',
-            fontSize: '1.5rem',
+            fontSize: '1.6rem',
             fontWeight: '900',
-            letterSpacing: '-0.03em',
+            letterSpacing: '-0.04em',
             fontFamily: 'var(--font-display)',
             color: 'var(--theme-text-primary)',
             whiteSpace: 'nowrap',
-            lineHeight: '1',
-            paddingTop: '1px'
+            lineHeight: '1.2',
+            paddingTop: '2px'
         },
         identityContainer: {
             display: isOpen ? 'flex' : 'none',
             flexDirection: 'column',
             gap: '0',
-            paddingLeft: '48px', // Perfectly aligned with 'Career' text (36px icon + 12px gap)
+            paddingLeft: '54px', // Aligned with 'Career' text (42px icon + 12px gap)
             marginBottom: '12px'
         },
         identityName: {
@@ -228,7 +241,9 @@ const EmployerSidebar = ({ isOpen, setIsOpen }) => {
                         className="logo-gem-container btn-scale"
                         onClick={() => navigate(ROUTES.EMPLOYER_DASHBOARD)}
                     >
-                        <img src={logoImg} alt="CareerLink" style={styles.logoImg} />
+                        <div style={styles.logoIconBox}>
+                            <img src={logoImg} alt="CareerLink" style={styles.logoImg} />
+                        </div>
                         <span style={styles.brandName}>Career<span style={{ color: 'var(--color-brand-accent)' }}>Link</span></span>
                     </div>
                     <div style={styles.identityContainer}>

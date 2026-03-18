@@ -19,8 +19,16 @@ const JobDetailModal = ({ job, onClose }) => {
                 {/* header card like the image */}
                 <div className="jb-detail-header-card">
                     <div className="jb-dhc-top">
-                        <div className="jb-dhc-avatar">
-                            {(job.Employer?.companyName || '?')[0]}
+                        <div className="jb-dhc-avatar" style={{ overflow: 'hidden' }}>
+                            {job.Employer?.profile_picture ? (
+                                <img 
+                                    src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `http://localhost:5000/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                    alt="Logo" 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                />
+                            ) : (
+                                (job.Employer?.companyName || '?')[0]
+                            )}
                         </div>
                         <div className="jb-dhc-info">
                             <h2 className="jb-dhc-title">{job.title || 'Job Title'}</h2>
@@ -100,7 +108,17 @@ const JobDetailModal = ({ job, onClose }) => {
                             <div className="jb-sb-content">
                                 <h4 className="jb-sb-title">About the Organization</h4>
                                 <div className="jb-sb-org">
-                                    <div className="jb-sb-org-avatar">{(job.Employer?.companyName || '?')[0]}</div>
+                                    <div className="jb-sb-org-avatar" style={{ overflow: 'hidden' }}>
+                                        {job.Employer?.profile_picture ? (
+                                            <img 
+                                                src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `http://localhost:5000/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                alt="Logo" 
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                            />
+                                        ) : (
+                                            (job.Employer?.companyName || '?')[0]
+                                        )}
+                                    </div>
                                     <div className="jb-sb-org-name">{job.Employer?.companyName || 'The Company'}</div>
                                 </div>
                                 <p className="jb-sb-text" style={{ marginTop: '16px', marginBottom: 0 }}>

@@ -241,8 +241,20 @@ const AdminDashboard = () => {
                                         <tr key={emp.id} style={{ animationDelay: `${i * 0.05}s` }} className="table-row-animate">
                                             <td>
                                                 <div className="td-company-info">
-                                                    <div className="item-avatar" style={{ background: color.bg, color: color.text, borderColor: color.border }}>
-                                                        {(emp.companyName || '?')[0]}
+                                                    <div className="item-avatar" style={{ background: color.bg, color: color.text, borderColor: color.border, overflow: 'hidden', position: 'relative' }}>
+                                                        {emp.profile_picture || emp.logo ? (
+                                                            <>
+                                                                <img 
+                                                                    src={(emp.profile_picture || emp.logo).startsWith('http') ? (emp.profile_picture || emp.logo) : `http://localhost:5000/uploads/${(emp.profile_picture || emp.logo).replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                                    alt="Logo" 
+                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1, background: 'white' }} 
+                                                                    onError={e => { e.target.style.display = 'none'; }}
+                                                                />
+                                                                <div className="item-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(emp.companyName || '?')[0]}</div>
+                                                            </>
+                                                        ) : (
+                                                            (emp.companyName || '?')[0]
+                                                        )}
                                                     </div>
                                                     <div className="td-name-col">
                                                         <span className="td-company-name">{emp.companyName}</span>
@@ -519,6 +531,76 @@ const AdminDashboard = () => {
                 @keyframes dashModalUp { from { opacity: 0; transform: translateY(40px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
                 @keyframes dashPulse { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
                 @keyframes trendSlide { from { width: 0; } to { width: 65%; } }
+
+                /* ── DARK THEME OVERRIDES ── */
+                .dark-theme .admin-page { background: var(--theme-bg, #020617); }
+                .dark-theme .hero-title { color: #FFFFFF; }
+                .dark-theme .hero-subtitle { color: #94A3B8; }
+                .dark-theme .admin-stat-card { background: var(--theme-card, #0B1120); border-color: var(--theme-border, rgba(255,255,255,0.06)); }
+                .dark-theme .admin-stat-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+                .dark-theme .stat-value { color: #F8FAFC; }
+                .dark-theme .stat-label { color: #94A3B8; }
+                .dark-theme .stat-badge { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+                
+                .dark-theme .admin-content-card { background: var(--theme-card, #0B1120); border-color: var(--theme-border, rgba(255,255,255,0.06)); }
+                .dark-theme .card-header.border-bottom { border-color: rgba(255,255,255,0.06); }
+                .dark-theme .card-title { color: #F8FAFC; }
+                .dark-theme .card-subtitle { color: #94A3B8; }
+                .dark-theme .card-action-btn { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #E2E8F0; }
+                .dark-theme .card-action-btn:hover { background: rgba(255,255,255,0.1); color: #FFFFFF; }
+                
+                .dark-theme .admin-custom-table th { background: rgba(255,255,255,0.02); color: #94A3B8; border-color: rgba(255,255,255,0.06); }
+                .dark-theme .admin-custom-table tbody tr { background: transparent; }
+                .dark-theme .admin-custom-table tbody tr:hover { background: rgba(255,255,255,0.02); box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.5); }
+                .dark-theme .admin-custom-table td { border-color: rgba(255,255,255,0.04); color: #E2E8F0; }
+                .dark-theme .admin-custom-table td:first-child { border-left-color: rgba(255,255,255,0.04); }
+                .dark-theme .admin-custom-table td:last-child { border-right-color: rgba(255,255,255,0.04); }
+                .dark-theme .td-company-name { color: #F8FAFC; }
+                .dark-theme .td-industry { color: #CBD5E1; }
+                .dark-theme .td-location { color: #94A3B8; }
+                .dark-theme .item-avatar { box-shadow: none; border-color: transparent; }
+                
+                .dark-theme .admin-quick-link { border-color: rgba(255,255,255,0.04); }
+                .dark-theme .admin-quick-link:hover { background: rgba(255,255,255,0.02); }
+                .dark-theme .ql-label { color: #F8FAFC; }
+                .dark-theme .ql-desc { color: #94A3B8; }
+                .dark-theme .ql-arrow { color: #64748B; }
+                
+                .dark-theme .table-pagination { background: rgba(147, 51, 234, 0.05); border-color: rgba(147, 51, 234, 0.1); }
+                
+                .dark-theme .admin-modal { background: #0F172A; border: 1px solid rgba(255,255,255,0.1); }
+                .dark-theme .admin-modal h3 { color: #F8FAFC; }
+                .dark-theme .admin-modal p { color: #94A3B8; }
+                .dark-theme .modal-btn.cancel { background: rgba(255,255,255,0.05); color: #CBD5E1; }
+                .dark-theme .modal-btn.cancel:hover { background: rgba(255,255,255,0.1); }
+
+                /* Jobs Modal */
+                .dark-theme .modal-title { color: #F8FAFC; }
+                .dark-theme .modal-close-btn { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #94A3B8; }
+                .dark-theme .modal-close-btn:hover { background: rgba(255,255,255,0.1); color: #F8FAFC; }
+                .dark-theme .modal-job-item { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); }
+                .dark-theme .job-title { color: #E2E8F0; }
+                .dark-theme .job-meta { color: #94A3B8; }
+                .dark-theme .job-status.inactive { background: rgba(255,255,255,0.05); color: #94A3B8; }
+                .dark-theme .job-status.active { background: rgba(16,185,129,0.1); color: #34D399; }
+
+                /* ── MAIN PAGE DARK MODE ── */
+                .dark-theme .ad-page { background: var(--theme-bg, #020617); }
+                .dark-theme .hero-title { color: #FFFFFF; }
+                .dark-theme .hero-subtitle { color: rgba(255,255,255,0.6); }
+                .dark-theme .admin-stat-card { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.08); }
+                .dark-theme .stat-value { color: #F8FAFC; }
+                .dark-theme .stat-label { color: #94A3B8; }
+                .dark-theme .admin-content-card { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.08); }
+                .dark-theme .card-title { color: #F8FAFC; }
+                .dark-theme .card-subtitle { color: #94A3B8; }
+                .dark-theme .card-header.border-bottom { border-bottom-color: rgba(255,255,255,0.05); }
+                .dark-theme .admin-custom-table th { background: #0F172A; border-bottom-color: rgba(255,255,255,0.08); color: #94A3B8; }
+                .dark-theme .admin-custom-table tbody tr { background: rgba(255,255,255,0.01); box-shadow: none; }
+                .dark-theme .admin-custom-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+                .dark-theme .admin-custom-table td { border-color: rgba(255,255,255,0.05); color: #CBD5E1; }
+                .dark-theme .admin-custom-table td:first-child,
+                .dark-theme .admin-custom-table td:last-child { border-color: rgba(255,255,255,0.05); }
             `}</style>
         </>
     );

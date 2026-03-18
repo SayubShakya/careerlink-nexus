@@ -189,7 +189,17 @@ const AdminEmployers = () => {
                                     <div className="ep-card-accent" style={{ background: compColor.grad }} />
                                     <div className="ep-card-header">
                                         <div className="ep-card-company">
-                                            <div className="ep-card-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}` }}>{(emp.companyName || '?')[0]}</div>
+                                            <div className="ep-card-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}`, overflow: 'hidden' }}>
+                                                {emp.profile_picture ? (
+                                                    <img 
+                                                        src={emp.profile_picture.startsWith('http') ? emp.profile_picture : `http://localhost:5000/uploads/${emp.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                        alt="Logo" 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                    />
+                                                ) : (
+                                                    (emp.companyName || '?')[0]
+                                                )}
+                                            </div>
                                             <div>
                                                 <div className="ep-card-name">{emp.companyName}</div>
                                                 <div className="ep-card-industry">{emp.industry || 'Industry not set'}</div>
@@ -390,6 +400,68 @@ const AdminEmployers = () => {
                 @keyframes epSunPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
                 @keyframes epRayRotate { 100% { transform: rotate(360deg); } }
                 @keyframes epCloudDrift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(12px); } }
+
+                /* ── DARK THEME OVERRIDES ── */
+                .dark-theme .ep-page { background: var(--theme-bg, #020617); }
+                .dark-theme .ep-hero-title { color: #FFFFFF; }
+                
+                .dark-theme .ep-stat-pill { background: rgba(255,255,255,0.03) !important; border-color: rgba(255,255,255,0.08) !important; }
+                .dark-theme .ep-sp-value { color: #F8FAFC; }
+                .dark-theme .ep-sp-label { color: #94A3B8; }
+                
+                .dark-theme .ep-search-input { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.1); color: #F8FAFC; }
+                .dark-theme .ep-search-input:focus { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+                .dark-theme .ep-search-clear { background: rgba(255,255,255,0.05); color: #94A3B8; }
+                .dark-theme .ep-search-clear:hover { background: rgba(255,255,255,0.1); color: #F8FAFC; }
+                
+                .dark-theme .ep-results-text { color: #94A3B8; }
+                .dark-theme .ep-results-text strong { color: #F8FAFC; }
+                .dark-theme .ep-search-tag { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); color: #818CF8; }
+                
+                .dark-theme .ep-card { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.08); }
+                .dark-theme .ep-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                .dark-theme .ep-card-name { color: #F8FAFC; }
+                .dark-theme .ep-card-industry { color: #94A3B8; }
+                
+                .dark-theme .ep-card-status.verified { background: rgba(16, 185, 129, 0.1); color: #34D399; border-color: rgba(16, 185, 129, 0.2); }
+                .dark-theme .ep-card-status.active { background: rgba(99, 102, 241, 0.1); color: #818CF8; border-color: rgba(99, 102, 241, 0.2); }
+                
+                .dark-theme .ep-card-info-item { color: #CBD5E1; }
+                .dark-theme .ep-info-icon { color: #64748B; }
+                .dark-theme .ep-card-divider { background: rgba(255,255,255,0.05); }
+                
+                .dark-theme .ep-card-jobs-pill { background: rgba(99, 102, 241, 0.1); color: #818CF8; border-color: rgba(99, 102, 241, 0.2); }
+                .dark-theme .ep-card-jobs-pill:hover { background: rgba(99, 102, 241, 0.15); }
+                .dark-theme .ep-card-date { color: #64748B; }
+                
+                .dark-theme .ep-btn-view { background: rgba(99, 102, 241, 0.1); color: #818CF8; border-color: rgba(99, 102, 241, 0.2); }
+                .dark-theme .ep-btn-view:hover { background: #6366F1; color: white; }
+                .dark-theme .ep-btn-delete { background: rgba(239, 68, 68, 0.1); color: #F87171; border-color: rgba(239, 68, 68, 0.2); }
+                .dark-theme .ep-btn-delete:hover { background: #EF4444; color: white; }
+                
+                .dark-theme .ep-pg-btn { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.1); color: #CBD5E1; }
+                .dark-theme .ep-pg-btn:hover:not(:disabled) { border-color: #6366F1; color: #818CF8; }
+                .dark-theme .ep-pg-num { background: var(--theme-card, #0B1120); border-color: rgba(255,255,255,0.1); color: #94A3B8; }
+                .dark-theme .ep-pg-num.active { background: #6366F1; color: white; border-color: #6366F1; }
+                
+                .dark-theme .ep-delete-modal { background: #0F172A; }
+                .dark-theme .ep-dm-title { color: #F8FAFC; }
+                .dark-theme .ep-dm-desc { color: #94A3B8; }
+                .dark-theme .ep-dm-cancel { background: rgba(255,255,255,0.05); color: #CBD5E1; border-color: rgba(255,255,255,0.1); }
+                
+                /* Jobs Modal */
+                .dark-theme .ep-jobs-modal { background: #0F172A; }
+                .dark-theme .ep-jm-header { border-bottom: 1px solid rgba(255,255,255,0.05); }
+                .dark-theme .ep-jm-stats-bar { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
+                .dark-theme .ep-jm-stat-item { color: #94A3B8; }
+                .dark-theme .ep-jm-stat-item strong { color: #F8FAFC; }
+                .dark-theme .ep-jm-stat-item.active { color: #34D399; }
+                .dark-theme .ep-jm-empty { color: #64748B; }
+                .dark-theme .ep-jm-job { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
+                .dark-theme .ep-jm-job-title { color: #F8FAFC; }
+                .dark-theme .ep-jm-job-meta { color: #94A3B8; }
+                .dark-theme .ep-jm-status.on { background: rgba(16, 185, 129, 0.1); color: #34D399; border-color: rgba(16, 185, 129, 0.2); }
+                .dark-theme .ep-jm-status.off { background: rgba(239, 68, 68, 0.1); color: #F87171; border-color: rgba(239, 68, 68, 0.2); }
             `}</style>
         </>
     );

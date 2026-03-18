@@ -1,6 +1,7 @@
 # Agent
 .agent/
 .agents/
+.gemini/
 
 # Dependencies
 node_modules/
@@ -13,6 +14,8 @@ coverage/
 # Production Build
 build/
 dist/
+dist-ssr/
+*.tsbuildinfo
 
 # Environment Variables
 .env
@@ -44,21 +47,16 @@ Desktop.ini
 *.njsproj
 *.sln
 *.sw?
+.eslintcache
 
 # Project Specific
-server/uploads/
 server/temp/
+server/uploads/*
+!server/uploads/logos/
 client/dist/
-client/dist-ssr/
-client/.eslintcache
 
 # Vite config caches
-*.tsbuildinfo
 .vite/
-
-# MacOS & Windows
-.DS_Store
-Thumbs.db
 
 # Databases
 *.sqlite

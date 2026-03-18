@@ -45,7 +45,7 @@ const MyProfile = () => {
     const [language, setLanguage] = useState('en');
 
     const { data: serverProfile, isLoading: profileLoading } = useGetProfile();
-    console.log(serverProfile, "serverProfile")
+
     const { mutate: updateProfile, isPending: saving } = usePutUpdateProfile();
 
     useEffect(() => {
