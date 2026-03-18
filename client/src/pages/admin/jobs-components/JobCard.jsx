@@ -15,10 +15,10 @@ const JobCard = ({ job, index, onSelect }) => {
                         {job.Employer?.profile_picture || job.Employer?.logo ? (
                             <>
                                 <img 
-                                    src={(job.Employer.profile_picture || job.Employer.logo).startsWith('http') ? (job.Employer.profile_picture || job.Employer.logo) : `http://localhost:5000/uploads/${(job.Employer.profile_picture || job.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} 
+                                    src={(job.Employer.profile_picture || job.Employer.logo).startsWith('http') ? (job.Employer.profile_picture || job.Employer.logo) : `/uploads/${(job.Employer.profile_picture || job.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} 
                                     alt="Logo" 
                                     className="jb-pc-avatar-img"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1, background: 'white' }} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1 }} 
                                     onError={e => { e.target.style.display = 'none'; }}
                                 />
                                 <div className="jb-pc-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(job.Employer?.companyName || '?')[0]}</div>

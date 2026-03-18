@@ -22,7 +22,7 @@ const JobDetailModal = ({ job, onClose }) => {
                         <div className="jb-dhc-avatar" style={{ overflow: 'hidden' }}>
                             {job.Employer?.profile_picture ? (
                                 <img 
-                                    src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `http://localhost:5000/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                    src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
                                     alt="Logo" 
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                 />
@@ -111,7 +111,7 @@ const JobDetailModal = ({ job, onClose }) => {
                                     <div className="jb-sb-org-avatar" style={{ overflow: 'hidden' }}>
                                         {job.Employer?.profile_picture ? (
                                             <img 
-                                                src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `http://localhost:5000/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                src={job.Employer.profile_picture.startsWith('http') ? job.Employer.profile_picture : `/uploads/${job.Employer.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
                                                 alt="Logo" 
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                             />
