@@ -162,9 +162,17 @@ const AdminJobSeekers = () => {
                                     <tr key={s.id} style={{ animationDelay: `${i * 0.04}s` }} className="js-table-row">
                                         <td>
                                             <div className="js-td-profile">
-                                                <div className="js-td-avatar" style={{ background: getAvatarGradient(getName(s)) }}>
+                                                <div className="js-td-avatar" style={{ background: getAvatarGradient(getName(s)), position: 'relative' }}>
                                                     {s.profile_picture ? (
-                                                        <img src={s.profile_picture.startsWith('http') ? s.profile_picture : `http://localhost:5000/uploads/${s.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} alt="" />
+                                                        <>
+                                                            <img 
+                                                                src={s.profile_picture.startsWith('http') ? s.profile_picture : `/uploads/${s.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                                alt="" 
+                                                                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1 }} 
+                                                                onError={e => { e.target.style.display = 'none'; }}
+                                                            />
+                                                            <div className="js-td-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{getName(s)[0]}</div>
+                                                        </>
                                                     ) : getName(s)[0]}
                                                 </div>
                                                 <div className="js-td-name-col">

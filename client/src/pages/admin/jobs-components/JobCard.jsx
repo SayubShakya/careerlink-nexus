@@ -7,6 +7,13 @@ const JobCard = ({ job, index, onSelect }) => {
     const type = getJobTypeBadge(job.jobType);
     const hasApps = (job.totalApplications || 0) > 0;
 
+    const getMonogram = (name) => {
+        if (!name) return '?';
+        const parts = name.split(/[\s-]+/);
+        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    };
+
     return (
         <div className="jb-premium-card" style={{ animationDelay: `${index * 0.05}s` }} onClick={() => onSelect(job)}>
             <div className="jb-pc-header">
@@ -18,13 +25,22 @@ const JobCard = ({ job, index, onSelect }) => {
                                     src={(job.Employer.profile_picture || job.Employer.logo).startsWith('http') ? (job.Employer.profile_picture || job.Employer.logo) : `/uploads/${(job.Employer.profile_picture || job.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')} 
                                     alt="Logo" 
                                     className="jb-pc-avatar-img"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1 }} 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'contain', 
+                                        padding: '4px',
+                                        position: 'absolute', 
+                                        inset: 0, 
+                                        zIndex: 2, 
+                                        background: 'white' 
+                                    }} 
                                     onError={e => { e.target.style.display = 'none'; }}
                                 />
-                                <div className="jb-pc-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(job.Employer?.companyName || '?')[0]}</div>
+                                <div className="jb-pc-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800', fontSize: '12px', position: 'relative', zIndex: 1 }}>{getMonogram(job.Employer?.companyName)}</div>
                             </>
                         ) : (
-                            (job.Employer?.companyName || '?')[0]
+                            <div className="jb-pc-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800', fontSize: '12px' }}>{getMonogram(job.Employer?.companyName)}</div>
                         )}
                     </div>
                     <div className="jb-pc-company-info">

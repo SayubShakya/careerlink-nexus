@@ -75,7 +75,7 @@ exports.banJob = catchAsync(async (req, res, next) => {
 // Get all employers with their job counts
 exports.getAllEmployers = catchAsync(async (req, res, next) => {
     const employers = await Employer.findAll({
-        attributes: ['id', 'email', 'companyName', 'companyWebsite', 'industry', 'location', 'is_verified', 'created_at'],
+        attributes: ['id', 'email', 'companyName', 'companyWebsite', 'industry', 'location', 'is_verified', 'profile_picture', 'created_at'],
         include: [{
             model: JobListing,
             attributes: ['id'],
@@ -104,7 +104,7 @@ exports.getAllJobs = catchAsync(async (req, res, next) => {
     const jobs = await JobListing.findAll({
         include: [{
             model: Employer,
-            attributes: ['id', 'companyName', 'email']
+            attributes: ['id', 'companyName', 'email', 'profile_picture']
         }],
         order: [['created_at', 'DESC']]
     });

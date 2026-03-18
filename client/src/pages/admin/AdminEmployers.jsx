@@ -102,6 +102,13 @@ const AdminEmployers = () => {
     const totalJobs = employers.reduce((a, e) => a + (e.jobCount || 0), 0);
     const verifiedCount = employers.filter(e => e.is_verified).length;
 
+    const getMonogram = (name) => {
+        if (!name) return '?';
+        const parts = name.split(/[\s-]+/);
+        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    };
+
     const handleDelete = id => {
         deleteEmployer.mutate(id, {
             onSuccess: () => {
@@ -189,15 +196,28 @@ const AdminEmployers = () => {
                                     <div className="ep-card-accent" style={{ background: compColor.grad }} />
                                     <div className="ep-card-header">
                                         <div className="ep-card-company">
-                                            <div className="ep-card-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}`, overflow: 'hidden' }}>
+                                            <div className="ep-card-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}`, overflow: 'hidden', position: 'relative' }}>
                                                 {emp.profile_picture ? (
-                                                    <img 
-                                                        src={emp.profile_picture.startsWith('http') ? emp.profile_picture : `http://localhost:5000/uploads/${emp.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
-                                                        alt="Logo" 
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                                    />
+                                                    <>
+                                                        <img 
+                                                            src={emp.profile_picture.startsWith('http') ? emp.profile_picture : `/uploads/${emp.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                            alt="Logo" 
+                                                            style={{ 
+                                                                width: '100%', 
+                                                                height: '100%', 
+                                                                objectFit: 'contain', 
+                                                                padding: '6px',
+                                                                position: 'absolute', 
+                                                                inset: 0, 
+                                                                zIndex: 2, 
+                                                                background: 'white' 
+                                                            }} 
+                                                            onError={e => { e.target.style.display = 'none'; }}
+                                                        />
+                                                        <div className="ep-card-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '800', color: 'white', position: 'relative', zIndex: 1 }}>{getMonogram(emp.companyName)}</div>
+                                                    </>
                                                 ) : (
-                                                    (emp.companyName || '?')[0]
+                                                    <div className="ep-card-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '800', color: 'white' }}>{getMonogram(emp.companyName)}</div>
                                                 )}
                                             </div>
                                             <div>

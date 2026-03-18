@@ -120,6 +120,14 @@ const QuickLink = ({ label, desc, icon, color, onClick }) => (
     </button>
 );
 
+/* ── Helpers ── */
+const getNameInitials = (name) => {
+    if (!name) return '?';
+    const parts = name.split(/[\s-]+/);
+    if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+};
+
 /* ════════════════════════════════════════════════ */
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -229,31 +237,40 @@ const AdminDashboard = () => {
                                         <tr><td colSpan="4" className="list-empty">No companies registered yet.</td></tr>
                                     ) : paginatedEmployers.map((emp, i) => {
                                         const colorVariations = [
-                                            { bg: 'linear-gradient(135deg, #EEF2FF 0%, #C7D2FE 100%)', text: '#4338CA', border: '#A5B4FC' }, // Indigo
-                                            { bg: 'linear-gradient(135deg, #F0FDF4 0%, #BBF7D0 100%)', text: '#15803D', border: '#86EFAC' }, // Green
-                                            { bg: 'linear-gradient(135deg, #FFFBEB 0%, #FDE68A 100%)', text: '#B45309', border: '#FCD34D' }, // Amber
-                                            { bg: 'linear-gradient(135deg, #FDF2F8 0%, #FBCFE8 100%)', text: '#BE185D', border: '#F9A8D4' }, // Pink
-                                            { bg: 'linear-gradient(135deg, #F5F3FF 0%, #DDD6FE 100%)', text: '#6D28D9', border: '#C4B5FD' }, // Violet
+                                            { grad: 'linear-gradient(135deg, #EEF2FF 0%, #C7D2FE 100%)', shadow: 'rgba(199, 210, 254, 0.4)' }, // Indigo
+                                            { grad: 'linear-gradient(135deg, #F0FDF4 0%, #BBF7D0 100%)', shadow: 'rgba(187, 247, 208, 0.4)' }, // Green
+                                            { grad: 'linear-gradient(135deg, #FFFBEB 0%, #FDE68A 100%)', shadow: 'rgba(253, 230, 138, 0.4)' }, // Amber
+                                            { grad: 'linear-gradient(135deg, #FDF2F8 0%, #FBCFE8 100%)', shadow: 'rgba(251, 207, 232, 0.4)' }, // Pink
+                                            { grad: 'linear-gradient(135deg, #F5F3FF 0%, #DDD6FE 100%)', shadow: 'rgba(221, 214, 254, 0.4)' }, // Violet
                                         ];
-                                        const color = colorVariations[(emp.companyName?.length || i) % colorVariations.length];
+                                        const compColor = colorVariations[(emp.companyName?.length || i) % colorVariations.length];
                                         
                                         return (
                                         <tr key={emp.id} style={{ animationDelay: `${i * 0.05}s` }} className="table-row-animate">
                                             <td>
                                                 <div className="td-company-info">
-                                                    <div className="item-avatar" style={{ background: color.bg, color: color.text, borderColor: color.border, overflow: 'hidden', position: 'relative' }}>
+                                                    <div className="item-avatar" style={{ background: compColor.grad, boxShadow: `0 4px 12px ${compColor.shadow}`, overflow: 'hidden', position: 'relative' }}>
                                                         {emp.profile_picture || emp.logo ? (
                                                             <>
                                                                 <img 
-                                                                    src={(emp.profile_picture || emp.logo).startsWith('http') ? (emp.profile_picture || emp.logo) : `http://localhost:5000/uploads/${(emp.profile_picture || emp.logo).replace(/^(\/?uploads\/|\/)/, '')}`} 
+                                                                    src={(emp.profile_picture || emp.logo).startsWith('http') ? (emp.profile_picture || emp.logo) : `/uploads/${(emp.profile_picture || emp.logo).replace(/^(\/?uploads\/|\/)/, '')}`} 
                                                                     alt="Logo" 
-                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, zIndex: 1, background: 'white' }} 
+                                                                    style={{ 
+                                                                        width: '100%', 
+                                                                        height: '100%', 
+                                                                        objectFit: 'contain', 
+                                                                        padding: '6px',
+                                                                        position: 'absolute', 
+                                                                        inset: 0, 
+                                                                        zIndex: 2, 
+                                                                        background: 'white' 
+                                                                    }} 
                                                                     onError={e => { e.target.style.display = 'none'; }}
                                                                 />
-                                                                <div className="item-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(emp.companyName || '?')[0]}</div>
+                                                                <div className="item-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: 'white', position: 'relative', zIndex: 1 }}>{getNameInitials(emp.companyName)}</div>
                                                             </>
                                                         ) : (
-                                                            (emp.companyName || '?')[0]
+                                                            <div className="item-avatar-init" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: 'white' }}>{getNameInitials(emp.companyName)}</div>
                                                         )}
                                                     </div>
                                                     <div className="td-name-col">

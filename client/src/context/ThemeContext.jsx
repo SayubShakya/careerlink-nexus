@@ -43,6 +43,15 @@ export const ThemeProvider = ({ children }) => {
         localStorage.setItem(themeKey, theme);
     }, [theme, themeKey]);
 
+    // Update class on <html> for global CSS theme awareness
+    useEffect(() => {
+        if (theme === THEME_MODES.DARK) {
+            document.documentElement.classList.add('dark-theme');
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+        }
+    }, [theme]);
+
     const toggleTheme = (newTheme) => {
         setTheme(newTheme);
     };
