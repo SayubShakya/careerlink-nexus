@@ -68,8 +68,11 @@ exports.deleteCV = catchAsync(async (req, res, next) => {
     }
 
     // If it's an uploaded file, delete from disk
-    if (cv.type === 'uploaded' && cv.file_path) {
-        const filePath = path.join(__dirname, '../../', cv.file_path);
+    if (cv.type === 'uploaded' && cv.file_path && !cv.file_path.startsWith('http')) {
+        // Handle both absolute paths (legacy) and relative paths (new)
+        const filePath = path.isAbsolute(cv.file_path)
+            ? cv.file_path
+            : path.join(__dirname, '../../', cv.file_path);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
@@ -199,7 +202,13 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         return next(new AppError('CV file path is missing', 404));
     }
 
-    const filePath = path.join(__dirname, '../../', cv.file_path);
+    // Handle both absolute paths (legacy) and relative paths (new)
+    const filePath = path.isAbsolute(cv.file_path)
+        ? cv.file_path
+        : path.join(__dirname, '../../', cv.file_path);
+    
+    console.log(`[downloadCV] Resolved file path: ${filePath}`);
+    
     if (!fs.existsSync(filePath)) {
         console.error(`[downloadCV] Local file missing: ${filePath}`);
         return next(new AppError('CV file not found on server. It may have been uploaded on a different machine. Please ask the candidate to re-upload their CV.', 404));
@@ -214,11 +223,17 @@ exports.uploadCV = catchAsync(async (req, res, next) => {
         return next(new AppError('Please provide a file to upload.', 400));
     }
 
+    // Store relative path from server root (e.g., "uploads/cvs/file-xxx.pdf")
+    const serverRoot = path.join(__dirname, '../..');
+    const relativePath = path.relative(serverRoot, req.file.path).replace(/\\/g, '/');
+
+    console.log(`[uploadCV] File saved. Absolute: ${req.file.path}, Relative: ${relativePath}`);
+
     const newCV = await CV.create({
         user_id: req.user.id,
         title: req.body.title || req.file.originalname,
         type: 'uploaded',
-        file_path: req.file.path.replace(/\\/g, '/') // Ensure forward slashes
+        file_path: relativePath
     });
 
     res.status(201).json({
