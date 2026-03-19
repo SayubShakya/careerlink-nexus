@@ -59,7 +59,7 @@ const MyProfile = () => {
                 phone: serverProfile?.Profile?.phone || ''
             });
             if (serverProfile?.profile_picture) {
-                setPreviewUrl(serverProfile.profile_picture.startsWith('http') ? serverProfile.profile_picture : `http://localhost:5000/uploads/${serverProfile.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/'));
+                setPreviewUrl(serverProfile.profile_picture.startsWith('http') ? serverProfile.profile_picture : `/uploads/${serverProfile.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/'));
             }
         }
     }, [serverProfile]);

@@ -27,6 +27,12 @@ import toast from 'react-hot-toast';
 import { usePostApplyJob } from '@/hooks/api/jobs/usePostApplyJob';
 import { useAuth } from '@/hooks/useAuth';
 
+const formatContent = (content) => {
+    if (!content) return '';
+    if (/<\/?[a-z][\s\S]*>/i.test(content)) return content;
+    return content.replace(/\n/g, '<br/>');
+};
+
 const JobDescription = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -180,7 +186,7 @@ const JobDescription = () => {
                     <div className="header-main">
                         <div className="company-logo-large">
                             {jobData.Employer?.logo ? (
-                                <img src={jobData.Employer.logo.startsWith('http') ? jobData.Employer.logo : `http://localhost:5000/${jobData.Employer.logo}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                                <img src={jobData.Employer.logo.startsWith('http') ? jobData.Employer.logo : `/${jobData.Employer.logo.replace(/^(\/?uploads\/|\/)/, 'uploads/')}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
                             ) : (
                                 jobData.logo || jobData.company?.charAt(0) || jobData.Employer?.name?.charAt(0) || 'J'
                             )}
@@ -237,22 +243,30 @@ const JobDescription = () => {
                     </div>
 
                     <div className="job-tags-row">
-                        <div className="tag-item">
-                            <Clock size={16} /> Job Type: {jobData.jobType}
-                        </div>
-                        <div className="tag-item">
-                            <Briefcase size={16} /> Experience: {jobData.specification || 'Entry Level'}
-                        </div>
-                        <div className="tag-item">
-                            <DollarSign size={16} /> {jobData.salary}
-                        </div>
-                        <div className="tag-item">
-                            <GraduationCap size={16} /> {jobData.education}
-                        </div>
-                        {jobData.Employer?.website && (
+                        {jobData.jobType && (
                             <div className="tag-item">
-                                <SearchCheck size={16} /> Official Website
+                                <Clock size={16} /> Job Type: {jobData.jobType}
                             </div>
+                        )}
+                        {jobData.specification && (
+                            <div className="tag-item">
+                                <Briefcase size={16} /> Experience: {jobData.specification.length > 30 ? 'Required' : jobData.specification}
+                            </div>
+                        )}
+                        {jobData.salary && (
+                            <div className="tag-item">
+                                <DollarSign size={16} /> {jobData.salary}
+                            </div>
+                        )}
+                        {jobData.education && (
+                            <div className="tag-item">
+                                <GraduationCap size={16} /> {jobData.education.length > 30 ? 'Required' : jobData.education}
+                            </div>
+                        )}
+                        {jobData.Employer?.website && (
+                            <a href={jobData.Employer.website} target="_blank" rel="noopener noreferrer" className="tag-item" style={{ textDecoration: 'none' }}>
+                                <SearchCheck size={16} /> Website
+                            </a>
                         )}
                     </div>
                 </div>
@@ -262,49 +276,55 @@ const JobDescription = () => {
                     <div className="job-details-col">
                         <section className="detail-section">
                             <h3 className="section-title-main">Job Description</h3>
-                            <p className="description-text">{jobData.description}</p>
+                            <div className="description-text" dangerouslySetInnerHTML={{ __html: formatContent(jobData.description) }} />
                         </section>
 
                         <section className="detail-section">
                             <h3 className="section-title-sub">Key Responsibilities:</h3>
-                            <div className="description-text" style={{ whiteSpace: 'pre-line' }}>
-                                {jobData.responsibilities}
-                            </div>
+                            <div className="description-text" dangerouslySetInnerHTML={{ __html: formatContent(jobData.responsibilities) }} />
                         </section>
 
-                        <section className="detail-section">
-                            <h3 className="section-title-sub">Qualifications & Skills:</h3>
-                            <div className="description-text" style={{ whiteSpace: 'pre-line' }}>
-                                {jobData.qualifications}
-                            </div>
-                        </section>
-
-                        <div className="divider-line"></div>
-
-                        <section className="detail-section spec-section">
-                            <h3 className="section-title-main">Job Specification</h3>
-                            <div className="spec-grid">
-                                <div className="spec-row">
-                                    <span className="spec-label">Required Education Level :</span>
-                                    <span className="spec-value">{jobData.education}</span>
-                                </div>
-                                <div className="spec-row">
-                                    <span className="spec-label">Experience Required :</span>
-                                    <span className="spec-value">{jobData.specification || 'Entry Level'}</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        <div className="divider-line"></div>
-
-                        <section className="detail-section">
-                            <h3 className="section-title-main">Skills Required</h3>
-                            <div className="skills-cloud">
-                                {jobData?.skills?.map((skill, i) => (
-                                    <span key={i} className="skill-pill">{skill}</span>
-                                ))}
-                            </div>
-                        </section>
+                        {jobData.qualifications && (
+                            <section className="detail-section">
+                                <h3 className="section-title-sub">Qualifications & Skills:</h3>
+                                <div className="description-text" dangerouslySetInnerHTML={{ __html: formatContent(jobData.qualifications) }} />
+                            </section>
+                        )}
+                        {(jobData.education || jobData.specification) && (
+                            <>
+                                <div className="divider-line"></div>
+                                <section className="detail-section spec-section">
+                                    <h3 className="section-title-main">Job Specification</h3>
+                                    <div className="spec-grid">
+                                        {jobData.education && (
+                                            <div className="spec-row">
+                                                <span className="spec-label">Required Education Level :</span>
+                                                <span className="spec-value" dangerouslySetInnerHTML={{ __html: formatContent(jobData.education) }} />
+                                            </div>
+                                        )}
+                                        {jobData.specification && (
+                                            <div className="spec-row">
+                                                <span className="spec-label">Experience Required :</span>
+                                                <span className="spec-value" dangerouslySetInnerHTML={{ __html: formatContent(jobData.specification) }} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+                            </>
+                        )}
+                        {jobData?.skills && jobData.skills.length > 0 && (
+                            <>
+                                <div className="divider-line"></div>
+                                <section className="detail-section">
+                                    <h3 className="section-title-main">Skills Required</h3>
+                                    <div className="skills-cloud">
+                                        {jobData.skills.map((skill, i) => (
+                                            <span key={i} className="skill-pill">{skill}</span>
+                                        ))}
+                                    </div>
+                                </section>
+                            </>
+                        )}
                     </div>
 
                     {/* Sidebar */}

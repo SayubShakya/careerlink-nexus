@@ -92,11 +92,11 @@ exports.googleVerify = catchAsync(async (req, res, next) => {
         if (req.body.role) {
             const role = req.body.role;
             const payload = role === 'job_seeker'
-                ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true }
+                ? { firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || 'User', email, password: googleId, is_sso: true, profile_picture: picture }
                 : {
                     companyName: req.body.companyName || `${name}'s Org`,
                     companyWebsite: req.body.companyWebsite || 'https://example.com',
-                    email, password: googleId, is_sso: true
+                    email, password: googleId, is_sso: true, profile_picture: picture
                 };
 
             let newUser;

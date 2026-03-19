@@ -61,8 +61,8 @@ const CVBuilder = () => {
             summary: '',
             socialLinks: [{ platform: 'LinkedIn', url: '' }]
         },
-        education: [{ id: Date.now(), degree: '', institute: '', year: '' }],
-        experience: [{ id: Date.now(), role: '', company: '', duration: '', tasks: '' }],
+        education: [{ id: Date.now(), degree: '', institute: '', startDate: '', endDate: '', isPresent: false }],
+        experience: [{ id: Date.now(), role: '', company: '', startDate: '', endDate: '', isPresent: false, tasks: '' }],
         skills: [''],
         achievements: [''],
         trainings: [''],
@@ -97,8 +97,51 @@ const CVBuilder = () => {
         if (cvId && cvs.length > 0) {
             const existing = cvs.find(c => String(c.id || c._id) === String(cvId));
             if (existing && existing.content) {
+                const migratedContent = { ...existing.content };
+                
+                // Migrate Education
+                if (migratedContent.education) {
+                    migratedContent.education = migratedContent.education.map(edu => {
+                        const { year, ...rest } = edu; // Remove old year field
+                        return {
+                            ...rest,
+                            startDate: edu.startDate || '',
+                            endDate: edu.endDate || year || '',
+                            isPresent: edu.isPresent !== undefined ? edu.isPresent : false
+                        };
+                    });
+                }
+                
+                // Migrate Experience
+                if (migratedContent.experience) {
+                    migratedContent.experience = migratedContent.experience.map(exp => {
+                        const { duration, ...rest } = exp; // Remove old duration field
+                        let startDate = exp.startDate || '';
+                        let endDate = exp.endDate || '';
+                        let isPresent = exp.isPresent !== undefined ? exp.isPresent : false;
+                        
+                        // Simple heuristic for old duration strings like "2021 - 2023" or "2021 - Present"
+                        if (!startDate && duration && typeof duration === 'string') {
+                            const parts = duration.split('-').map(p => p.trim());
+                            if (parts.length === 2) {
+                                startDate = parts[0];
+                                if (parts[1]?.toLowerCase() === 'present') {
+                                    isPresent = true;
+                                    endDate = '';
+                                } else {
+                                    endDate = parts[1];
+                                }
+                            } else {
+                                startDate = duration; // Fallback
+                            }
+                        }
+                        
+                        return { ...rest, startDate, endDate, isPresent };
+                    });
+                }
+
                 setCvData({
-                    ...existing.content,
+                    ...migratedContent,
                     title: existing.title,
                     id: existing.id || existing._id
                 });
@@ -164,7 +207,50 @@ const CVBuilder = () => {
         }));
     };
 
+    const validateForm = () => {
+        const errors = [];
+        if (!cvData.title?.trim()) errors.push("CV Title is required");
+        if (!cvData.about.firstName?.trim()) errors.push("First Name is required");
+        if (!cvData.about.lastName?.trim()) errors.push("Last Name is required");
+        if (!cvData.about.email?.trim()) errors.push("Email is required");
+        if (!cvData.about.designation?.trim()) errors.push("Headline is required");
+
+        if (cvData.education.length === 0) {
+            errors.push("At least one Education entry is required");
+        } else {
+            cvData.education.forEach((edu, index) => {
+                if (!edu.degree?.trim()) errors.push(`Education #${index + 1}: Degree is required`);
+                if (!edu.institute?.trim()) errors.push(`Education #${index + 1}: Institute is required`);
+                if (!edu.startDate?.trim()) errors.push(`Education #${index + 1}: Start Date is required`);
+            });
+        }
+
+        cvData.experience.forEach((exp, index) => {
+            if (exp.role?.trim() || exp.company?.trim() || exp.tasks?.trim()) {
+                if (!exp.role?.trim()) errors.push(`Work History #${index + 1}: Position is required`);
+                if (!exp.company?.trim()) errors.push(`Work History #${index + 1}: Company is required`);
+                if (!exp.startDate?.trim()) errors.push(`Work History #${index + 1}: Start Date is required`);
+            }
+        });
+
+        return errors;
+    };
+
     const handleSave = () => {
+        const errors = validateForm();
+        if (errors.length > 0) {
+            toast.error(
+                <div style={{ textAlign: 'left' }}>
+                    <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>Please fix the following errors:</p>
+                    <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.85rem' }}>
+                        {errors.map((err, i) => <li key={i}>{err}</li>)}
+                    </ul>
+                </div>,
+                { duration: 5000 }
+            );
+            return;
+        }
+
         if (cvId || cvData.id) {
             updateCV({
                 id: cvId || cvData.id,
@@ -397,6 +483,7 @@ const CVBuilder = () => {
                     <div style={styles.titleContainer}>
                         <input
                             style={styles.titleInput}
+                            placeholder="CV Title *"
                             value={cvData.title}
                             onFocus={() => setIsTitleEditing(true)}
                             onBlur={() => setIsTitleEditing(false)}
@@ -432,12 +519,12 @@ const CVBuilder = () => {
                     </h3>
                     <div style={styles.card}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                            <input style={styles.input} placeholder="First Name" value={cvData.about.firstName} onChange={(e) => handleAboutChange('firstName', e.target.value)} />
-                            <input style={styles.input} placeholder="Last Name" value={cvData.about.lastName} onChange={(e) => handleAboutChange('lastName', e.target.value)} />
+                            <input style={styles.input} placeholder="First Name *" value={cvData.about.firstName} onChange={(e) => handleAboutChange('firstName', e.target.value)} />
+                            <input style={styles.input} placeholder="Last Name *" value={cvData.about.lastName} onChange={(e) => handleAboutChange('lastName', e.target.value)} />
                         </div>
-                        <input style={{ ...styles.input, marginTop: '24px' }} placeholder="Headline (e.g. Senior Software Architect)" value={cvData.about.designation} onChange={(e) => handleAboutChange('designation', e.target.value)} />
+                        <input style={{ ...styles.input, marginTop: '24px' }} placeholder="Headline * (e.g. Senior Software Architect)" value={cvData.about.designation} onChange={(e) => handleAboutChange('designation', e.target.value)} />
                         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', marginTop: '24px' }}>
-                            <input style={styles.input} placeholder="Email" value={cvData.about.email} onChange={(e) => handleAboutChange('email', e.target.value)} />
+                            <input style={styles.input} placeholder="Email *" value={cvData.about.email} onChange={(e) => handleAboutChange('email', e.target.value)} />
                             <input style={styles.input} placeholder="Phone" value={cvData.about.phone} onChange={(e) => handleAboutChange('phone', e.target.value)} />
                         </div>
                         <textarea
@@ -460,14 +547,31 @@ const CVBuilder = () => {
                     {cvData.education.map(edu => (
                         <div key={edu.id} style={styles.card}>
                             <button onClick={() => removeItem('education', edu.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Degree / Qualification" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 150px', gap: '20px' }}>
-                                <input style={styles.input} placeholder="University / Institute" value={edu.institute} onChange={(e) => updateItem('education', edu.id, 'institute', e.target.value)} />
-                                <input style={styles.input} placeholder="Grad. Year" value={edu.year} onChange={(e) => updateItem('education', edu.id, 'year', e.target.value)} />
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Degree / Qualification *" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
+                            <input style={{ ...styles.input, marginBottom: '20px' }} placeholder="University / Institute *" value={edu.institute} onChange={(e) => updateItem('education', edu.id, 'institute', e.target.value)} />
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '20px', alignItems: 'center' }}>
+                                <input style={styles.input} placeholder="Start Year/Date *" value={edu.startDate} onChange={(e) => updateItem('education', edu.id, 'startDate', e.target.value)} />
+                                <input 
+                                    style={{ ...styles.input, opacity: edu.isPresent ? 0.5 : 1 }} 
+                                    placeholder="End Year/Date" 
+                                    value={edu.endDate} 
+                                    disabled={edu.isPresent}
+                                    onChange={(e) => updateItem('education', edu.id, 'endDate', e.target.value)} 
+                                />
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})` }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={edu.isPresent} 
+                                        onChange={(e) => updateItem('education', edu.id, 'isPresent', e.target.checked)}
+                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                    />
+                                    Present
+                                </label>
                             </div>
                         </div>
                     ))}
-                    <button onClick={() => addItem('education', { degree: '', institute: '', year: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add School/College</button>
+                    <button onClick={() => addItem('education', { degree: '', institute: '', startDate: '', endDate: '', isPresent: false })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add School/College</button>
                 </section>
 
                 {/* Experience */}
@@ -481,15 +585,32 @@ const CVBuilder = () => {
                     {cvData.experience.map(exp => (
                         <div key={exp.id} style={styles.card}>
                             <button onClick={() => removeItem('experience', exp.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Position / Role" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: '20px', marginBottom: '20px' }}>
-                                <input style={styles.input} placeholder="Company / Organization" value={exp.company} onChange={(e) => updateItem('experience', exp.id, 'company', e.target.value)} />
-                                <input style={styles.input} placeholder="Date (e.g. 2021 - Present)" value={exp.duration} onChange={(e) => updateItem('experience', exp.id, 'duration', e.target.value)} />
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Position / Role *" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
+                            <input style={{ ...styles.input, marginBottom: '20px' }} placeholder="Company / Organization *" value={exp.company} onChange={(e) => updateItem('experience', exp.id, 'company', e.target.value)} />
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
+                                <input style={styles.input} placeholder="Start Year/Date *" value={exp.startDate} onChange={(e) => updateItem('experience', exp.id, 'startDate', e.target.value)} />
+                                <input 
+                                    style={{ ...styles.input, opacity: exp.isPresent ? 0.5 : 1 }} 
+                                    placeholder="End Year/Date" 
+                                    value={exp.endDate} 
+                                    disabled={exp.isPresent}
+                                    onChange={(e) => updateItem('experience', exp.id, 'endDate', e.target.value)} 
+                                />
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})` }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={exp.isPresent} 
+                                        onChange={(e) => updateItem('experience', exp.id, 'isPresent', e.target.checked)}
+                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                    />
+                                    Present
+                                </label>
                             </div>
                             <textarea style={{ ...styles.input, minHeight: '120px', lineHeight: '1.6' }} placeholder="Key responsibilities and achievements..." value={exp.tasks} onChange={(e) => updateItem('experience', exp.id, 'tasks', e.target.value)} />
                         </div>
                     ))}
-                    <button onClick={() => addItem('experience', { role: '', company: '', duration: '', tasks: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add a Job</button>
+                    <button onClick={() => addItem('experience', { role: '', company: '', startDate: '', endDate: '', isPresent: false, tasks: '' })} style={{ ...styles.btnPrimary, background: 'transparent', color: `hsl(${tokens.primary})`, border: `2px dashed hsla(${tokens.primary}, 0.3)`, boxShadow: 'none' }}><Plus size={18} /> Add a Job</button>
                 </section>
 
                 {/* Skills */}
@@ -566,18 +687,23 @@ const CVBuilder = () => {
                         </div>
                         Languages you speak
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         {cvData.languages.map((l, i) => (
-                            <div key={i} style={{ display: 'flex', gap: '12px' }}>
-                                <input style={styles.input} value={l.lang} placeholder="Language" onChange={(e) => {
-                                    const n = [...cvData.languages]; n[i].lang = e.target.value;
-                                    setCvData(prev => ({ ...prev, languages: n }));
-                                }} />
+                            <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <input 
+                                    style={{ ...styles.input, flex: 1 }} 
+                                    value={l.lang} 
+                                    placeholder="Language (e.g. English)" 
+                                    onChange={(e) => {
+                                        const n = cvData.languages.map((item, idx) => idx === i ? { ...item, lang: e.target.value } : item);
+                                        setCvData(prev => ({ ...prev, languages: n }));
+                                    }} 
+                                />
                                 <select
                                     style={{ ...styles.input, width: '180px', cursor: 'pointer' }}
                                     value={l.level}
                                     onChange={(e) => {
-                                        const n = [...cvData.languages]; n[i].level = e.target.value;
+                                        const n = cvData.languages.map((item, idx) => idx === i ? { ...item, level: e.target.value } : item);
                                         setCvData(prev => ({ ...prev, languages: n }));
                                     }}
                                 >
@@ -587,6 +713,12 @@ const CVBuilder = () => {
                                     <option>Intermediate</option>
                                     <option>Elementary</option>
                                 </select>
+                                <button 
+                                    onClick={() => setCvData(prev => ({ ...prev, languages: prev.languages.filter((_, idx) => idx !== i) }))} 
+                                    style={{ border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
+                                >
+                                    <Trash2 size={20} />
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -599,23 +731,23 @@ const CVBuilder = () => {
                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `hsla(${tokens.primary}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Users size={20} color={`hsl(${tokens.primary})`} />
                         </div>
-                        People who know you (References)
+                        References
                     </h3>
                     {cvData.references.map((rf, i) => (
                         <div key={i} style={styles.card}>
                             <button onClick={() => setCvData(prev => ({ ...prev, references: prev.references.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                                 <input style={styles.input} placeholder="Reference Name" value={rf.name} onChange={(e) => {
-                                    const n = [...cvData.references]; n[i].name = e.target.value;
+                                    const n = cvData.references.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item);
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />
                                 <input style={{ ...styles.input, paddingRight: '50px' }} placeholder="Position / Connection" value={rf.position} onChange={(e) => {
-                                    const n = [...cvData.references]; n[i].position = e.target.value;
+                                    const n = cvData.references.map((item, idx) => idx === i ? { ...item, position: e.target.value } : item);
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />
                             </div>
                             <input style={styles.input} placeholder="Phone or Email Contact" value={rf.contact} onChange={(e) => {
-                                const n = [...cvData.references]; n[i].contact = e.target.value;
+                                const n = cvData.references.map((item, idx) => idx === i ? { ...item, contact: e.target.value } : item);
                                 setCvData(prev => ({ ...prev, references: n }));
                             }} />
                         </div>
@@ -661,7 +793,9 @@ const CVBuilder = () => {
                                         <div key={exp.id} style={{ marginBottom: '24px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                                                 <h5 style={{ fontWeight: '900', fontSize: '1.05rem', margin: 0 }}>{exp.role}</h5>
-                                                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: `hsl(${tokens.textMuted})` }}>{exp.duration}</span>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: `hsl(${tokens.textMuted})` }}>
+                                                    {`${exp.startDate || ''} - ${exp.isPresent ? 'Present' : exp.endDate || ''}`}
+                                                </span>
                                             </div>
                                             <h6 style={{ fontSize: '0.9rem', fontWeight: '700', color: `hsl(${tokens.primaryDark})`, margin: '4px 0 12px 0' }}>{exp.company}</h6>
                                             <p style={{ fontSize: '0.88rem', lineHeight: '1.6', color: `hsl(${tokens.textMain})`, whiteSpace: 'pre-line' }}>{exp.tasks}</p>
@@ -678,7 +812,9 @@ const CVBuilder = () => {
                                         <div key={edu.id} style={{ marginBottom: '16px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                                 <h5 style={{ fontWeight: '900', fontSize: '1rem', margin: 0 }}>{edu.degree}</h5>
-                                                <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{edu.year}</span>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>
+                                                    {`${edu.startDate || ''} - ${edu.isPresent ? 'Present' : edu.endDate || ''}`}
+                                                </span>
                                             </div>
                                             <p style={{ fontSize: '0.9rem', color: `hsl(${tokens.textMuted})`, fontWeight: '600' }}>{edu.institute}</p>
                                         </div>

@@ -304,7 +304,7 @@ const JobSeekerDashboard = () => {
                 <div className="hero-visual-side">
                     {user?.profile_picture && (
                         <div className="dashboard-profile-circle">
-                            <img src={user.profile_picture.startsWith('http') ? user.profile_picture : `http://localhost:5000/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} alt="Profile" />
+                            <img src={user.profile_picture.startsWith('http') ? user.profile_picture : `/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`} alt="Profile" />
                         </div>
                     )}
                 </div>
@@ -340,7 +340,7 @@ const JobSeekerDashboard = () => {
                                     <div className="item-info">
                                         <div className="company-badge" style={{ overflow: 'hidden' }}>
                                             {(app.JobListing?.Employer?.profile_picture || app.JobListing?.Employer?.logo) ? (
-                                                <img src={(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).startsWith('http') ? (app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo) : `http://localhost:5000/uploads/${(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                                                <img src={(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).startsWith('http') ? (app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo) : `/uploads/${(app.JobListing.Employer.profile_picture || app.JobListing.Employer.logo).replace(/^(\/?uploads\/|\/)/, '')}`} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
                                             ) : (
                                                 app.JobListing?.Employer?.name?.charAt(0) || app.JobListing?.company?.charAt(0) || 'J'
                                             )}

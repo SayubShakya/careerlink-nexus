@@ -5,6 +5,12 @@ import {
 } from 'lucide-react';
 import { formatDate } from './JobUtils';
 
+const formatContent = (content) => {
+    if (!content) return '';
+    if (/<\/?[a-z][\s\S]*>/i.test(content)) return content;
+    return content.replace(/\n/g, '<br/>');
+};
+
 const JobDetailModal = ({ job, onClose }) => {
     if (!job) return null;
 
@@ -49,11 +55,23 @@ const JobDetailModal = ({ job, onClose }) => {
                     </div>
 
                     <div className="jb-dhc-tags">
-                        <div className="jb-tag-pill"><Briefcase /> Job Type: {job.jobType || 'Full-time'}</div>
-                        <div className="jb-tag-pill"><UsersIcon /> Experience: Entry Level</div>
-                        <div className="jb-tag-pill"><DollarSign /> {job.salary || 'Negotiable'}</div>
-                        <div className="jb-tag-pill"><GraduationCap /> BSc in Computer Science</div>
-                        <div className="jb-tag-pill"><Globe /> Official Website</div>
+                        {job.jobType && (
+                            <div className="jb-tag-pill"><Briefcase size={14} /> {job.jobType}</div>
+                        )}
+                        {job.specification && (
+                             <div className="jb-tag-pill"><UsersIcon size={14} /> {job.specification.length > 20 ? 'Experience Req.' : job.specification}</div>
+                        )}
+                        {job.salary && (
+                            <div className="jb-tag-pill"><DollarSign size={14} /> {job.salary}</div>
+                        )}
+                        {job.education && (
+                            <div className="jb-tag-pill"><GraduationCap size={14} /> {job.education.length > 20 ? 'Education Req.' : job.education}</div>
+                        )}
+                        {job.Employer?.companyWebsite && (
+                            <a href={job.Employer.companyWebsite} target="_blank" rel="noopener noreferrer" className="jb-tag-pill" style={{ textDecoration: 'none' }}>
+                                <Globe size={14} /> Website
+                            </a>
+                        )}
                     </div>
                 </div>
 
@@ -63,27 +81,52 @@ const JobDetailModal = ({ job, onClose }) => {
                         <div className="jb-detail-box">
                             <div className="jb-detail-section">
                                 <h3>Job Description</h3>
-                                <p>{job.description || 'No description provided.'}</p>
+                                <div dangerouslySetInnerHTML={{ __html: formatContent(job.description || 'No description provided.') }} />
                             </div>
 
-                            <div className="jb-detail-section">
-                                <h3>Key Responsibilities:</h3>
-                                <p>
-                                    Write automated test scripts, Perform manual testing, Track bugs in Jira
-                                </p>
-                            </div>
+                            {job.responsibilities && (
+                                <div className="jb-detail-section">
+                                    <h3>Key Responsibilities:</h3>
+                                    <div dangerouslySetInnerHTML={{ __html: formatContent(job.responsibilities) }} />
+                                </div>
+                            )}
 
-                            <div className="jb-detail-section">
-                                <h3>Qualifications & Skills:</h3>
-                                <p>
-                                    Experience with Selenium/Playwright, Strong attention to detail, Knowledge of SDLC
-                                </p>
-                            </div>
+                            {job.qualifications && (
+                                <div className="jb-detail-section">
+                                    <h3>Qualifications & Skills:</h3>
+                                    <div dangerouslySetInnerHTML={{ __html: formatContent(job.qualifications) }} />
+                                </div>
+                            )}
 
                             <div className="jb-detail-section">
                                 <h3>Job Specification</h3>
-                                <p>No extra details provided.</p>
+                                {job.education && (
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <strong>Required Education Level:</strong>
+                                        <div dangerouslySetInnerHTML={{ __html: formatContent(job.education) }} />
+                                    </div>
+                                )}
+                                {job.specification && (
+                                    <div>
+                                        <strong>Experience Required / Additional Specifications:</strong>
+                                        <div dangerouslySetInnerHTML={{ __html: formatContent(job.specification) }} />
+                                    </div>
+                                )}
+                                {!job.education && !job.specification && <p>No extra details provided.</p>}
                             </div>
+
+                            {job.skills && job.skills.length > 0 && (
+                                <div className="jb-detail-section">
+                                    <h3>Skills Required</h3>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                                        {job.skills.map((skill, i) => (
+                                            <span key={i} className="jb-tag-pill" style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)' }}>
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

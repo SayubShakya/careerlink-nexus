@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
 import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
 import toast from 'react-hot-toast';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import {
     PlusCircle,
     Trash2,
@@ -34,6 +36,22 @@ import {
     Zap,
     Layers
 } from 'lucide-react';
+
+const quillModules = {
+    toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['link', 'clean']
+    ],
+};
+
+const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link'
+];
 
 // Design System
 import '@/styles/ProfessionalGlass.css';
@@ -287,13 +305,27 @@ const JobManagement = () => {
         setSkills(skills.filter(skill => skill !== skillToRemove));
     };
 
+    const handleQuillChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        // Also clear error if any
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: null }));
+        }
+    };
+
     const validateForm = () => {
         const newErrors = {};
+        // For Quill fields, we check if the content is more than just tags
+        const isQuillEmpty = (html) => {
+            if (!html) return true;
+            const text = html.replace(/<[^>]*>/g, '').trim();
+            return text.length === 0;
+        };
+
         if (!formData.title.trim()) newErrors.title = 'Job Title is required';
         if (!formData.location.trim()) newErrors.location = 'Location is required';
-        if (!formData.salary.toString().trim()) newErrors.salary = 'Salary is required';
-        if (!formData.deadline) newErrors.deadline = 'Deadline is required';
-        if (!formData.description.trim()) newErrors.description = 'Description is required';
+        if (isQuillEmpty(formData.description)) newErrors.description = 'Job Overview is required';
+        if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -782,7 +814,7 @@ const JobManagement = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label style={styles.label}>Salary (How much you pay) *</label>
+                                    <label style={styles.label}>Salary</label>
                                     <div style={{ position: 'relative' }}>
                                         <DollarSign size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                         <input
@@ -791,7 +823,7 @@ const JobManagement = () => {
                                             name="salary"
                                             value={formData.salary}
                                             onChange={handleInputChange}
-                                            placeholder="e.g. 120000"
+                                            placeholder="e.g. 120000 (Optional)"
                                         />
                                     </div>
                                     {errors.salary && <p style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '6px', fontWeight: '600' }}>{errors.salary}</p>}
@@ -837,66 +869,94 @@ const JobManagement = () => {
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '32px' }}>
-                                <label style={styles.label}>Job Description *</label>
-                                <textarea
-                                    style={{ ...styles.textarea, borderColor: errors.description ? '#ef4444' : 'var(--glass-border)' }}
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    placeholder="What is this job about? Write a few sentences here."
-                                />
+                            <div style={{ marginBottom: '40px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--glass-accent-light)', marginBottom: '24px', fontFamily: 'var(--font-display)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '12px' }}>Job Description</h3>
+                                
+                                <div style={{ marginBottom: '24px' }}>
+                                    <label style={styles.label}>Job Overview *</label>
+                                    <div className="quill-wrapper">
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={formData.description}
+                                            onChange={(val) => handleQuillChange('description', val)}
+                                            modules={quillModules}
+                                            formats={quillFormats}
+                                            placeholder="Briefly describe the role and the company..."
+                                        />
+                                    </div>
+                                    {errors.description && <p style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '6px', fontWeight: '600' }}>{errors.description}</p>}
+                                </div>
+
+                                <div className="form-group">
+                                    <label style={styles.label}>Key Responsibilities</label>
+                                    <div className="quill-wrapper">
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={formData.responsibilities}
+                                            onChange={(val) => handleQuillChange('responsibilities', val)}
+                                            modules={quillModules}
+                                            formats={quillFormats}
+                                            placeholder="List the main tasks and duties..."
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div style={styles.grid}>
+                            <div style={{ marginBottom: '40px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--glass-accent-light)', marginBottom: '24px', fontFamily: 'var(--font-display)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '12px' }}>Qualifications & Skills</h3>
+                                
                                 <div className="form-group">
-                                    <label style={styles.label}>What they will do</label>
-                                    <textarea
-                                        style={{ ...styles.textarea, minHeight: '120px' }}
-                                        name="responsibilities"
-                                        value={formData.responsibilities}
-                                        onChange={handleInputChange}
-                                        placeholder="Write down what they will do every day."
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label style={styles.label}>What they need to know</label>
-                                    <textarea
-                                        style={{ ...styles.textarea, minHeight: '120px' }}
-                                        name="qualifications"
-                                        value={formData.qualifications}
-                                        onChange={handleInputChange}
-                                        placeholder="What kind of school or skills should they have?"
-                                    />
+                                    <label style={styles.label}>Qualifications & Skills</label>
+                                    <div className="quill-wrapper">
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={formData.qualifications}
+                                            onChange={(val) => handleQuillChange('qualifications', val)}
+                                            modules={quillModules}
+                                            formats={quillFormats}
+                                            placeholder="Required skills, certifications, and technical knowledge..."
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={styles.grid}>
-                                <div className="form-group">
-                                    <label style={styles.label}>Education Requirements</label>
-                                    <textarea
-                                        style={{ ...styles.textarea, minHeight: '120px' }}
-                                        name="education"
-                                        value={formData.education}
-                                        onChange={handleInputChange}
-                                        placeholder="What kind of degree or training do they need?"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label style={styles.label}>Additional Specifications</label>
-                                    <textarea
-                                        style={{ ...styles.textarea, minHeight: '120px' }}
-                                        name="specification"
-                                        value={formData.specification}
-                                        onChange={handleInputChange}
-                                        placeholder="Any other specific requirements or perks?"
-                                    />
+                            <div style={{ marginBottom: '40px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--glass-accent-light)', marginBottom: '24px', fontFamily: 'var(--font-display)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '12px' }}>Job Specification</h3>
+                                
+                                <div className="form-group-quill-container">
+                                    <div className="form-group quill-half">
+                                        <label style={styles.label}>Required Education Level</label>
+                                        <div className="quill-wrapper">
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={formData.education}
+                                                onChange={(val) => handleQuillChange('education', val)}
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Minimum degree or professional certification..."
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-group quill-half">
+                                        <label style={styles.label}>Experience Required / Additional Specifications</label>
+                                        <div className="quill-wrapper">
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={formData.specification}
+                                                onChange={(val) => handleQuillChange('specification', val)}
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Years of experience, entry-level status, or other specific requirements..."
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Skills Tag Input (Industrial Style) */}
                             <div style={{ marginBottom: '40px' }}>
-                                <label style={styles.label}>Skills they should have</label>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--glass-accent-light)', marginBottom: '24px', fontFamily: 'var(--font-display)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '12px' }}>Skills Required</h3>
+                                <label style={styles.label}>Skills Required (Keywords)</label>
                                 <div style={{ position: 'relative' }}>
                                     <Zap size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--glass-text-muted)' }} />
                                     <input
@@ -1259,6 +1319,65 @@ const JobManagement = () => {
 
                 ::-webkit-calendar-picker-indicator:hover {
                     opacity: 1;
+                }
+                .quill-wrapper {
+                    background: var(--theme-bg-subtle);
+                    border-radius: 12px;
+                    border: 1px solid var(--theme-border);
+                    overflow: hidden;
+                    transition: all 0.3s ease;
+                }
+                .quill-wrapper:focus-within {
+                    border-color: var(--glass-accent-light) !important;
+                    box-shadow: 0 0 0 4px var(--glass-accent-glow) !important;
+                    transform: translateY(-1px);
+                }
+                .ql-toolbar.ql-snow {
+                    border: none !important;
+                    border-bottom: 1px solid var(--theme-border) !important;
+                    background: rgba(255, 255, 255, 0.02) !important;
+                    padding: 8px 12px !important;
+                }
+                .ql-container.ql-snow {
+                    border: none !important;
+                    min-height: 150px;
+                    font-family: var(--font-body) !important;
+                    font-size: 0.95rem !important;
+                }
+                .ql-editor {
+                    min-height: 150px;
+                    color: var(--theme-text-primary) !important;
+                    padding: 14px 18px !important;
+                }
+                .ql-editor.ql-blank::before {
+                    color: var(--glass-text-muted) !important;
+                    font-style: normal !important;
+                    left: 18px !important;
+                }
+                .ql-snow .ql-stroke {
+                    stroke: var(--glass-text-secondary) !important;
+                }
+                .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+                    fill: var(--glass-text-secondary) !important;
+                }
+                .ql-snow .ql-picker {
+                    color: var(--glass-text-secondary) !important;
+                }
+                .ql-snow .ql-picker-options {
+                    background-color: var(--theme-bg-subtle) !important;
+                    border-color: var(--theme-border) !important;
+                }
+
+                .form-group-quill-container {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 24px;
+                }
+
+                @media (max-width: 880px) {
+                    .form-group-quill-container {
+                        grid-template-columns: 1fr;
+                    }
                 }
             `}</style>
             </div>

@@ -70,7 +70,8 @@ exports.generateCV = (cvData, userData) => {
             experience.forEach(exp => {
                 doc.fontSize(11).font('Helvetica-Bold').fillColor('#0F172A').text(exp.role || exp.title || 'Role');
                 doc.fontSize(10).font('Helvetica-Bold').fillColor('#3E61FF').text(exp.company || '');
-                doc.fontSize(9).font('Helvetica-Oblique').fillColor('#64748B').text(exp.duration || `${exp.startDate || ''} - ${exp.endDate || 'Present'}`);
+                const dateRange = exp.duration || `${exp.startDate || ''} - ${exp.isPresent ? 'Present' : exp.endDate || ''}`;
+                doc.fontSize(9).font('Helvetica-Oblique').fillColor('#64748B').text(dateRange);
                 doc.moveDown(0.3);
                 const tasks = exp.tasks || exp.description;
                 if (tasks && tasks.trim()) {
@@ -88,7 +89,8 @@ exports.generateCV = (cvData, userData) => {
             sectionTitle(doc, 'EDUCATION');
             education.forEach(edu => {
                 doc.fontSize(11).font('Helvetica-Bold').fillColor('#0F172A').text(edu.degree || 'Degree');
-                doc.fontSize(10).font('Helvetica').fillColor('#334155').text(`${edu.institute || edu.school || ''} | ${edu.year || ''}`);
+                const eduDate = edu.year || `${edu.startDate || ''} - ${edu.isPresent ? 'Present' : edu.endDate || ''}`;
+                doc.fontSize(10).font('Helvetica').fillColor('#334155').text(`${edu.institute || edu.school || ''} | ${eduDate}`);
                 doc.moveDown();
             });
         }

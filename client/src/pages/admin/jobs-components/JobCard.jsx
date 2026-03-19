@@ -58,7 +58,7 @@ const JobCard = ({ job, index, onSelect }) => {
 
             <div className="jb-pc-meta">
                 <span className="jb-pc-type" style={{ background: type.bg, color: type.color, borderColor: type.border }}>{type.label}</span>
-                {job.salary ? <span className="jb-pc-salary"><DollarSign size={14} /> {job.salary}</span> : <span className="jb-pc-salary na">Ask Boss</span>}
+                {job.salary && <span className="jb-pc-salary"><DollarSign size={14} /> {job.salary}</span>}
             </div>
 
             <div className="jb-pc-body">

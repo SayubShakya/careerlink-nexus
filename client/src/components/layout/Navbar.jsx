@@ -89,15 +89,32 @@ export default function Navbar() {
                             <Link to={getDashboardRoute()} style={navStyles.link} className="nav-item">Dashboard</Link>
                             {user?.profile_picture ? (
                                 <img
-                                    src={user.profile_picture.startsWith('http') ? user.profile_picture : `http://localhost:5000/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
+                                    src={user.profile_picture.startsWith('http') ? user.profile_picture : `/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
                                     alt="Profile"
+                                    onError={(e) => {
+                                        // If image fails to load, replace with a monogram fallback
+                                        e.target.style.display = 'none';
+                                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                    }}
                                     style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-brand-primary)' }}
                                 />
-                            ) : (
-                                <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: 'var(--color-brand-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                    {user?.firstName ? user.firstName[0].toUpperCase() : 'U'}
-                                </div>
-                            )}
+                            ) : null}
+                            <div 
+                                className="profile-monogram"
+                                style={{ 
+                                    width: '38px', 
+                                    height: '38px', 
+                                    borderRadius: '50%', 
+                                    backgroundColor: 'var(--color-brand-primary)', 
+                                    color: 'white', 
+                                    display: user?.profile_picture ? 'none' : 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    fontWeight: 'bold' 
+                                }}
+                            >
+                                {user?.firstName ? user.firstName[0].toUpperCase() : (user?.companyName ? user.companyName[0].toUpperCase() : 'U')}
+                            </div>
                             <button onClick={handleLogout} style={navStyles.logoutBtn} className="logout-nav-btn">Logout</button>
                         </div>
                     ) : (
