@@ -10,7 +10,7 @@ const Notification = require('./models/Notification');
 const Category = require('./models/Category');
 const Skill = require('./models/Skill');
 const Profile = require('./models/Profile');
-const { Experience, Education, ProfileSkill, Project, Training, SocialLink } = require('./models/ProfileDetails');
+const { Experience, Education, ProfileSkill, Project, Training, SocialLink, Language } = require('./models/ProfileDetails');
 
 const syncDatabase = async () => {
     try {
@@ -42,7 +42,6 @@ const syncDatabase = async () => {
         await Notification.sync({ alter: true });
         await Category.sync({ alter: true });
         await Skill.sync({ alter: true });
-        const { Experience, Education, ProfileSkill, Project, Training, SocialLink, Language } = require('./models/ProfileDetails');
         await Language.sync({ alter: true });
 
         // CREATE SQL VIEW for S4-14 (CV Dynamic Builder)
