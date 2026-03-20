@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
-import { useGetJobs } from '@/hooks/api/jobs/useJobs';
+import { useGetJobs, useGetGlobalStats } from '@/hooks/api/jobs/useJobs';
 import {
     Search,
     Briefcase,
@@ -38,10 +38,12 @@ const PublicFindJobs = () => {
         location: locationTerm
     });
 
+    const { data: globalStats } = useGetGlobalStats();
+
     const stats = [
-        { label: 'Live Jobs', value: serverJobs.length || '350', icon: <Briefcase size={20} /> },
-        { label: 'Vacancies', value: '932', icon: <SearchCheck size={20} /> },
-        { label: 'Organizations', value: '220', icon: <Building2 size={20} /> },
+        { label: 'Live Jobs', value: globalStats?.liveJobs ?? '...', icon: <Briefcase size={20} /> },
+        { label: 'Vacancies', value: globalStats?.vacancies ?? '...', icon: <SearchCheck size={20} /> },
+        { label: 'Organizations', value: globalStats?.organizations ?? '...', icon: <Building2 size={20} /> },
     ];
 
     const filterOptions = ['All Jobs', 'Jobs by Function', 'Jobs by Title', 'Jobs by Industry', 'Jobs by Location'];

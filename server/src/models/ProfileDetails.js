@@ -100,6 +100,21 @@ const SocialLink = sequelize.define('SocialLink', {
     link_url: { type: DataTypes.TEXT, allowNull: false }
 }, { tableName: 'personal_social_links', timestamps: true, createdAt: 'created_at', updatedAt: false });
 
+const Language = sequelize.define('Language', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    profile_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: { model: Profile, key: 'id' }
+    },
+    language_name: { type: DataTypes.STRING(100), allowNull: false },
+    proficiency: { type: DataTypes.STRING(50), allowNull: false, defaultValue: 'Native' }
+}, { tableName: 'user_languages', timestamps: false });
+
 // Global Associations
 Profile.hasMany(Experience, { foreignKey: 'profile_id', as: 'experiences' });
 Profile.hasMany(Education, { foreignKey: 'profile_id', as: 'educations' });
@@ -107,5 +122,6 @@ Profile.hasMany(ProfileSkill, { foreignKey: 'profile_id', as: 'skills' });
 Profile.hasMany(Project, { foreignKey: 'profile_id', as: 'projects' });
 Profile.hasMany(Training, { foreignKey: 'profile_id', as: 'trainings' });
 Profile.hasMany(SocialLink, { foreignKey: 'profile_id', as: 'social_links' });
+Profile.hasMany(Language, { foreignKey: 'profile_id', as: 'languages' });
 
-module.exports = { Experience, Education, ProfileSkill, Project, Training, SocialLink };
+module.exports = { Experience, Education, ProfileSkill, Project, Training, SocialLink, Language };

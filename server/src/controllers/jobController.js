@@ -156,3 +156,28 @@ exports.deleteJob = catchAsync(async (req, res, next) => {
         data: null
     });
 });
+// Get Global Platform Stats (Public)
+exports.getGlobalStats = catchAsync(async (req, res, next) => {
+    const liveJobs = await JobListing.count({ where: { is_active: true } });
+    
+    // Sum of vacancy column for active jobs
+    const vacancyResult = await JobListing.findOne({
+        attributes: [
+            [require('../config/sequelize').fn('COALESCE', require('../config/sequelize').fn('SUM', require('../config/sequelize').col('vacancy')), 1), 'totalVacancies']
+        ],
+        where: { is_active: true },
+        raw: true
+    });
+    const vacancies = parseInt(vacancyResult?.totalVacancies || 0);
+    
+    const organizations = await Employer.count();
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            liveJobs: liveJobs || 0,
+            vacancies: vacancies || 0,
+            organizations: organizations || 0
+        }
+    });
+});

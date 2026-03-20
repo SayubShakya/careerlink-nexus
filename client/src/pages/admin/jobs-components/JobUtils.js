@@ -27,3 +27,53 @@ export const formatDate = (dateStr) => {
     if (isNaN(d.getTime())) return 'Recently';
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
+
+/**
+ * Format salary with Nepalese Rupee symbol and Indian/Nepali comma separators.
+ * Examples:
+ *   120000 → "रू 1,20,000"
+ *   "50000-80000" → "रू 50,000 - रू 80,000"
+ *   "Negotiable" → "रू Negotiable"
+ */
+export const formatSalary = (salary) => {
+    if (!salary && salary !== 0) return '';
+
+    const formatNumber = (num) => {
+        const n = parseInt(String(num).replace(/[^0-9]/g, ''), 10);
+        if (isNaN(n)) return String(num);
+        // Indian/Nepali number system: last 3 digits separated, then groups of 2
+        const str = n.toString();
+        if (str.length <= 3) return str;
+        const lastThree = str.slice(-3);
+        const remaining = str.slice(0, -3);
+        const formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+        return formatted + ',' + lastThree;
+    };
+
+    const salaryStr = String(salary).trim();
+
+    // If already has रू, return as-is
+    if (salaryStr.includes('रू')) return salaryStr;
+
+    // Handle ranges like "50000-80000" or "50000 - 80000"
+    if (salaryStr.includes('-')) {
+        const parts = salaryStr.split('-').map(p => p.trim());
+        if (parts.length === 2) {
+            const isNum1 = /^\d+$/.test(parts[0].replace(/,/g, ''));
+            const isNum2 = /^\d+$/.test(parts[1].replace(/,/g, ''));
+            if (isNum1 && isNum2) {
+                return `रू ${formatNumber(parts[0])} - रू ${formatNumber(parts[1])}`;
+            }
+        }
+    }
+
+    // Pure number
+    const pureNum = salaryStr.replace(/,/g, '');
+    if (/^\d+$/.test(pureNum)) {
+        return `रू ${formatNumber(pureNum)}`;
+    }
+
+    // Fallback: prefix with रू
+    return `रू ${salaryStr}`;
+};
+

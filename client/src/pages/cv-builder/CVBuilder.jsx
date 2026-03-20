@@ -209,27 +209,35 @@ const CVBuilder = () => {
 
     const validateForm = () => {
         const errors = [];
-        if (!cvData.title?.trim()) errors.push("CV Title is required");
-        if (!cvData.about.firstName?.trim()) errors.push("First Name is required");
-        if (!cvData.about.lastName?.trim()) errors.push("Last Name is required");
-        if (!cvData.about.email?.trim()) errors.push("Email is required");
-        if (!cvData.about.designation?.trim()) errors.push("Headline is required");
+        if (!cvData.title?.trim()) errors.push("CV Document Title is required");
+        
+        // Identity & Contact
+        if (!cvData.about.firstName?.trim()) errors.push("First Name is mandatory");
+        if (!cvData.about.lastName?.trim()) errors.push("Last Name is mandatory");
+        if (!cvData.about.email?.trim()) errors.push("Contact Email is mandatory");
+        if (!cvData.about.designation?.trim()) errors.push("Professional Headline (Designation) is required");
 
+        // Education
         if (cvData.education.length === 0) {
-            errors.push("At least one Education entry is required");
+            errors.push("At least one Education record is required");
         } else {
             cvData.education.forEach((edu, index) => {
-                if (!edu.degree?.trim()) errors.push(`Education #${index + 1}: Degree is required`);
-                if (!edu.institute?.trim()) errors.push(`Education #${index + 1}: Institute is required`);
-                if (!edu.startDate?.trim()) errors.push(`Education #${index + 1}: Start Date is required`);
+                const name = edu.degree || `Education #${index + 1}`;
+                if (!edu.degree?.trim()) errors.push(`Education #${index + 1}: Degree/Field of Study is required`);
+                if (!edu.institute?.trim()) errors.push(`${name}: Institution/School name is required`);
+                if (!edu.startDate?.trim()) errors.push(`${name}: Start Date is required`);
+                if (!edu.isPresent && (!edu.endDate || !edu.endDate.trim())) errors.push(`${name}: End Date is mandatory (unless currently studying)`);
             });
         }
 
+        // Work History (Checked if partially filled)
         cvData.experience.forEach((exp, index) => {
             if (exp.role?.trim() || exp.company?.trim() || exp.tasks?.trim()) {
-                if (!exp.role?.trim()) errors.push(`Work History #${index + 1}: Position is required`);
-                if (!exp.company?.trim()) errors.push(`Work History #${index + 1}: Company is required`);
-                if (!exp.startDate?.trim()) errors.push(`Work History #${index + 1}: Start Date is required`);
+                const name = exp.role || `Experience #${index + 1}`;
+                if (!exp.role?.trim()) errors.push(`Work History #${index + 1}: Job Position is required`);
+                if (!exp.company?.trim()) errors.push(`${name}: Company Name is required`);
+                if (!exp.startDate?.trim()) errors.push(`${name}: Start Date is required`);
+                if (!exp.isPresent && (!exp.endDate || !exp.endDate.trim())) errors.push(`${name}: End Date is mandatory (unless currently working)`);
             }
         });
 

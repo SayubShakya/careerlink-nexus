@@ -154,7 +154,7 @@ const AdminDashboard = () => {
         deleteEmployer.mutate(id, { onSuccess: () => { setConfirmDelId(null); refetch(); } });
     };
 
-    const ds = stats || { totalEmployers: 0, totalJobSeekers: 0, totalJobs: 0, totalApplications: 0 };
+    const ds = stats || { totalEmployers: 0, totalJobSeekers: 0, totalJobs: 0, totalApplications: 0, totalClicks: 0, hiringBosses: 0 };
     
     // Pagination logic
     const [currentPage, setCurrentPage] = useState(1);
@@ -167,7 +167,9 @@ const AdminDashboard = () => {
         { label: 'Employers', value: ds.totalEmployers, icon: <Building2 size={20} />, color: '#6366F1', bg: '#EEF2FF' },
         { label: 'Job Seekers', value: ds.totalJobSeekers, icon: <Users size={20} />, color: '#10B981', bg: '#ECFDF5' },
         { label: 'Job Listings', value: ds.totalJobs, icon: <Briefcase size={20} />, color: '#F59E0B', bg: '#FFFBEB' },
-        { label: 'Applications', value: ds.totalApplications, icon: <FileText size={20} />, color: '#EC4899', bg: '#FDF2F8' },
+        { label: 'Total Clicks', value: ds.totalClicks, icon: <Activity size={20} />, color: '#8B5CF6', bg: '#F5F3FF' },
+        { label: 'How Many Applied', value: ds.totalApplications, icon: <FileText size={20} />, color: '#EC4899', bg: '#FDF2F8' },
+        { label: 'Hiring Bosses', value: ds.hiringBosses, icon: <Building2 size={20} />, color: '#0EA5E9', bg: '#F0F9FF' },
     ];
 
     return (
@@ -448,7 +450,7 @@ const AdminDashboard = () => {
                 @keyframes dashRayRotate { 100% { transform: rotate(360deg); } }
 
                 /* ── STATS ── */
-                .admin-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; animation: dashFadeUp 0.4s ease 0.05s both; }
+                .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; animation: dashFadeUp 0.4s ease 0.05s both; }
                 .admin-stat-card { background: white; border-radius: 20px; padding: 24px; border: 1px solid #E5E7EB; position: relative; overflow: hidden; display: flex; align-items: center; gap: 18px; transition: all 0.25s; animation: dashFadeUp 0.4s ease both; }
                 .admin-stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-color: #D1D5DB; }
                 .stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

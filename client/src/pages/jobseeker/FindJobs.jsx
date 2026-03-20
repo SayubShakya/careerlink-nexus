@@ -4,7 +4,7 @@ import {
     Search, Briefcase, Building2, ChevronRight, SearchCheck, Star,
     MapPin, DollarSign, Zap, ChevronLeft, Heart
 } from 'lucide-react';
-import { useGetJobs, useGetSavedJobs, useSaveJob, useUnsaveJob } from '@/hooks/api/jobs/useJobs';
+import { useGetJobs, useGetSavedJobs, useSaveJob, useUnsaveJob, useGetGlobalStats } from '@/hooks/api/jobs/useJobs';
 import toast from 'react-hot-toast';
 import bannerHuman from '@/assets/images/banner-human2.png';
 import { useState, useMemo } from 'react';
@@ -33,10 +33,12 @@ const FindJobs = () => {
     const [expandedGroups, setExpandedGroups] = useState(new Set());
     const CARDS_PER_PAGE = 20;
 
+    const { data: globalStats } = useGetGlobalStats();
+    
     const stats = [
-        { label: 'Live Jobs', value: '350', icon: <Briefcase size={20} /> },
-        { label: 'Vacancies', value: '932', icon: <SearchCheck size={20} /> },
-        { label: 'Organizations', value: '220', icon: <Building2 size={20} /> },
+        { label: 'Live Jobs', value: globalStats?.liveJobs ?? '...', icon: <Briefcase size={20} /> },
+        { label: 'Vacancies', value: globalStats?.vacancies ?? '...', icon: <SearchCheck size={20} /> },
+        { label: 'Organizations', value: globalStats?.organizations ?? '...', icon: <Building2 size={20} /> },
     ];
 
 
@@ -46,7 +48,7 @@ const FindJobs = () => {
         { name: 'Leapfrog', logo: '🐸' }, { name: 'F1Soft', logo: '💻' },
     ];
 
-    const { data: serverJobs = [], isLoading } = useGetJobs({
+    const { data: serverJobs = [], isLoading: isJobsLoading } = useGetJobs({
         search: searchTerm,
         type: jobType === 'All' ? undefined : jobType,
         location: locationTerm
@@ -264,7 +266,7 @@ const FindJobs = () => {
                     </div>
                 </div>
 
-                {isLoading ? (
+                {isJobsLoading ? (
                     <div className="fj-skeleton-grid">
                         {Array.from({ length: 12 }).map((_, i) => (
                             <div key={i} className="fj-skel-card">

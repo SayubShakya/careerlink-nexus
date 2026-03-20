@@ -101,6 +101,16 @@ exports.generateCV = (cvData, userData) => {
         if (filteredSkills.length > 0) {
             sectionTitle(doc, 'SKILLS');
             doc.fontSize(10).font('Helvetica').fillColor('#334155').text(filteredSkills.join(' • '));
+            doc.moveDown();
+        }
+
+        // Languages
+        const languages = content.languages || [];
+        const filteredLangs = languages.filter(l => l && l.lang && l.lang.trim());
+        if (filteredLangs.length > 0) {
+            sectionTitle(doc, 'LANGUAGES');
+            const langStrings = filteredLangs.map(l => `${l.lang} (${l.level || 'Native'})`);
+            doc.fontSize(10).font('Helvetica').fillColor('#334155').text(langStrings.join(' • '));
         }
 
         doc.end();

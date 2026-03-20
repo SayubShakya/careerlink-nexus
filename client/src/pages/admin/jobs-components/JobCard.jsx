@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin, DollarSign, Eye, Users as UsersIcon, Clock, Ban, ArrowUpRight } from 'lucide-react';
-import { getCompanyColor, getJobTypeBadge, formatDate } from './JobUtils';
+import { getCompanyColor, getJobTypeBadge, formatDate, formatSalary } from './JobUtils';
 
 const JobCard = ({ job, index, onSelect }) => {
     const comp = getCompanyColor(job.Employer?.companyName);
@@ -56,9 +56,9 @@ const JobCard = ({ job, index, onSelect }) => {
 
             <h3 className="jb-pc-title">{job.title}</h3>
 
-            <div className="jb-pc-meta">
+            <div className="jb-pc-meta" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <span className="jb-pc-type" style={{ background: type.bg, color: type.color, borderColor: type.border }}>{type.label}</span>
-                {job.salary && <span className="jb-pc-salary"><DollarSign size={14} /> {job.salary}</span>}
+                {job.salary && <span className="jb-pc-salary" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>{formatSalary(job.salary)}</span>}
             </div>
 
             <div className="jb-pc-body">

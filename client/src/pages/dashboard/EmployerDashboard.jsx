@@ -78,29 +78,30 @@ const StatCard = ({ label, value, icon, index, trend }) => (
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: '16px',
             animationDelay: `${index * 0.1}s`,
             position: 'relative',
         }}
     >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
+                width: '44px',
+                height: '44px',
+                borderRadius: '14px',
                 background: 'var(--theme-bg-subtle)',
                 border: '1px solid var(--theme-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--glass-accent-light)',
+                flexShrink: 0,
             }}>
                 {icon}
             </div>
             {trend && <StatTrend value={trend.val} label={trend.label} />}
         </div>
 
-        <div>
+        <div style={{ paddingTop: '4px' }}>
             <div style={{
                 fontSize: '2.4rem',
                 fontWeight: '900',
@@ -117,7 +118,7 @@ const StatCard = ({ label, value, icon, index, trend }) => (
                 fontWeight: '800',
                 textTransform: 'uppercase',
                 letterSpacing: '0.12em',
-                marginTop: '4px'
+                marginTop: '6px'
             }}>
                 {label}
             </div>
@@ -376,12 +377,14 @@ const EmployerDashboard = () => {
                                         <span style={{ color: 'var(--theme-text-primary)' }}>Shortlist Progress</span>
                                         <span style={{ color: 'var(--glass-accent-light)' }}>{Math.round((stats.shortlisted / (stats.totalApplications || 1)) * 100)}%</span>
                                     </div>
-                                    <div style={{ width: '100%', height: '6px', background: 'var(--theme-bg-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
+                                    <div style={{ width: '100%', height: '8px', background: 'var(--theme-bg-subtle)', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--theme-border)' }}>
                                         <div style={{ 
                                             width: `${(stats.shortlisted / (stats.totalApplications || 1)) * 100}%`, 
                                             height: '100%', 
                                             background: 'linear-gradient(90deg, #3F51B5, #3E61FF)',
-                                            borderRadius: '3px'
+                                            borderRadius: '4px',
+                                            transition: 'width 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            boxShadow: '0 0 10px rgba(62, 97, 255, 0.3)'
                                         }} />
                                     </div>
                                 </div>

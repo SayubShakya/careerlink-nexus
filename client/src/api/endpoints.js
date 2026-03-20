@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     },
     JOBS: {
         LIST: '/jobs',
+        STATS: '/jobs/stats',
         DETAILS: (id) => `/jobs/${id}`,
         APPLY: (id) => `/jobs/${id}/apply`,
         CREATE: '/jobs',

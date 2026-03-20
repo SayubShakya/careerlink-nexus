@@ -145,3 +145,16 @@ export const useUnsaveJob = () => {
         }
     });
 };
+
+/**
+ * Hook to fetch Global Platform Stats (Live Jobs, Vacancies, etc)
+ */
+export const useGetGlobalStats = () => {
+    return useQuery({
+        queryKey: ["global-stats"],
+        queryFn: async () => {
+            const response = await api.get(API_ENDPOINTS.JOBS.STATS);
+            return response.data.data;
+        }
+    });
+};

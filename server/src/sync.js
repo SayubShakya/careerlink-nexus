@@ -42,6 +42,8 @@ const syncDatabase = async () => {
         await Notification.sync({ alter: true });
         await Category.sync({ alter: true });
         await Skill.sync({ alter: true });
+        const { Experience, Education, ProfileSkill, Project, Training, SocialLink, Language } = require('./models/ProfileDetails');
+        await Language.sync({ alter: true });
 
         // CREATE SQL VIEW for S4-14 (CV Dynamic Builder)
         await sequelize.query(`
@@ -62,7 +64,8 @@ const syncDatabase = async () => {
                 (SELECT COALESCE(json_agg(sk), '[]'::json) FROM personal_skills sk WHERE sk.profile_id = p.id) as skills,
                 (SELECT COALESCE(json_agg(proj), '[]'::json) FROM personal_projects proj WHERE proj.profile_id = p.id) as projects,
                 (SELECT COALESCE(json_agg(trn), '[]'::json) FROM personal_trainings trn WHERE trn.profile_id = p.id) as training,
-                (SELECT COALESCE(json_agg(sl), '[]'::json) FROM personal_social_links sl WHERE sl.profile_id = p.id) as social_links
+                (SELECT COALESCE(json_agg(sl), '[]'::json) FROM personal_social_links sl WHERE sl.profile_id = p.id) as social_links,
+                (SELECT COALESCE(json_agg(lang), '[]'::json) FROM user_languages lang WHERE lang.profile_id = p.id) as languages
             FROM profiles p
             JOIN job_seeker_users u ON p.user_id = u.id;
         `);

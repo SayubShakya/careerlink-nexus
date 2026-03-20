@@ -6,6 +6,7 @@ const JobSeeker = require('../models/JobSeeker');
 const Application = require('../models/Application');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const sequelize = require('../config/sequelize');
 
 // S4-27: System Config (Categories)
 exports.createCategory = catchAsync(async (req, res, next) => {
@@ -99,7 +100,7 @@ exports.getAllEmployers = catchAsync(async (req, res, next) => {
     });
 });
 
-// Get all jobs with employer info
+// Get all jobs with employer info and applicant counts
 exports.getAllJobs = catchAsync(async (req, res, next) => {
     const jobs = await JobListing.findAll({
         include: [{
@@ -109,10 +110,21 @@ exports.getAllJobs = catchAsync(async (req, res, next) => {
         order: [['created_at', 'DESC']]
     });
 
+    // Count applicants for each job
+    const jobsWithCounts = await Promise.all(jobs.map(async (job) => {
+        const applicantCount = await Application.count({
+            where: { job_id: job.id }
+        });
+        return {
+            ...job.toJSON(),
+            totalApplications: applicantCount
+        };
+    }));
+
     res.status(200).json({
         status: 'success',
-        results: jobs.length,
-        data: { jobs }
+        results: jobsWithCounts.length,
+        data: { jobs: jobsWithCounts }
     });
 });
 
@@ -143,6 +155,18 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
     const activeJobs = await JobListing.count({ where: { is_active: true } });
     const totalApplications = await Application.count();
 
+    // Total Clicks = SUM of views from all job_listings
+    const clicksResult = await JobListing.findOne({
+        attributes: [
+            [sequelize.fn('COALESCE', sequelize.fn('SUM', sequelize.col('views')), 0), 'totalClicks']
+        ],
+        raw: true
+    });
+    const totalClicks = parseInt(clicksResult?.totalClicks || 0);
+
+    // Hiring Bosses = count of employers (same as totalEmployers)
+    const hiringBosses = totalEmployers;
+
     res.status(200).json({
         status: 'success',
         data: {
@@ -151,7 +175,9 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
                 totalJobSeekers,
                 totalJobs,
                 activeJobs,
-                totalApplications
+                totalApplications,
+                totalClicks,
+                hiringBosses
             }
         }
     });

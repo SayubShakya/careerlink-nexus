@@ -5,6 +5,7 @@ const applicationController = require('../controllers/applicationController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 
 // Public Routes
+router.get('/stats', jobController.getGlobalStats);
 router.get('/', jobController.getAllJobs);
 router.get('/:id', jobController.getJob);
 

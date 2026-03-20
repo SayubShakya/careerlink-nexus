@@ -41,8 +41,15 @@ exports.createPlatformCV = catchAsync(async (req, res, next) => {
 
 // Get single CV details
 exports.getCV = catchAsync(async (req, res, next) => {
+    let whereClause = { id: req.params.id };
+    
+    // Only restrict by user_id if the user is a job seeker
+    if (req.role === 'job_seeker') {
+        whereClause.user_id = req.user.id;
+    }
+
     const cv = await CV.findOne({
-        where: { id: req.params.id, user_id: req.user.id }
+        where: whereClause
     });
 
     if (!cv) {
