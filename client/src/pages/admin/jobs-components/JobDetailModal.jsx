@@ -5,8 +5,15 @@ import {
 } from 'lucide-react';
 import { formatDate } from './JobUtils';
 
+const isEmptyHtml = (html) => {
+    if (!html) return true;
+    const stripped = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+    return stripped.length === 0;
+};
+
 const formatContent = (content) => {
     if (!content) return '';
+    if (isEmptyHtml(content)) return '';
     if (/<\/?[a-z][\s\S]*>/i.test(content)) return content;
     return content.replace(/\n/g, '<br/>');
 };
@@ -58,13 +65,13 @@ const JobDetailModal = ({ job, onClose }) => {
                         {job.jobType && (
                             <div className="jb-tag-pill"><Briefcase size={14} /> {job.jobType}</div>
                         )}
-                        {job.specification && (
+                        {!isEmptyHtml(job.specification) && (
                              <div className="jb-tag-pill"><UsersIcon size={14} /> {job.specification.length > 20 ? 'Experience Req.' : job.specification}</div>
                         )}
                         {job.salary && (
                             <div className="jb-tag-pill"><DollarSign size={14} /> {job.salary}</div>
                         )}
-                        {job.education && (
+                        {!isEmptyHtml(job.education) && (
                             <div className="jb-tag-pill"><GraduationCap size={14} /> {job.education.length > 20 ? 'Education Req.' : job.education}</div>
                         )}
                         {job.Employer?.companyWebsite && (
@@ -84,14 +91,14 @@ const JobDetailModal = ({ job, onClose }) => {
                                 <div dangerouslySetInnerHTML={{ __html: formatContent(job.description || 'No description provided.') }} />
                             </div>
 
-                            {job.responsibilities && (
+                            {!isEmptyHtml(job.responsibilities) && (
                                 <div className="jb-detail-section">
                                     <h3>Key Responsibilities:</h3>
                                     <div dangerouslySetInnerHTML={{ __html: formatContent(job.responsibilities) }} />
                                 </div>
                             )}
 
-                            {job.qualifications && (
+                            {!isEmptyHtml(job.qualifications) && (
                                 <div className="jb-detail-section">
                                     <h3>Qualifications & Skills:</h3>
                                     <div dangerouslySetInnerHTML={{ __html: formatContent(job.qualifications) }} />
@@ -100,13 +107,13 @@ const JobDetailModal = ({ job, onClose }) => {
 
                             <div className="jb-detail-section">
                                 <h3>Job Specification</h3>
-                                {job.education && (
+                                {!isEmptyHtml(job.education) && (
                                     <div style={{ marginBottom: '12px' }}>
                                         <strong>Required Education Level:</strong>
                                         <div dangerouslySetInnerHTML={{ __html: formatContent(job.education) }} />
                                     </div>
                                 )}
-                                {job.specification && (
+                                {!isEmptyHtml(job.specification) && (
                                     <div>
                                         <strong>Experience Required / Additional Specifications:</strong>
                                         <div dangerouslySetInnerHTML={{ __html: formatContent(job.specification) }} />

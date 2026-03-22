@@ -51,24 +51,6 @@ const GlassCounter = ({ value, prefix = "" }) => {
     return <span className="glass-number">{prefix}{count.toLocaleString()}</span>;
 };
 
-const StatTrend = ({ value, label }) => (
-    <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '2px 8px',
-        background: 'rgba(16, 185, 129, 0.1)',
-        borderRadius: '20px',
-        fontSize: '0.65rem',
-        fontWeight: '800',
-        color: '#10B981',
-        border: '1px solid rgba(16, 185, 129, 0.15)',
-        marginTop: '0'
-    }}>
-        <TrendingUp size={10} />
-        {value} {label}
-    </div>
-);
 
 const StatCard = ({ label, value, icon, index, trend }) => (
     <div
@@ -98,7 +80,6 @@ const StatCard = ({ label, value, icon, index, trend }) => (
             }}>
                 {icon}
             </div>
-            {trend && <StatTrend value={trend.val} label={trend.label} />}
         </div>
 
         <div style={{ paddingTop: '4px' }}>
@@ -204,10 +185,10 @@ const EmployerDashboard = () => {
     const greeting = getGreeting();
 
     const statsConfig = [
-        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={20} />, trend: { val: 'Live', label: '' } },
-        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={20} />, trend: { val: '+2', label: 'this wk' } },
-        { label: 'Applications', value: stats.totalApplications, icon: <Users size={20} />, trend: { val: '+12', label: 'total' } },
-        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={20} />, trend: { val: 'Elite', label: '' } },
+        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={20} /> },
+        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={20} /> },
+        { label: 'Applications', value: stats.totalApplications, icon: <Users size={20} /> },
+        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={20} /> },
     ];
 
     return (
