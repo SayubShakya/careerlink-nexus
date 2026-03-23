@@ -24,8 +24,7 @@ const cloudStorage = new CloudinaryStorage({
     }
 });
 
-// Local storage configuration specifically for CV PDFs
-// Needed because Cloudinary blocks PDF delivery (401) by default for security 
+// Local storage configuration specifically for CV PDFs (kept as a temporary fallback or for private storage)
 const localCvStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = path.join(__dirname, '../../uploads/cvs');
@@ -36,6 +35,20 @@ const localCvStorage = multer.diskStorage({
         const ext = path.extname(file.originalname).toLowerCase();
         cb(null, `file-${req.user?.id || 'guest'}-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`);
     }
+});
+
+// Cloudinary storage for CVs (globally accessible)
+// We use resource_type: 'raw' to avoid image-specific delivery issues with PDFs
+const cloudCvStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: (req, file) => ({
+        folder: 'nexus_cvs',
+        resource_type: 'raw',
+        format: 'pdf',
+        public_id: `cv-${req.user?.id || 'guest'}-${Date.now()}`,
+        type: 'upload', // Changed from 'authenticated' to allow the server to serve it regardless of IP
+        access_mode: 'public'
+    })
 });
 
 const imageFilter = (req, file, cb) => {
@@ -65,9 +78,9 @@ const uploadImage = multer({
 });
 
 const uploadCV = multer({
-    storage: localCvStorage,
+    storage: cloudCvStorage, // Switched to Cloudinary for global accessibility
     fileFilter: docFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for CVs
 });
 
 module.exports = {

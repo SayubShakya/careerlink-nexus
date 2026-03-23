@@ -362,7 +362,9 @@ const CVBuilder = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: '24px',
-            width: '100%'
+            width: '100%',
+            flexWrap: 'wrap',
+            overflow: 'visible'
         },
         titleContainer: {
             flex: 1,
@@ -398,7 +400,7 @@ const CVBuilder = () => {
             gap: '16px'
         },
         card: {
-            padding: '32px',
+            padding: '24px',
             borderRadius: tokens.radiusLg,
             border: `1px solid hsl(${tokens.border})`,
             backgroundColor: 'white',
@@ -507,7 +509,7 @@ const CVBuilder = () => {
                             transition: 'width 0.3s'
                         }} />
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', flexShrink: 0, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '12px', flexShrink: 0, alignItems: 'center', maxWidth: '100%' }}>
                         <button onClick={handleSave} disabled={isSaving} style={{ ...styles.btnPrimary, padding: '12px 20px', whiteSpace: 'nowrap' }}>
                             {isSaving ? 'Saving...' : <><Save size={18} /> Save Now</>}
                         </button>
@@ -554,20 +556,20 @@ const CVBuilder = () => {
                     </h3>
                     {cvData.education.map(edu => (
                         <div key={edu.id} style={styles.card}>
-                            <button onClick={() => removeItem('education', edu.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Degree / Qualification *" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
+                            <button onClick={() => removeItem('education', edu.id)} style={{ position: 'absolute', top: '12px', right: '12px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10 }}><Trash2 size={20} /></button>
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700' }} placeholder="Degree / Qualification *" value={edu.degree} onChange={(e) => updateItem('education', edu.id, 'degree', e.target.value)} />
                             <input style={{ ...styles.input, marginBottom: '20px' }} placeholder="University / Institute *" value={edu.institute} onChange={(e) => updateItem('education', edu.id, 'institute', e.target.value)} />
                             
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '20px', alignItems: 'center' }}>
-                                <input style={styles.input} placeholder="Start Year/Date *" value={edu.startDate} onChange={(e) => updateItem('education', edu.id, 'startDate', e.target.value)} />
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+                                <input style={{ ...styles.input, flex: '1 1 140px', minWidth: '140px' }} placeholder="Start Year/Date *" value={edu.startDate} onChange={(e) => updateItem('education', edu.id, 'startDate', e.target.value)} />
                                 <input 
-                                    style={{ ...styles.input, opacity: edu.isPresent ? 0.5 : 1 }} 
+                                    style={{ ...styles.input, flex: '1 1 140px', minWidth: '140px', opacity: edu.isPresent ? 0.5 : 1 }} 
                                     placeholder="End Year/Date" 
                                     value={edu.endDate} 
                                     disabled={edu.isPresent}
                                     onChange={(e) => updateItem('education', edu.id, 'endDate', e.target.value)} 
                                 />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})` }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})`, whiteSpace: 'nowrap' }}>
                                     <input 
                                         type="checkbox" 
                                         checked={edu.isPresent} 
@@ -592,20 +594,20 @@ const CVBuilder = () => {
                     </h3>
                     {cvData.experience.map(exp => (
                         <div key={exp.id} style={styles.card}>
-                            <button onClick={() => removeItem('experience', exp.id)} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
-                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700', paddingRight: '50px' }} placeholder="Position / Role *" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
+                            <button onClick={() => removeItem('experience', exp.id)} style={{ position: 'absolute', top: '12px', right: '12px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10 }}><Trash2 size={20} /></button>
+                            <input style={{ ...styles.input, marginBottom: '20px', fontWeight: '700' }} placeholder="Position / Role *" value={exp.role} onChange={(e) => updateItem('experience', exp.id, 'role', e.target.value)} />
                             <input style={{ ...styles.input, marginBottom: '20px' }} placeholder="Company / Organization *" value={exp.company} onChange={(e) => updateItem('experience', exp.id, 'company', e.target.value)} />
                             
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                                <input style={styles.input} placeholder="Start Year/Date *" value={exp.startDate} onChange={(e) => updateItem('experience', exp.id, 'startDate', e.target.value)} />
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px', alignItems: 'center' }}>
+                                <input style={{ ...styles.input, flex: '1 1 140px', minWidth: '140px' }} placeholder="Start Year/Date *" value={exp.startDate} onChange={(e) => updateItem('experience', exp.id, 'startDate', e.target.value)} />
                                 <input 
-                                    style={{ ...styles.input, opacity: exp.isPresent ? 0.5 : 1 }} 
+                                    style={{ ...styles.input, flex: '1 1 140px', minWidth: '140px', opacity: exp.isPresent ? 0.5 : 1 }} 
                                     placeholder="End Year/Date" 
                                     value={exp.endDate} 
                                     disabled={exp.isPresent}
                                     onChange={(e) => updateItem('experience', exp.id, 'endDate', e.target.value)} 
                                 />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})` }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', color: `hsl(${tokens.textMuted})`, whiteSpace: 'nowrap' }}>
                                     <input 
                                         type="checkbox" 
                                         checked={exp.isPresent} 
@@ -640,7 +642,7 @@ const CVBuilder = () => {
                                         setCvData(prev => ({ ...prev, skills: n }));
                                     }}
                                 />
-                                <button onClick={() => setCvData(prev => ({ ...prev, skills: prev.skills.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', right: '12px', border: 'none', background: 'transparent', color: '#9CA3AF', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                <button onClick={() => setCvData(prev => ({ ...prev, skills: prev.skills.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', right: '12px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', transition: 'all 0.2s' }}><Trash2 size={16} /></button>
                             </div>
                         ))}
                         <button onClick={() => setCvData(prev => ({ ...prev, skills: [...prev.skills, ''] }))} style={{ ...styles.input, width: 'fit-content', borderStyle: 'dashed', fontWeight: '700' }}>+ Add Skill</button>
@@ -743,13 +745,13 @@ const CVBuilder = () => {
                     </h3>
                     {cvData.references.map((rf, i) => (
                         <div key={i} style={styles.card}>
-                            <button onClick={() => setCvData(prev => ({ ...prev, references: prev.references.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', top: '24px', right: '24px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', opacity: 0.6, zIndex: 10 }}><Trash2 size={20} /></button>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
-                                <input style={styles.input} placeholder="Reference Name" value={rf.name} onChange={(e) => {
+                            <button onClick={() => setCvData(prev => ({ ...prev, references: prev.references.filter((_, idx) => idx !== i) }))} style={{ position: 'absolute', top: '12px', right: '12px', border: 'none', background: 'transparent', color: '#EF4444', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10 }}><Trash2 size={20} /></button>
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                                <input style={{ ...styles.input, flex: 1, minWidth: '200px' }} placeholder="Reference Name" value={rf.name} onChange={(e) => {
                                     const n = cvData.references.map((item, idx) => idx === i ? { ...item, name: e.target.value } : item);
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />
-                                <input style={{ ...styles.input, paddingRight: '50px' }} placeholder="Position / Connection" value={rf.position} onChange={(e) => {
+                                <input style={{ ...styles.input, flex: 1, minWidth: '200px' }} placeholder="Position / Company" value={rf.position} onChange={(e) => {
                                     const n = cvData.references.map((item, idx) => idx === i ? { ...item, position: e.target.value } : item);
                                     setCvData(prev => ({ ...prev, references: n }));
                                 }} />

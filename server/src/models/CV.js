@@ -55,4 +55,12 @@ const CV = sequelize.define('CV', {
 JobSeeker.hasMany(CV, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 CV.belongsTo(JobSeeker, { foreignKey: 'user_id' });
 
+// Virtual property for download path
+CV.prototype.toJSON = function () {
+    const values = { ...this.get() };
+    const apiBase = process.env.VITE_API_BASE_URL || '/api';
+    values.cv_path = `${apiBase}/cvs/${values.id}/download`;
+    return values;
+};
+
 module.exports = CV;

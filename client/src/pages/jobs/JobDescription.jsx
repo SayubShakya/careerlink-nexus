@@ -62,6 +62,14 @@ const JobDescription = () => {
     const [applyMethod, setApplyMethod] = useState('select'); // 'select' | 'upload'
     const fileInputRef = useRef(null);
 
+    // Auto-select primary CV from server data
+    useEffect(() => {
+        if (isLoggedIn && userCVs.length > 0 && !selectedCvId) {
+            const primary = userCVs.find(c => c.is_primary) || userCVs[0];
+            setSelectedCvId(primary.id);
+        }
+    }, [userCVs, isLoggedIn, selectedCvId]);
+
 
     const { data: serverJobData, isLoading: jobLoading } = useGetJobDetails(id);
     const { data: userCVs = [], isLoading: isLoadingCVs } = useGetCVs({ enabled: isLoggedIn });

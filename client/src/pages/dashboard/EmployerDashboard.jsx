@@ -51,6 +51,60 @@ const GlassCounter = ({ value, prefix = "" }) => {
     return <span className="glass-number">{prefix}{count.toLocaleString()}</span>;
 };
 
+const StatTrend = ({ value, label }) => {
+    // If neutral (0), show a "Stable" status.
+    if (!value || value === '0' || value === 0) {
+        return (
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px',
+                background: 'rgba(156, 163, 175, 0.1)', borderRadius: '20px',
+                fontSize: '0.65rem', fontWeight: '800', color: '#9CA3AF',
+                border: '1px solid rgba(156, 163, 175, 0.15)', marginTop: '0'
+            }}>
+                Stable
+            </div>
+        );
+    }
+
+    const strValue = String(value);
+    const isNegative = strValue.startsWith('-');
+    const isSpecialText = ['Elite', 'High Performance', 'Active', 'Standard', 'Live'].includes(strValue);
+    
+    let color = '#10B981';
+    let bg = 'rgba(16, 185, 129, 0.1)';
+
+    if (isNegative) {
+        color = '#EF4444';
+        bg = 'rgba(239, 68, 68, 0.1)';
+    } else if (isSpecialText) {
+        if (strValue === 'Standard') {
+             color = '#F59E0B';
+             bg = 'rgba(245, 158, 11, 0.1)';
+        } else if (strValue === 'Live') {
+             color = '#3B82F6';
+             bg = 'rgba(59, 130, 246, 0.1)';
+        }
+    }
+
+    return (
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 8px',
+            background: bg,
+            borderRadius: '20px',
+            fontSize: '0.65rem',
+            fontWeight: '800',
+            color: color,
+            border: `1px solid ${bg}`,
+            marginTop: '0'
+        }}>
+            {(!isSpecialText && !isNegative) && <TrendingUp size={10} />}
+            {strValue} {label}
+        </div>
+    );
+};
 
 const StatCard = ({ label, value, icon, index, trend }) => (
     <div
@@ -185,10 +239,10 @@ const EmployerDashboard = () => {
     const greeting = getGreeting();
 
     const statsConfig = [
-        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={20} /> },
-        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={20} /> },
-        { label: 'Applications', value: stats.totalApplications, icon: <Users size={20} /> },
-        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={20} /> },
+        { label: 'Total Jobs', value: stats.totalJobs, icon: <Briefcase size={20} />, trend: { val: 'Live', label: '' } },
+        { label: 'Active Jobs', value: stats.activeJobs, icon: <Target size={20} />, trend: { val: stats.jobs_trend || '0', label: 'this wk' } },
+        { label: 'Applications', value: stats.totalApplications, icon: <Users size={20} />, trend: { val: stats.app_trend || '0', label: 'this wk' } },
+        { label: 'Shortlisted', value: stats.shortlisted, icon: <CheckCircle2 size={20} />, trend: { val: stats.shortlist_trend || 'Standard', label: '' } },
     ];
 
     return (

@@ -373,24 +373,24 @@ const Applications = () => {
     const { mutate: updateAppStatus } = useUpdateApplicationStatus();
     const location = useLocation();
     
-    const handleViewCV = async (cvId) => {
-        if (!cvId) {
+    const handleViewCV = async (cv) => {
+        if (!cv || (!cv.id && !cv.cv_path)) {
             alert('No CV data found for this candidate.');
             return;
         }
+        
+        const cvId = cv.id;
+        const cvPath = cv.cv_path || `${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`;
+        
         try {
-            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`, { responseType: 'blob' });
+            const response = await api.get(cvPath, { responseType: 'blob' });
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
         } catch (err) {
             console.error('View failed:', err);
             const serverMsg = err.response?.data?.message || err.message;
-            if (serverMsg && serverMsg.includes('File not found on server')) {
-                alert("This CV is missing from your local device storage because it was uploaded locally on another developer's machine before Cloudinary was implemented. Please test with a newly submitted application to verify Cloud CV viewing works.");
-            } else {
-                alert(`Failed to view CV: ${serverMsg}`);
-            }
+            alert(`Failed to view CV: ${serverMsg}`);
         }
     };
 
@@ -892,8 +892,8 @@ const Applications = () => {
                                                         className="btn-scale"
                                                         style={{ background: 'var(--theme-bg-subtle)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-primary)', padding: '8px 16px', borderRadius: '10px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', letterSpacing: '0.05em' }}
                                                         onClick={() => {
-                                                            const cvId = app.cv_id || app.CV?.id;
-                                                            handleViewCV(cvId);
+                                                            const cvObj = app.CV || { id: app.cv_id };
+                                                            handleViewCV(cvObj);
                                                         }}
                                                     >
                                                         <FileText size={14} className="text-gradient-sapphire" /> VIEW CV
