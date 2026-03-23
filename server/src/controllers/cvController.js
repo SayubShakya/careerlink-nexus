@@ -161,11 +161,15 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
                     let pathAfterUpload = urlParts[1];
                     // Remove version prefix (v1234567890/)
                     pathAfterUpload = pathAfterUpload.replace(/^v\d+\//, '');
-                    // Remove file extension for public_id
-                    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, '');
                     
                     // Determine resource type from URL
                     const resourceType = cv.file_path.includes('/raw/upload/') ? 'raw' : 'image';
+                    
+                    // FOR RAW FILES: The public ID MUST include the extension
+                    // FOR IMAGES: The public ID typically excludes the extension
+                    const publicId = resourceType === 'raw' 
+                        ? pathAfterUpload 
+                        : pathAfterUpload.replace(/\.[^/.]+$/, '');
                     
                     const signedUrl = cloudinary.url(publicId, {
                         resource_type: resourceType,
