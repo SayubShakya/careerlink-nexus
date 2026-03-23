@@ -62,15 +62,6 @@ const JobDescription = () => {
     const [applyMethod, setApplyMethod] = useState('select'); // 'select' | 'upload'
     const fileInputRef = useRef(null);
 
-    // Auto-select primary CV from server data
-    useEffect(() => {
-        if (isLoggedIn && userCVs.length > 0 && !selectedCvId) {
-            const primary = userCVs.find(c => c.is_primary) || userCVs[0];
-            setSelectedCvId(primary.id);
-        }
-    }, [userCVs, isLoggedIn, selectedCvId]);
-
-
     const { data: serverJobData, isLoading: jobLoading } = useGetJobDetails(id);
     const { data: userCVs = [], isLoading: isLoadingCVs } = useGetCVs({ enabled: isLoggedIn });
     const { data: savedJobs = [] } = useGetSavedJobs();
@@ -82,6 +73,14 @@ const JobDescription = () => {
     const userApplication = appliedJobs.find(app => app.job_id === id);
     const hasApplied = !!userApplication;
     const activeStatus = userApplication?.status || STATIC_APPLIED_STATUS;
+
+    // Auto-select primary CV from server data
+    useEffect(() => {
+        if (isLoggedIn && userCVs.length > 0 && !selectedCvId) {
+            const primary = userCVs.find(c => c.is_primary) || userCVs[0];
+            setSelectedCvId(primary.id);
+        }
+    }, [userCVs, isLoggedIn, selectedCvId]);
 
     const toggleSave = () => {
         if (!isLoggedIn) {
