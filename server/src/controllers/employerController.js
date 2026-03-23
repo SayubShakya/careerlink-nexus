@@ -97,6 +97,43 @@ exports.getStats = catchAsync(async (req, res, next) => {
         }]
     });
 
+    // Trend Logic Calculations
+    const lastWeekDate = new Date();
+    lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+    const twoWeeksAgoDate = new Date();
+    twoWeeksAgoDate.setDate(twoWeeksAgoDate.getDate() - 14);
+
+    // Jobs trend (actual number of new entries this week)
+    const recentJobsCount = await JobListing.count({
+        where: { employer_id: req.user.id, created_at: { [Op.gte]: lastWeekDate } }
+    });
+    const previousJobsCount = await JobListing.count({
+        where: { employer_id: req.user.id, created_at: { [Op.gte]: twoWeeksAgoDate, [Op.lt]: lastWeekDate } }
+    });
+    // Requirement specifies "this wk" reflects actual number of new entries, 
+    // AND compares counts. If it's pure count, we use recentJobsCount. 
+    // Let's use difference if requested, but actual number makes more sense for "this wk".
+    // "The 'this wk' badges reflect the actual number of new entries created in the database within the last 7 days."
+    const jobs_trend = recentJobsCount > 0 ? `+${recentJobsCount}` : "0";
+
+    // Applications trend
+    const recentAppsCount = await Application.count({
+        where: { applied_at: { [Op.gte]: lastWeekDate } },
+        include: [{ model: JobListing, where: { employer_id: req.user.id } }]
+    });
+    const previousAppsCount = await Application.count({
+        where: { applied_at: { [Op.gte]: twoWeeksAgoDate, [Op.lt]: lastWeekDate } },
+        include: [{ model: JobListing, where: { employer_id: req.user.id } }]
+    });
+    const app_trend = recentAppsCount > 0 ? `+${recentAppsCount}` : "0";
+
+    // Shortlisted tag
+    const ratio = totalApplications > 0 ? (shortlisted / totalApplications) : 0;
+    let shortlist_trend = "Standard";
+    if (ratio >= 0.2) shortlist_trend = "Elite";
+    else if (ratio >= 0.1) shortlist_trend = "High Performance";
+    else if (shortlisted > 0) shortlist_trend = "Active";
+
     res.status(200).json({
         status: 'success',
         data: {
@@ -104,7 +141,10 @@ exports.getStats = catchAsync(async (req, res, next) => {
                 totalJobs,
                 activeJobs,
                 totalApplications,
-                shortlisted
+                shortlisted,
+                jobs_trend,
+                app_trend,
+                shortlist_trend
             }
         }
     });

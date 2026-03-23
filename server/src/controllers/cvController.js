@@ -95,23 +95,38 @@ exports.deleteCV = catchAsync(async (req, res, next) => {
 
 // Download/View CV (Supports both uploaded and platform-generated)
 exports.downloadCV = catchAsync(async (req, res, next) => {
-    let whereClause = { id: req.params.id };
-    
-    // Only restrict by user_id if the user is a job seeker
-    if (req.role === 'job_seeker') {
-        whereClause.user_id = req.user.id;
-    }
-
-    const cv = await CV.findOne({
-        where: whereClause
-    });
+    const cv = await CV.findByPk(req.params.id);
 
     if (!cv) {
-        console.error(`[downloadCV] CV not found. ID: ${req.params.id}, Role: ${req.role}`);
-        return next(new AppError('No CV found with that ID or unauthorized', 404));
+        return next(new AppError('No CV found with that ID', 404));
     }
 
-    console.log(`[downloadCV] CV found: id=${cv.id}, type=${cv.type}, file_path=${cv.file_path}`);
+    // CHECK PERMISSIONS
+    if (req.role === 'job_seeker') {
+        if (cv.user_id !== req.user.id) {
+            return next(new AppError('Unauthorized: You can only download your own CVs.', 403));
+        }
+    } else if (req.role === 'employer') {
+        // Employer can only download CVs of candidates who have applied to their jobs
+        const Application = require('../models/Application');
+        const JobListing = require('../models/JobListing');
+        
+        const hasApplication = await Application.findOne({
+            where: { cv_id: cv.id },
+            include: [{
+                model: JobListing,
+                where: { employer_id: req.user.id }
+            }]
+        });
+
+        if (!hasApplication && req.role !== 'admin') {
+            return next(new AppError('Unauthorized: You can only download CVs of candidates who have applied to your jobs.', 403));
+        }
+    } else if (req.role !== 'admin') {
+        return next(new AppError('Unauthorized access to CV.', 403));
+    }
+
+    console.log(`[downloadCV] Permission granted for user=${req.user.id}, role=${req.role}, cv=${cv.id}`);
 
     // CASE 1: Platform-generated CVs — generate PDF on-the-fly
     if (cv.type === 'platform') {
@@ -230,17 +245,17 @@ exports.uploadCV = catchAsync(async (req, res, next) => {
         return next(new AppError('Please provide a file to upload.', 400));
     }
 
-    // Store relative path from server root (e.g., "uploads/cvs/file-xxx.pdf")
-    const serverRoot = path.join(__dirname, '../..');
-    const relativePath = path.relative(serverRoot, req.file.path).replace(/\\/g, '/');
-
-    console.log(`[uploadCV] File saved. Absolute: ${req.file.path}, Relative: ${relativePath}`);
+    // For Cloudinary uploads, req.file.path or req.file.secure_url will contain the global URL
+    // For local uploads (fallback), we store the relative path
+    const filePath = req.file.path || req.file.secure_url;
+    
+    console.log(`[uploadCV] File processed. Path/URL: ${filePath}`);
 
     const newCV = await CV.create({
         user_id: req.user.id,
         title: req.body.title || req.file.originalname,
         type: 'uploaded',
-        file_path: relativePath
+        file_path: filePath
     });
 
     res.status(201).json({
