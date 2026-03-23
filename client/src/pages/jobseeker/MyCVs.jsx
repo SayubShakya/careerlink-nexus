@@ -56,36 +56,58 @@ const MyCVs = () => {
         });
     };
 
+    const getDownloadUrl = (id) => {
+        // Build an authenticated download URL using the API token
+        // The server will redirect to Cloudinary directly
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        return `${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`;
+    };
+
     const handleDownload = async (id, title) => {
         try {
-            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `${title.replace(/\s+/g, '_')}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, {
+                responseType: 'blob',
+                maxRedirects: 5
+            });
+            // If we get blob data back (platform PDFs), download it
+            if (response.data && response.data.size > 0) {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `${title.replace(/\s+/g, '_')}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            }
         } catch (err) {
-            console.error('Download failed:', err);
-            toast.error('Failed to download CV');
+            // If axios can't follow the redirect (e.g. CORS on Cloudinary), open directly in tab
+            if (err.response?.status === 302 || err.request) {
+                window.open(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, '_blank');
+            } else {
+                console.error('Download failed:', err);
+                toast.error('Failed to download CV');
+            }
         }
     };
 
     const handleView = async (id) => {
-        const viewToast = toast.loading("Opening preview...");
         try {
-            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, { responseType: 'blob' });
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            toast.dismiss(viewToast);
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, {
+                responseType: 'blob',
+                maxRedirects: 5
+            });
+            if (response.data && response.data.size > 0) {
+                const blob = new Blob([response.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            }
         } catch (err) {
-            console.error('View failed:', err);
-            toast.error('Failed to view CV', { id: viewToast });
+            // Redirect response — just open the URL directly in a new tab
+            window.open(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, '_blank');
         }
     };
+
 
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);

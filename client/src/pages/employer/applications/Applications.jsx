@@ -380,32 +380,22 @@ const Applications = () => {
         }
         
         const cvId = cv.id;
-        const cvPath = cv.cv_path || `${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`;
+        const endpoint = `${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`;
         
         try {
-            const response = await api.get(cvPath, { responseType: 'blob' });
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        } catch (err) {
-            console.error('View failed:', err);
-            let serverMsg = err.message;
-            // When responseType is 'blob', error response data is a Blob, not JSON
-            // We need to read it as text and parse it to get the server error message
-            if (err.response?.data instanceof Blob) {
-                try {
-                    const text = await err.response.data.text();
-                    const json = JSON.parse(text);
-                    serverMsg = json.message || json.error || serverMsg;
-                } catch (_) {
-                    // Could not parse blob, use default message
-                }
-            } else if (err.response?.data?.message) {
-                serverMsg = err.response.data.message;
+            const response = await api.get(endpoint, { responseType: 'blob', maxRedirects: 5 });
+            if (response.data && response.data.size > 0) {
+                const blob = new Blob([response.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_blank');
             }
-            alert(`Failed to view CV: ${serverMsg}`);
+        } catch (err) {
+            // Server redirected to Cloudinary — open the endpoint directly in a new tab
+            // The browser will follow the redirect and show the PDF
+            window.open(endpoint, '_blank');
         }
     };
+
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
