@@ -10,10 +10,12 @@ const ADMIN_ID = '00000000-0000-0000-0000-000000000001';
 
 // Protect routes - verifies JWT token
 exports.protect = catchAsync(async (req, res, next) => {
-    // 1) Get token from header
+    // 1) Get token from header OR query param (query param needed for window.open / direct URL access)
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
     }
 
     if (!token) {

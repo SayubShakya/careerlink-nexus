@@ -141,39 +141,51 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         });
         return res.send(pdfBuffer);
     }
-    // CASE 2: Uploaded CV with Cloudinary URL
+    // CASE 2: Uploaded CV with Cloudinary URL — always generate a signed URL
     if (cv.file_path && cv.file_path.startsWith('http')) {
         const cloudinary = require('../utils/cloudinary');
-        let serveUrl = cv.file_path;
 
-        // Detect if this is an 'authenticated' delivery type (old files) or 'upload' (public, new files)
-        const isAuthenticated = cv.file_path.includes('/authenticated/');
+        try {
+            // Detect delivery type: 'upload' (public) or 'authenticated' (private)
+            const isAuthenticated = cv.file_path.includes('/authenticated/');
+            const deliveryType = isAuthenticated ? 'authenticated' : 'upload';
+            const resourceType = cv.file_path.includes('/raw/') ? 'raw' : 'image';
 
-        if (isAuthenticated) {
-            // Generate a short-lived signed URL for authenticated (private) files
-            const urlParts = cv.file_path.split('/authenticated/');
-            if (urlParts.length === 2) {
-                let pathAfterType = urlParts[1].replace(/^v\d+\//, '');
-                const publicId = pathAfterType.replace(/\.[^/.]+$/, '');
-                const resourceType = cv.file_path.includes('/raw/') ? 'raw' : 'image';
+            // Extract the path after the delivery segment to get the public_id
+            const splitOn = isAuthenticated ? '/authenticated/' : '/upload/';
+            const urlParts = cv.file_path.split(splitOn);
 
-                serveUrl = cloudinary.url(publicId, {
-                    resource_type: resourceType,
-                    type: 'authenticated',
-                    sign_url: true,
-                    expires_at: Math.floor(Date.now() / 1000) + 300, // valid 5 minutes
-                    secure: true
-                });
-                console.log(`[downloadCV] Issuing signed redirect for authenticated file: ${publicId}`);
+            if (urlParts.length < 2) {
+                // Malformed URL — redirect as-is and hope for the best
+                console.warn(`[downloadCV] Could not parse Cloudinary URL, redirecting raw: ${cv.file_path}`);
+                return res.redirect(302, cv.file_path);
             }
-        } else {
-            // Public 'upload' type — redirect client directly to Cloudinary URL
-            console.log(`[downloadCV] Redirecting to public Cloudinary URL: ${cv.file_path}`);
-        }
 
-        // Redirect the client directly — no server-side proxying needed
-        return res.redirect(302, serveUrl);
+            // Strip version prefix (v1234567890/)
+            let pathAfterDelivery = urlParts[1].replace(/^v\d+\//, '');
+
+            // For 'raw' files the public_id MUST include the extension
+            // For 'image' files the public_id excludes the extension
+            const publicId = resourceType === 'raw'
+                ? pathAfterDelivery               // keep extension: nexus_cvs/cv-xxx.pdf
+                : pathAfterDelivery.replace(/\.[^/.]+$/, '');
+
+            const signedUrl = cloudinary.url(publicId, {
+                resource_type: resourceType,
+                type: deliveryType,
+                sign_url: true,
+                expires_at: Math.floor(Date.now() / 1000) + 300, // 5 minutes
+                secure: true
+            });
+
+            console.log(`[downloadCV] Signed redirect → type=${deliveryType} resource=${resourceType} id=${publicId}`);
+            return res.redirect(302, signedUrl);
+        } catch (err) {
+            console.error('[downloadCV] Failed to build signed URL, falling back to raw redirect:', err.message);
+            return res.redirect(302, cv.file_path);
+        }
     }
+
 
     // CASE 3: Local file path
     if (!cv.file_path) {

@@ -30,6 +30,7 @@ import {
 
 import api from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
+import { API_BASE_URL } from '@/config/constants';
 import Pagination from '@/components/ui/Pagination';
 
 // Design System
@@ -373,6 +374,12 @@ const Applications = () => {
     const { mutate: updateAppStatus } = useUpdateApplicationStatus();
     const location = useLocation();
     
+    const buildDirectUrl = (id) => {
+        const token = localStorage.getItem('userToken');
+        const base = API_BASE_URL.startsWith('http') ? API_BASE_URL : `http://localhost:5000/api`;
+        return `${base}/cvs/${id}/download?token=${token}&t=${Date.now()}`;
+    };
+
     const handleViewCV = async (cv) => {
         if (!cv || (!cv.id && !cv.cv_path)) {
             alert('No CV data found for this candidate.');
@@ -380,22 +387,20 @@ const Applications = () => {
         }
         
         const cvId = cv.id;
-        const endpoint = `${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`;
+        const endpoint = buildDirectUrl(cvId);
         
         try {
-            const response = await api.get(endpoint, { responseType: 'blob', maxRedirects: 5 });
+            const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`, { responseType: 'blob', maxRedirects: 5 });
             if (response.data && response.data.size > 0) {
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
                 window.open(url, '_blank');
             }
         } catch (err) {
-            // Server redirected to Cloudinary — open the endpoint directly in a new tab
-            // The browser will follow the redirect and show the PDF
+            // Server redirected to Cloudinary — open the absolute endpoint with token in new tab
             window.open(endpoint, '_blank');
         }
     };
-
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');

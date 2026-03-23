@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '@/config/constants';
 import {
     FileText,
     Upload,
@@ -56,11 +57,11 @@ const MyCVs = () => {
         });
     };
 
-    const getDownloadUrl = (id) => {
-        // Build an authenticated download URL using the API token
-        // The server will redirect to Cloudinary directly
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        return `${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`;
+    // Build a full absolute URL with JWT token — needed for window.open() which can't set headers
+    const buildDirectUrl = (id) => {
+        const token = localStorage.getItem('userToken');
+        const base = API_BASE_URL.startsWith('http') ? API_BASE_URL : `http://localhost:5000/api`;
+        return `${base}/cvs/${id}/download?token=${token}&t=${Date.now()}`;
     };
 
     const handleDownload = async (id, title) => {
@@ -83,7 +84,7 @@ const MyCVs = () => {
         } catch (err) {
             // If axios can't follow the redirect (e.g. CORS on Cloudinary), open directly in tab
             if (err.response?.status === 302 || err.request) {
-                window.open(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, '_blank');
+                window.open(buildDirectUrl(id), '_blank');
             } else {
                 console.error('Download failed:', err);
                 toast.error('Failed to download CV');
@@ -103,8 +104,8 @@ const MyCVs = () => {
                 window.open(url, '_blank');
             }
         } catch (err) {
-            // Redirect response — just open the URL directly in a new tab
-            window.open(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, '_blank');
+            // Redirect response — open the absolute URL directly in a new tab (with token)
+            window.open(buildDirectUrl(id), '_blank');
         }
     };
 
