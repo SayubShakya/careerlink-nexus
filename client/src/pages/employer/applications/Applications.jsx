@@ -389,7 +389,20 @@ const Applications = () => {
             window.open(url, '_blank');
         } catch (err) {
             console.error('View failed:', err);
-            const serverMsg = err.response?.data?.message || err.message;
+            let serverMsg = err.message;
+            // When responseType is 'blob', error response data is a Blob, not JSON
+            // We need to read it as text and parse it to get the server error message
+            if (err.response?.data instanceof Blob) {
+                try {
+                    const text = await err.response.data.text();
+                    const json = JSON.parse(text);
+                    serverMsg = json.message || json.error || serverMsg;
+                } catch (_) {
+                    // Could not parse blob, use default message
+                }
+            } else if (err.response?.data?.message) {
+                serverMsg = err.response.data.message;
+            }
             alert(`Failed to view CV: ${serverMsg}`);
         }
     };
