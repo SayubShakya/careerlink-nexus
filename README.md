@@ -1,100 +1,84 @@
-# CareerLink: The Nexus Master Guide
-**University of Bedfordshire | CIS047-3 Agile Project Management | Team Nexus**
+# 🚀 CareerLink: A Simple Job Portal
 
-![Project Status](https://img.shields.io/badge/Status-Development-blue) ![Methodology](https://img.shields.io/badge/Methodology-Scrumban-orange) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
+Welcome to **CareerLink**, a web application built by **Team Nexus** as our **College Final Assignment**.
 
----
+## 📖 About the Project
+**CareerLink** is a modern and easy-to-use job website. We noticed that finding a job today is stressful:
+- Other sites have too many distractions (like a noisy social media feed).
+- Job seekers apply but sometimes never hear back (known as "ghosting").
+- Filling out the same application forms over and over again is tiring.
 
-## 🧐 1. Project Summary (What, How, When, Why)
-
-### WHAT is CareerLink?
-CareerLink is a **minimalist, feedback-first job portal** designed specifically for students and early-career seekers. 
-- It removes the social media noise found on other sites.
-- It provides a **One-Click Apply** system based on pre-vetted user profiles.
-- It ensures employers provide mandatory feedback on every application.
-
-### HOW do we build it?
-We use the **Scrumban Methodology**, which gives us the discipline of Scrum and the speed of Kanban.
-- **Workflow**: We use a Kanban board with **WIP limits** to ensure we finish what we start.
-- **Lenses**: Every team member looks at the code through a specific Role Lens (Quality, Risk, etc.).
-- **Tools**: Google Chat for daily sync, Google Meet for weekly stand-ups, and React/Node.js for the build.
-
-### WHEN is it delivered? (The Roadmap)
-- **Weeks 1-3 (Foundation)**: Setup, planning, and requirements. (Completed)
-- **Weeks 4-6 (Core)**: Authentication, Job Feed, and Seeker Profile Builder. **(Current Phase)**
-- **Weeks 7-8 (Advanced)**: One-Click application logic and Employer Dashboards.
-- **Week 9-10 (Review)**: Final testing, bug fixing, and academic submission.
-
-### WHY are we building it?
-- **For Users**: To end the frustration of "applying into a void" and provide a distraction-free environment.
-- **For the Assessment**: To demonstrate mastery of Agile roles (PM, Quality, Risk, etc.) in a real software lifecycle.
+**Why We Built This:** This project was created as our final college assignment to demonstrate our ability to plan, design, and build a full-stack, real-world application from scratch. Our main goal was to create a simple, clear website where job seekers can save their profile once and apply to jobs with **one click**, while employers can easily post jobs and manage their candidates.
 
 ---
 
-## 👥 2. Team Nexus (Agile Lenses)
+## 🧑‍💻 The Team & Roles
+We worked as a team of 5, giving everyone a specific role to make sure the project succeeded:
+- **Nihariks Shakya (Project Manager):** Keeps the team focused on our main goals and talks to our teacher.
+- **Aayush Man Shakya (Start-Up Manager):** Makes sure the website solves a real problem for the users.
+- **Sayub Shakya (Scheduling Manager):** Plans our tasks so the project finishes on time.
+- **DipeshRaj Shrestha (Quality Manager):** Tests every feature to find and fix bugs.
+- **Amogh Shakya (Risk Manager):** Checks for security issues to keep passwords and data safe.
 
-| Name | Role | Core Responsibility |
-| :--- | :--- | :--- |
-| **Nihariks Shakya** | Product Owner / Manager | Feature vision, prioritization, stakeholder alignment. |
-| **Sayub Shakya** | Scheduling Manager | Flow management, meeting planning, Kanban synchronization. |
-| **Aayush Man Shakya** | Start-up Manager | Problem definition, user personas, tech configuration. |
-| **DipeshRaj Shrestha** | Quality Manager | Acceptance criteria, testing, code review standards. |
-| **Amogh Shakya** | Risk Manager | Threat identification, mitigation planning, safety audits. |
-
----
-
-## ⚙️ 3. Development Workflow (Scrumban)
-
-### The Kanban Board
-- **Backlog**: Future ideas and requirements.
-- **Ready**: Priority tasks for the current week.
-- **In Progress**: Active work (Limit: 1-2 tasks per person).
-- **Quality Review**: Code waiting for QA verification.
-- **Done**: Fully tested and merged.
-
-### Git & Branching Strategy
-1. **Never push to `main`**: All features must start in a `feature/name` branch.
-2. **Pull Requests (PR)**: Merging requires a review from the **Quality Manager** or **PM**.
-3. **Daily Progress**: Use **Google Chat** for quick updates and pair programming requests.
-
-### Definition of Done (DoD)
-A task is NOT finished until:
-- [ ] It meets the criteria in `REQUIREMENTS_JOB_SEEKER.md`.
-- [ ] No console errors or UI bugs exist.
-- [ ] It has been reviewed through our specialized "Lenses."
-- [ ] It is merged into the `main` branch.
+*(Read more about our roles in `docs/2_TEAM_ROLES.md`)*
 
 ---
 
-## 📚 Technical Documentation
-
-For in-depth technical details regarding our architecture and folder structures, please refer to the following guides:
-
-*   [**Frontend Architecture**](./docs/FRONTEND_STRUCTURE.md): Detailed breakdown of the React/Vite structure, naming conventions, and best practices.
-*   [**Backend Architecture**](./docs/BACKEND_STRUCTURE.md): Explanation of the Service-Controller-Route (SCR) pattern and database configuration.
-
----
-
-## 🤝 4. Collaboration & Communication
-- **Sunday Stand-up**: Be on time at **9:00 PM** for the Google Meet sessions.
-- **Google Chat**: Use our Nexus group (College Email) for day-to-day feedback and sharing ideas.
-- **Classroom Sessions**: Use lab time for face-to-face brainstorming and teacher consultation.
-- **Internal Demos**: We hold internal "show and tell" sessions to catch bugs early.
+## 🛠️ Technology Stack
+To make this project fast and secure, we used modern tools:
+- **Frontend:** React.js (Vite)
+- **Backend:** Node.js, Express.js
+- **Database:** PostgreSQL (with Sequelize ORM)
+- **Authentication:** JWT (JSON Web Tokens), Google OAuth
 
 ---
 
-## 🛠️ 5. Tech Stack & Setup
+## 💻 How to Clone and Run the Project
+If you want to view, test, or run CareerLink on your own computer, follow these simple steps:
 
-### Stack
-- **Frontend**: React.js (Vite) + Vanilla CSS
-- **Backend**: Node.js + Express.js
-- **Database**: PostgreSQL / Supabase
+### 1. Clone the Repository
+Open your terminal (or Command Prompt) and type:
+```bash
+git clone https://github.com/your-username/careerlink-nexus.git
+cd careerlink-nexus
+```
 
-### Local Installation
-1. **Clone**: `git clone [REPO_URL]`
-2. **Install**: Run `npm install` in both `/client` and `/server`.
-3. **Environment**: Setup `.env` files based on `.env.example`.
-4. **Run**: Use `npm run dev` or the provided `run.sh` script.
+### 2. Setup the Backend (Server)
+Open a terminal window and go to the `server` folder:
+```bash
+cd server
+npm install
+```
+*Note: You will need to create a `.env` file inside the `server` folder. In this file, you must add your Database credentials (like DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET, and Google Client details).*
+
+Once the `.env` file is ready, run the server:
+```bash
+npm start
+```
+
+### 3. Setup the Frontend (Client)
+Open a **new** terminal window and go to the `client` folder:
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### 4. View the Website
+Once both the server and client are running, open your web browser and click this link:
+[http://localhost:5173](http://localhost:5173)
 
 ---
-**One Project. One Team. One Nexus.**
+
+## 📚 Detailed Documentation
+If you are our teacher or just want to read exactly how we planned and built this project over 10 weeks, check out our full documentation in the `docs/` folder:
+
+1. [Project Overview](docs/1_PROJECT_OVERVIEW.md) - Exact features, problems solved, and technology used.
+2. [Team Roles](docs/2_TEAM_ROLES.md) - Detailed breakdown of what each team member did.
+3. [Project Plan](docs/3_PROJECT_PLAN.md) - Our 4-step timeline from start to finish.
+4. [Workflow](docs/4_WORKFLOW.md) - Our strict 5-step process for building code without breaking the website.
+5. [Methodology](docs/5_METHODOLOGY.md) - How we used a method called "Scrumban" to plan our weeks.
+
+---
+
+> **Built to help students and professionals get hired, with no distractions. - Team Nexus**

@@ -101,10 +101,6 @@ const StatCard = ({ label, value, icon, color, bg, idx }) => (
             <div className="stat-value"><AnimCounter value={value} /></div>
             <div className="stat-label">{label}</div>
         </div>
-        <div className="stat-badge">
-            <TrendingUp size={11} />
-            Live
-        </div>
     </div>
 );
 

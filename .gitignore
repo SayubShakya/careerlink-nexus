@@ -62,3 +62,6 @@ client/dist/
 *.sqlite
 *.sqlite3
 *.db
+
+# Documentation
+docs/

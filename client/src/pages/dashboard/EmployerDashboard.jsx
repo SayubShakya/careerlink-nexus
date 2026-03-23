@@ -134,7 +134,6 @@ const StatCard = ({ label, value, icon, index, trend }) => (
             }}>
                 {icon}
             </div>
-            {trend && <StatTrend value={trend.val} label={trend.label} />}
         </div>
 
         <div style={{ paddingTop: '4px' }}>

@@ -27,8 +27,15 @@ import toast from 'react-hot-toast';
 import { usePostApplyJob } from '@/hooks/api/jobs/usePostApplyJob';
 import { useAuth } from '@/hooks/useAuth';
 
+const isEmptyHtml = (html) => {
+    if (!html) return true;
+    const stripped = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+    return stripped.length === 0;
+};
+
 const formatContent = (content) => {
     if (!content) return '';
+    if (isEmptyHtml(content)) return '';
     if (/<\/?[a-z][\s\S]*>/i.test(content)) return content;
     return content.replace(/\n/g, '<br/>');
 };
@@ -256,7 +263,7 @@ const JobDescription = () => {
                                 <Clock size={16} /> Job Type: {jobData.jobType}
                             </div>
                         )}
-                        {jobData.specification && (
+                        {!isEmptyHtml(jobData.specification) && (
                             <div className="tag-item">
                                 <Briefcase size={16} /> Experience: {jobData.specification.length > 30 ? 'Required' : jobData.specification}
                             </div>
@@ -266,7 +273,7 @@ const JobDescription = () => {
                                 <DollarSign size={16} /> {jobData.salary}
                             </div>
                         )}
-                        {jobData.education && (
+                        {!isEmptyHtml(jobData.education) && (
                             <div className="tag-item">
                                 <GraduationCap size={16} /> {jobData.education.length > 30 ? 'Required' : jobData.education}
                             </div>
@@ -292,25 +299,25 @@ const JobDescription = () => {
                             <div className="description-text" dangerouslySetInnerHTML={{ __html: formatContent(jobData.responsibilities) }} />
                         </section>
 
-                        {jobData.qualifications && (
+                        {!isEmptyHtml(jobData.qualifications) && (
                             <section className="detail-section">
                                 <h3 className="section-title-sub">Qualifications & Skills:</h3>
                                 <div className="description-text" dangerouslySetInnerHTML={{ __html: formatContent(jobData.qualifications) }} />
                             </section>
                         )}
-                        {(jobData.education || jobData.specification) && (
+                        {(!isEmptyHtml(jobData.education) || !isEmptyHtml(jobData.specification)) && (
                             <>
                                 <div className="divider-line"></div>
                                 <section className="detail-section spec-section">
                                     <h3 className="section-title-main">Job Specification</h3>
                                     <div className="spec-grid">
-                                        {jobData.education && (
+                                        {!isEmptyHtml(jobData.education) && (
                                             <div className="spec-row">
                                                 <span className="spec-label">Required Education Level :</span>
                                                 <span className="spec-value" dangerouslySetInnerHTML={{ __html: formatContent(jobData.education) }} />
                                             </div>
                                         )}
-                                        {jobData.specification && (
+                                        {!isEmptyHtml(jobData.specification) && (
                                             <div className="spec-row">
                                                 <span className="spec-label">Experience Required :</span>
                                                 <span className="spec-value" dangerouslySetInnerHTML={{ __html: formatContent(jobData.specification) }} />
