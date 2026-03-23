@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '@/components/common/Logo';
 import { ROUTES } from '../../routes/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,7 @@ export default function Navbar() {
     const { isAuthenticated: checkAuth, getCurrentUser } = useAuth();
     const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const isAuthenticated = checkAuth();
     const role = localStorage.getItem('role');
 
@@ -73,6 +74,21 @@ export default function Navbar() {
         }
     };
 
+    const isActive = (path) => {
+        if (path === '/' && location.pathname !== '/') return false;
+        return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    };
+
+    const getLinkStyle = (path) => {
+        return isActive(path) 
+            ? { ...navStyles.btn, textDecoration: 'none', display: 'inline-block' } 
+            : navStyles.link;
+    };
+
+    const getLinkClass = (path) => {
+        return isActive(path) ? "active-nav-btn" : "nav-item";
+    };
+
     return (
         <nav className={`sticky-header ${scrolled ? 'scrolled' : ''}`} aria-label="Main Navigation">
             <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
@@ -81,12 +97,12 @@ export default function Navbar() {
                 </Link>
 
                 <nav style={navStyles.navLinks} aria-label="Quick Links">
-                    <Link to="/" style={navStyles.link} className="nav-item">Home</Link>
-                    <Link to="/find-jobs" style={navStyles.link} className="nav-item">Find Jobs</Link>
+                    <Link to="/" style={getLinkStyle('/')} className={getLinkClass('/')}>Home</Link>
+                    <Link to="/find-jobs" style={getLinkStyle('/find-jobs')} className={getLinkClass('/find-jobs')}>Find Jobs</Link>
 
                     {isAuthenticated ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <Link to={getDashboardRoute()} style={navStyles.link} className="nav-item">Dashboard</Link>
+                            <Link to={getDashboardRoute()} style={getLinkStyle(getDashboardRoute())} className={getLinkClass(getDashboardRoute())}>Dashboard</Link>
                             {user?.profile_picture ? (
                                 <img
                                     src={user.profile_picture.startsWith('http') ? user.profile_picture : `/uploads/${user.profile_picture.replace(/^(\/?uploads\/|\/)/, '')}`.replace(/\\/g, '/')}
@@ -119,11 +135,17 @@ export default function Navbar() {
                         </div>
                     ) : (
                         <>
-                            <Link to={ROUTES.LOGIN} style={navStyles.link} className="nav-item">Sign In</Link>
+                            <Link 
+                                to={ROUTES.LOGIN} 
+                                style={getLinkStyle(ROUTES.LOGIN)} 
+                                className={getLinkClass(ROUTES.LOGIN)}
+                            >
+                                Sign In
+                            </Link>
                             <Link
                                 to={ROUTES.REGISTER}
-                                style={{ ...navStyles.btn, textDecoration: 'none', display: 'inline-block' }}
-                                className="signup-nav-btn"
+                                style={getLinkStyle(ROUTES.REGISTER)}
+                                className={getLinkClass(ROUTES.REGISTER)}
                             >
                                 Sign Up
                             </Link>
@@ -137,6 +159,12 @@ export default function Navbar() {
           opacity: 1 !important;
           color: var(--color-brand-accent) !important;
           background: rgba(62, 97, 255, 0.05);
+        }
+        .active-nav-btn {
+          opacity: 1;
+        }
+        .active-nav-btn:hover {
+          opacity: 0.9;
         }
         @media (max-width: 768px) {
           nav { display: none !important; }

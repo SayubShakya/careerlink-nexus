@@ -48,7 +48,6 @@ const JobDetailModal = ({ job, onClose }) => {
                             <div className="jb-dhc-meta-row">
                                 <div className="jb-dhc-meta-item"><Building2 /> {job.Employer?.companyName || 'Hiring Boss'}</div>
                                 <div className="jb-dhc-meta-item"><MapPin /> {job.location || 'On-site'}</div>
-                                <div className="jb-dhc-meta-item"><UsersIcon /> Vacancy: 1</div>
                             </div>
                             <div className="jb-dhc-meta-row">
                                 <div className="jb-dhc-meta-item views">Views: {job.views || 0}</div>
@@ -146,7 +145,6 @@ const JobDetailModal = ({ job, onClose }) => {
                                 <p className="jb-sb-text">
                                     Click on <b>Apply</b> and apply to this job via your jobseeker profile with easy apply process.
                                 </p>
-                                <button className="jb-sb-btn-main">Apply Now</button>
                                 <div className="jb-sb-date-footer"> 
                                     Apply Before: <span>4/1/2026</span>
                                 </div>
@@ -174,15 +172,6 @@ const JobDetailModal = ({ job, onClose }) => {
                                 <p className="jb-sb-text" style={{ marginTop: '16px', marginBottom: 0 }}>
                                     {job.Employer?.description || 'A great company to work for.'}
                                 </p>
-                            </div>
-                        </div>
-
-                         {/* Admin Tool: Delete */}
-                         <div className="jb-sidebar-box" style={{ borderColor: '#FEE2E2', marginTop: 'auto' }}>
-                            <div className="jb-sb-content" style={{ padding: '12px' }}>
-                                <button className="jb-sb-btn-main" style={{ background: '#EF4444' }} onClick={() => {/* Delete Logic */}}>
-                                    <Trash2 size={16} style={{ marginRight: '8px' }} /> Admin: Delete Job
-                                </button>
                             </div>
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Navigate, useLocation, ScrollRestoration } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import EmployerSidebar from './EmployerSidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -71,6 +71,7 @@ const EmployerLayout = () => {
 
     return (
         <div style={styles.container}>
+            <ScrollRestoration />
             {/* Mobile Header */ }
             <div className="mobile-header-glass hidden-desktop">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

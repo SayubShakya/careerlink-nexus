@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, ScrollRestoration } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/routes/routes';
@@ -54,6 +54,7 @@ const AdminLayout = () => {
             transition: 'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
         }}>
+            <ScrollRestoration />
             {/* Mobile Header */}
             <div className="admin-mobile-header hidden-desktop">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

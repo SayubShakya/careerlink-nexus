@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, ScrollRestoration } from 'react-router-dom';
 import JobseekerNavbar from './JobseekerNavbar';
 import Footer from '../Footer';
 import { useTheme } from '@/hooks/useTheme';
@@ -33,6 +33,7 @@ const JobseekerLayout = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-dashboard)' }}>
+            <ScrollRestoration />
             <JobseekerNavbar />
             <main style={{ flex: 1 }}>
                 <Outlet />

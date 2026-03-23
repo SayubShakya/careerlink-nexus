@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, ScrollRestoration } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -11,6 +11,7 @@ const Layout = () => {
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
+            <ScrollRestoration />
             <Navbar />
             <main className="flex-grow" style={{ paddingTop: 'var(--header-height)', backgroundColor: 'white' }}>
                 <Outlet />
