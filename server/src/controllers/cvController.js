@@ -141,47 +141,130 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         });
         return res.send(pdfBuffer);
     }
-    // CASE 2: Uploaded CV with Cloudinary URL — always generate a signed URL
+    // CASE 2: Uploaded CV with Cloudinary URL — proxy the file through the server
     if (cv.file_path && cv.file_path.startsWith('http')) {
         const cloudinary = require('../utils/cloudinary');
+        const https = require('https');
 
         try {
-            // Detect delivery type: 'upload' (public) or 'authenticated' (private)
-            const isAuthenticated = cv.file_path.includes('/authenticated/');
-            const deliveryType = isAuthenticated ? 'authenticated' : 'upload';
             const resourceType = cv.file_path.includes('/raw/') ? 'raw' : 'image';
 
-            // Extract the path after the delivery segment to get the public_id
-            const splitOn = isAuthenticated ? '/authenticated/' : '/upload/';
+            // Extract the public_id from the URL
+            const splitOn = cv.file_path.includes('/authenticated/') ? '/authenticated/' : '/upload/';
             const urlParts = cv.file_path.split(splitOn);
 
             if (urlParts.length < 2) {
-                // Malformed URL — redirect as-is and hope for the best
                 console.warn(`[downloadCV] Could not parse Cloudinary URL, redirecting raw: ${cv.file_path}`);
                 return res.redirect(302, cv.file_path);
             }
 
-            // Strip version prefix (v1234567890/)
-            let pathAfterDelivery = urlParts[1].replace(/^v\d+\//, '');
+            // Strip version prefix and any signature fragments
+            let pathAfterDelivery = urlParts[1]
+                .replace(/^s--[A-Za-z0-9_-]+--\//, '')
+                .replace(/^v\d+\//, '');
 
-            // For 'raw' files the public_id MUST include the extension
-            // For 'image' files the public_id excludes the extension
-            const publicId = resourceType === 'raw'
-                ? pathAfterDelivery               // keep extension: nexus_cvs/cv-xxx.pdf
-                : pathAfterDelivery.replace(/\.[^/.]+$/, '');
+            // For raw files, the URL includes .pdf but the internal public_id may or may not
+            const publicIdWithExt = pathAfterDelivery;                              // nexus_cvs/cv-xxx.pdf
+            const publicIdNoExt = pathAfterDelivery.replace(/\.[^/.]+$/, '');       // nexus_cvs/cv-xxx
 
-            const signedUrl = cloudinary.url(publicId, {
-                resource_type: resourceType,
-                type: deliveryType,
-                sign_url: true,
-                expires_at: Math.floor(Date.now() / 1000) + 300, // 5 minutes
-                secure: true
-            });
+            console.log(`[downloadCV] public_id (with ext): ${publicIdWithExt}`);
+            console.log(`[downloadCV] public_id (no ext): ${publicIdNoExt}`);
 
-            console.log(`[downloadCV] Signed redirect → type=${deliveryType} resource=${resourceType} id=${publicId}`);
-            return res.redirect(302, signedUrl);
+            // Helper: try to fetch a URL and stream it; returns true on success
+            const tryFetchAndStream = (url) => {
+                return new Promise((resolve) => {
+                    https.get(url, (fileRes) => {
+                        if (fileRes.statusCode !== 200) {
+                            // Consume the response to free the socket
+                            fileRes.resume();
+                            console.error(`[downloadCV] URL returned status ${fileRes.statusCode}`);
+                            return resolve(false);
+                        }
+
+                        const filename = (cv.title || 'cv').replace(/\s+/g, '_') + '.pdf';
+                        res.set({
+                            'Content-Type': 'application/pdf',
+                            'Content-Disposition': `inline; filename="${filename}"`,
+                            'Cache-Control': 'no-store'
+                        });
+                        if (fileRes.headers['content-length']) {
+                            res.set('Content-Length', fileRes.headers['content-length']);
+                        }
+
+                        fileRes.pipe(res);
+                        fileRes.on('end', () => resolve(true));
+                        fileRes.on('error', () => resolve(false));
+                    }).on('error', () => resolve(false));
+                });
+            };
+
+            // Strategy 1: private_download_url with type:'upload' (no ext)
+            // private_download_url defaults to type:'private' which returns 404 for upload-type assets
+            try {
+                const dlUrl1 = cloudinary.utils.private_download_url(publicIdNoExt, 'pdf', {
+                    resource_type: resourceType,
+                    type: 'upload',
+                    expires_at: Math.floor(Date.now() / 1000) + 300,
+                });
+                console.log(`[downloadCV] Strategy 1 - private_download (upload, no ext): ${dlUrl1}`);
+                const ok = await tryFetchAndStream(dlUrl1);
+                if (ok) return;
+            } catch (e) {
+                console.log(`[downloadCV] Strategy 1 failed: ${e.message}`);
+            }
+
+            // Strategy 2: private_download_url with type:'upload' (with ext)
+            try {
+                const dlUrl2 = cloudinary.utils.private_download_url(publicIdWithExt, 'pdf', {
+                    resource_type: resourceType,
+                    type: 'upload',
+                    expires_at: Math.floor(Date.now() / 1000) + 300,
+                });
+                console.log(`[downloadCV] Strategy 2 - private_download (upload, with ext): ${dlUrl2}`);
+                const ok = await tryFetchAndStream(dlUrl2);
+                if (ok) return;
+            } catch (e) {
+                console.log(`[downloadCV] Strategy 2 failed: ${e.message}`);
+            }
+
+            // Strategy 3: private_download_url with type:'private' (no ext) — in case upload type was different
+            try {
+                const dlUrl3 = cloudinary.utils.private_download_url(publicIdNoExt, 'pdf', {
+                    resource_type: resourceType,
+                    expires_at: Math.floor(Date.now() / 1000) + 300,
+                });
+                console.log(`[downloadCV] Strategy 3 - private_download (private, no ext): ${dlUrl3}`);
+                const ok = await tryFetchAndStream(dlUrl3);
+                if (ok) return;
+            } catch (e) {
+                console.log(`[downloadCV] Strategy 3 failed: ${e.message}`);
+            }
+
+            // Strategy 4: Signed CDN URL with version from stored URL
+            try {
+                // Extract version from stored URL
+                const versionMatch = cv.file_path.match(/\/v(\d+)\//);
+                const version = versionMatch ? versionMatch[1] : undefined;
+
+                const signedUrl = cloudinary.url(publicIdWithExt, {
+                    resource_type: resourceType,
+                    type: 'upload',
+                    sign_url: true,
+                    version: version,
+                    secure: true
+                });
+                console.log(`[downloadCV] Strategy 4 - signed CDN (version=${version}): ${signedUrl}`);
+                const ok = await tryFetchAndStream(signedUrl);
+                if (ok) return;
+            } catch (e) {
+                console.log(`[downloadCV] Strategy 4 failed: ${e.message}`);
+            }
+
+            // All strategies failed
+            console.error(`[downloadCV] All download strategies failed, redirecting raw URL`);
+            return res.redirect(302, cv.file_path);
         } catch (err) {
-            console.error('[downloadCV] Failed to build signed URL, falling back to raw redirect:', err.message);
+            console.error('[downloadCV] Failed to proxy CV:', err.message);
             return res.redirect(302, cv.file_path);
         }
     }

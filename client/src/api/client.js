@@ -36,10 +36,15 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            if (typeof window !== 'undefined') {
+            // Only clear token if the 401 came from our own API, not from
+            // external redirects (e.g. Cloudinary) or blob download requests
+            const requestUrl = error.config?.url || '';
+            const isOwnApi = requestUrl.startsWith('/') || requestUrl.includes(API_BASE_URL);
+            const isBlobRequest = error.config?.responseType === 'blob';
+
+            if (isOwnApi && !isBlobRequest && typeof window !== 'undefined') {
                 localStorage.removeItem('userToken');
                 localStorage.removeItem('user');
-                // Optional: window.location.href = '/login'; 
             }
         }
         return Promise.reject(error);
