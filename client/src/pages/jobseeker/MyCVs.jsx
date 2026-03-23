@@ -58,19 +58,24 @@ const MyCVs = () => {
     };
 
     // Build a full absolute URL with JWT token — needed for window.open() which can't set headers
-    const buildDirectUrl = (id) => {
-        const token = localStorage.getItem('userToken');
+    const buildDirectUrl = (id, token) => {
+        const tok = token || localStorage.getItem('userToken');
+        if (!tok) {
+            console.warn('[buildDirectUrl] No token found');
+            return null;
+        }
         const base = API_BASE_URL.startsWith('http') ? API_BASE_URL : `http://localhost:5000/api`;
-        return `${base}/cvs/${id}/download?token=${token}&t=${Date.now()}`;
+        return `${base}/cvs/${id}/download?token=${encodeURIComponent(tok)}&t=${Date.now()}`;
     };
 
     const handleDownload = async (id, title) => {
+        // Read token BEFORE the axios call — the 401 interceptor may wipe it
+        const token = localStorage.getItem('userToken');
         try {
             const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, {
                 responseType: 'blob',
                 maxRedirects: 5
             });
-            // If we get blob data back (platform PDFs), download it
             if (response.data && response.data.size > 0) {
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
@@ -82,17 +87,18 @@ const MyCVs = () => {
                 window.URL.revokeObjectURL(url);
             }
         } catch (err) {
-            // If axios can't follow the redirect (e.g. CORS on Cloudinary), open directly in tab
-            if (err.response?.status === 302 || err.request) {
-                window.open(buildDirectUrl(id), '_blank');
+            const directUrl = buildDirectUrl(id, token);
+            if (directUrl) {
+                window.open(directUrl, '_blank');
             } else {
-                console.error('Download failed:', err);
-                toast.error('Failed to download CV');
+                toast.error('Session expired. Please log in again.');
             }
         }
     };
 
     const handleView = async (id) => {
+        // Read token BEFORE the axios call — the 401 interceptor may wipe it
+        const token = localStorage.getItem('userToken');
         try {
             const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(id)}?t=${Date.now()}`, {
                 responseType: 'blob',
@@ -104,8 +110,12 @@ const MyCVs = () => {
                 window.open(url, '_blank');
             }
         } catch (err) {
-            // Redirect response — open the absolute URL directly in a new tab (with token)
-            window.open(buildDirectUrl(id), '_blank');
+            const directUrl = buildDirectUrl(id, token);
+            if (directUrl) {
+                window.open(directUrl, '_blank');
+            } else {
+                toast.error('Session expired. Please log in again.');
+            }
         }
     };
 

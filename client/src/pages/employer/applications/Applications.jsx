@@ -374,10 +374,11 @@ const Applications = () => {
     const { mutate: updateAppStatus } = useUpdateApplicationStatus();
     const location = useLocation();
     
-    const buildDirectUrl = (id) => {
-        const token = localStorage.getItem('userToken');
+    const buildDirectUrl = (id, token) => {
+        const tok = token || localStorage.getItem('userToken');
+        if (!tok) return null;
         const base = API_BASE_URL.startsWith('http') ? API_BASE_URL : `http://localhost:5000/api`;
-        return `${base}/cvs/${id}/download?token=${token}&t=${Date.now()}`;
+        return `${base}/cvs/${id}/download?token=${encodeURIComponent(tok)}&t=${Date.now()}`;
     };
 
     const handleViewCV = async (cv) => {
@@ -387,8 +388,15 @@ const Applications = () => {
         }
         
         const cvId = cv.id;
-        const endpoint = buildDirectUrl(cvId);
+        // Read token BEFORE the axios call — the 401 interceptor may wipe it from localStorage
+        const token = localStorage.getItem('userToken');
+        const endpoint = buildDirectUrl(cvId, token);
         
+        if (!endpoint) {
+            alert('Session expired. Please log in again.');
+            return;
+        }
+
         try {
             const response = await api.get(`${API_ENDPOINTS.CV.DOWNLOAD(cvId)}?t=${Date.now()}`, { responseType: 'blob', maxRedirects: 5 });
             if (response.data && response.data.size > 0) {
@@ -401,6 +409,7 @@ const Applications = () => {
             window.open(endpoint, '_blank');
         }
     };
+
 
     // UI State
     const [searchQuery, setSearchQuery] = useState('');
