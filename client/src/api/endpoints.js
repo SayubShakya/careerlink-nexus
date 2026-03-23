@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
         CREATE: '/jobs',
         UPDATE: (id) => `/jobs/${id}`,
         DELETE: (id) => `/jobs/${id}`,
+        APPLICANT_COUNT: (id) => `/jobs/${id}/applicant-count`,
     },
     CV: {
         LIST: '/cvs',

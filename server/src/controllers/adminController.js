@@ -149,6 +149,8 @@ exports.getAllJobSeekers = catchAsync(async (req, res, next) => {
 
 // Get admin dashboard stats
 exports.getDashboardStats = catchAsync(async (req, res, next) => {
+    const { Op } = require('sequelize');
+
     const totalEmployers = await Employer.count();
     const totalJobSeekers = await JobSeeker.count();
     const totalJobs = await JobListing.count();
@@ -167,6 +169,36 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
     // Hiring Bosses = count of employers (same as totalEmployers)
     const hiringBosses = totalEmployers;
 
+    // --- Trend Calculations (last 7 days vs previous 7 days) ---
+    const lastWeekDate = new Date();
+    lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+    const twoWeeksAgoDate = new Date();
+    twoWeeksAgoDate.setDate(twoWeeksAgoDate.getDate() - 14);
+
+    // Jobs trend
+    const recentJobs = await JobListing.count({ where: { created_at: { [Op.gte]: lastWeekDate } } });
+    const jobs_trend = recentJobs > 0 ? `+${recentJobs}` : '0';
+
+    // Applications trend
+    const recentApps = await Application.count({ where: { applied_at: { [Op.gte]: lastWeekDate } } });
+    const app_trend = recentApps > 0 ? `+${recentApps}` : '0';
+
+    // Employers trend
+    const recentEmployers = await Employer.count({ where: { created_at: { [Op.gte]: lastWeekDate } } });
+    const employer_trend = recentEmployers > 0 ? `+${recentEmployers}` : '0';
+
+    // Job Seekers trend
+    const recentSeekers = await JobSeeker.count({ where: { created_at: { [Op.gte]: lastWeekDate } } });
+    const seeker_trend = recentSeekers > 0 ? `+${recentSeekers}` : '0';
+
+    // Shortlisted ratio tag
+    const shortlistedCount = await Application.count({ where: { status: 'shortlisted' } });
+    const ratio = totalApplications > 0 ? (shortlistedCount / totalApplications) : 0;
+    let shortlist_trend = 'Standard';
+    if (ratio >= 0.2) shortlist_trend = 'Elite';
+    else if (ratio >= 0.1) shortlist_trend = 'High Performance';
+    else if (shortlistedCount > 0) shortlist_trend = 'Active';
+
     res.status(200).json({
         status: 'success',
         data: {
@@ -177,7 +209,12 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
                 activeJobs,
                 totalApplications,
                 totalClicks,
-                hiringBosses
+                hiringBosses,
+                jobs_trend,
+                app_trend,
+                employer_trend,
+                seeker_trend,
+                shortlist_trend
             }
         }
     });
@@ -185,10 +222,24 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
 
 // Delete an employer and their job listings
 exports.deleteEmployer = catchAsync(async (req, res, next) => {
+    const SavedJob = require('../models/SavedJob');
     const employer = await Employer.findByPk(req.params.id);
     if (!employer) return next(new AppError('Employer not found', 404));
 
-    // Delete all job listings by this employer (cascade handles applications)
+    // Get all job IDs for this employer
+    const jobs = await JobListing.findAll({
+        where: { employer_id: req.params.id },
+        attributes: ['id']
+    });
+    const jobIds = jobs.map(j => j.id);
+
+    if (jobIds.length > 0) {
+        // Delete all applications and saved jobs linked to those jobs
+        await Application.destroy({ where: { job_id: jobIds } });
+        await SavedJob.destroy({ where: { job_id: jobIds } });
+    }
+
+    // Delete all job listings by this employer
     await JobListing.destroy({ where: { employer_id: req.params.id } });
 
     // Delete the employer

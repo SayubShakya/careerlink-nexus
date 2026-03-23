@@ -139,8 +139,9 @@ exports.updateJob = catchAsync(async (req, res, next) => {
     });
 });
 
-// For Employers: Delete a job
-exports.deleteJob = catchAsync(async (req, res, next) => {
+// Get applicant count for a job (used before delete confirmation)
+exports.getJobApplicantCount = catchAsync(async (req, res, next) => {
+    const Application = require('../models/Application');
     const job = await JobListing.findOne({
         where: { id: req.params.id, employer_id: req.user.id }
     });
@@ -148,6 +149,29 @@ exports.deleteJob = catchAsync(async (req, res, next) => {
     if (!job) {
         return next(new AppError('No job found with that ID belonging to you', 404));
     }
+
+    const applicantCount = await Application.count({ where: { job_id: job.id } });
+
+    res.status(200).json({
+        status: 'success',
+        data: { applicantCount }
+    });
+});
+
+// For Employers: Delete a job
+exports.deleteJob = catchAsync(async (req, res, next) => {
+    const Application = require('../models/Application');
+    const job = await JobListing.findOne({
+        where: { id: req.params.id, employer_id: req.user.id }
+    });
+
+    if (!job) {
+        return next(new AppError('No job found with that ID belonging to you', 404));
+    }
+
+    // Explicitly delete related records to avoid FK constraint errors
+    await Application.destroy({ where: { job_id: job.id } });
+    await SavedJob.destroy({ where: { job_id: job.id } });
 
     await job.destroy();
 

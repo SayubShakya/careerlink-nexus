@@ -92,7 +92,7 @@ const AnimCounter = ({ value }) => {
 };
 
 /* ── Stat Card ── */
-const StatCard = ({ label, value, icon, color, bg, idx }) => (
+const StatCard = ({ label, value, icon, color, bg, idx, trend }) => (
     <div className="admin-stat-card" style={{ animationDelay: `${idx * 0.08}s` }}>
         <div className="stat-icon" style={{ background: bg, color }}>
             {icon}
@@ -101,6 +101,17 @@ const StatCard = ({ label, value, icon, color, bg, idx }) => (
             <div className="stat-value"><AnimCounter value={value} /></div>
             <div className="stat-label">{label}</div>
         </div>
+        {trend && trend !== '0' && (
+            <div className="stat-badge">
+                <TrendingUp size={10} />
+                {trend} this wk
+            </div>
+        )}
+        {trend === '0' && (
+            <div className="stat-badge" style={{ background: '#F8FAFC', borderColor: '#E2E8F0', color: '#94A3B8' }}>
+                Stable
+            </div>
+        )}
     </div>
 );
 
@@ -160,11 +171,11 @@ const AdminDashboard = () => {
     const paginatedEmployers = employers.slice(startIndex, startIndex + itemsPerPage);
 
     const cards = [
-        { label: 'Employers', value: ds.totalEmployers, icon: <Building2 size={20} />, color: '#6366F1', bg: '#EEF2FF' },
-        { label: 'Job Seekers', value: ds.totalJobSeekers, icon: <Users size={20} />, color: '#10B981', bg: '#ECFDF5' },
-        { label: 'Job Listings', value: ds.totalJobs, icon: <Briefcase size={20} />, color: '#F59E0B', bg: '#FFFBEB' },
+        { label: 'Employers', value: ds.totalEmployers, icon: <Building2 size={20} />, color: '#6366F1', bg: '#EEF2FF', trend: ds.employer_trend },
+        { label: 'Job Seekers', value: ds.totalJobSeekers, icon: <Users size={20} />, color: '#10B981', bg: '#ECFDF5', trend: ds.seeker_trend },
+        { label: 'Job Listings', value: ds.totalJobs, icon: <Briefcase size={20} />, color: '#F59E0B', bg: '#FFFBEB', trend: ds.jobs_trend },
         { label: 'Total Clicks', value: ds.totalClicks, icon: <Activity size={20} />, color: '#8B5CF6', bg: '#F5F3FF' },
-        { label: 'How Many Applied', value: ds.totalApplications, icon: <FileText size={20} />, color: '#EC4899', bg: '#FDF2F8' },
+        { label: 'How Many Applied', value: ds.totalApplications, icon: <FileText size={20} />, color: '#EC4899', bg: '#FDF2F8', trend: ds.app_trend },
         { label: 'Hiring Bosses', value: ds.hiringBosses, icon: <Building2 size={20} />, color: '#0EA5E9', bg: '#F0F9FF' },
     ];
 
@@ -362,9 +373,13 @@ const AdminDashboard = () => {
                             <div className="trend-content">
                                 <div className="trend-icon"><Zap size={20} /></div>
                                 <h3 className="trend-title">Platform Pulse</h3>
-                                <p className="trend-desc">Engagement is up 12% this week compared to last month.</p>
+                                <p className="trend-desc">
+                                    {ds.app_trend && ds.app_trend !== '0'
+                                        ? `${ds.app_trend} new applications this week. ${ds.shortlist_trend === 'Elite' ? 'Elite shortlist ratio!' : 'Keep it going!'}`
+                                        : 'No new applications this week. Activity will update as users engage.'}
+                                </p>
                                 <div className="trend-bar-wrap">
-                                    <div className="trend-bar" style={{ width: '65%' }} />
+                                    <div className="trend-bar" style={{ width: `${Math.min(100, (ds.totalApplications || 0) * 5)}%` }} />
                                 </div>
                             </div>
                         </div>

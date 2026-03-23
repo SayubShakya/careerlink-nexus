@@ -42,7 +42,7 @@ exports.createPlatformCV = catchAsync(async (req, res, next) => {
 // Get single CV details
 exports.getCV = catchAsync(async (req, res, next) => {
     let whereClause = { id: req.params.id };
-    
+
     // Only restrict by user_id if the user is a job seeker
     if (req.role === 'job_seeker') {
         whereClause.user_id = req.user.id;
@@ -110,7 +110,7 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         // Employer can only download CVs of candidates who have applied to their jobs
         const Application = require('../models/Application');
         const JobListing = require('../models/JobListing');
-        
+
         const hasApplication = await Application.findOne({
             where: { cv_id: cv.id },
             include: [{
@@ -141,131 +141,171 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
         });
         return res.send(pdfBuffer);
     }
-    // CASE 2: Uploaded CV with Cloudinary URL — proxy the file through the server
+    // CASE 2: Uploaded CV with Cloudinary URL — proxy download through server
+    // Direct Cloudinary CDN URLs return 401 due to account-level "PDF/ZIP delivery" restriction.
+    // We fetch the binary via the authenticated Admin API and stream it to the client.
     if (cv.file_path && cv.file_path.startsWith('http')) {
-        const cloudinary = require('../utils/cloudinary');
         const https = require('https');
+        const http = require('http');
 
         try {
+            // Extract public_id from the Cloudinary URL
+            const isAuthenticated = cv.file_path.includes('/authenticated/');
             const resourceType = cv.file_path.includes('/raw/') ? 'raw' : 'image';
-
-            // Extract the public_id from the URL
-            const splitOn = cv.file_path.includes('/authenticated/') ? '/authenticated/' : '/upload/';
+            const splitOn = isAuthenticated ? '/authenticated/' : '/upload/';
             const urlParts = cv.file_path.split(splitOn);
 
             if (urlParts.length < 2) {
-                console.warn(`[downloadCV] Could not parse Cloudinary URL, redirecting raw: ${cv.file_path}`);
-                return res.redirect(302, cv.file_path);
+                console.warn(`[downloadCV] Could not parse Cloudinary URL: ${cv.file_path}`);
+                return next(new AppError('CV file URL is malformed.', 500));
             }
 
-            // Strip version prefix and any signature fragments
-            let pathAfterDelivery = urlParts[1]
-                .replace(/^s--[A-Za-z0-9_-]+--\//, '')
-                .replace(/^v\d+\//, '');
+            // Strip version prefix and any signature prefix
+            let pathAfterDelivery = urlParts[1].replace(/^v\d+\//, '').replace(/^s--[^/]+--\//, '');
+            const publicId = resourceType === 'raw'
+                ? pathAfterDelivery
+                : pathAfterDelivery.replace(/\.[^/.]+$/, '');
 
-            // For raw files, the URL includes .pdf but the internal public_id may or may not
-            const publicIdWithExt = pathAfterDelivery;                              // nexus_cvs/cv-xxx.pdf
-            const publicIdNoExt = pathAfterDelivery.replace(/\.[^/.]+$/, '');       // nexus_cvs/cv-xxx
+            const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+            const apiKey = process.env.CLOUDINARY_API_KEY;
+            const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-            console.log(`[downloadCV] public_id (with ext): ${publicIdWithExt}`);
-            console.log(`[downloadCV] public_id (no ext): ${publicIdNoExt}`);
+            // Use Admin API content endpoint to fetch the actual file binary
+            // This uses Basic Auth (api_key:api_secret) and bypasses CDN ACL restrictions
+            const contentUrl = `https://${apiKey}:${apiSecret}@api.cloudinary.com/v1_1/${cloudName}/resources/${resourceType}/upload/${encodeURIComponent(publicId)}`;
 
-            // Helper: try to fetch a URL and stream it; returns true on success
-            const tryFetchAndStream = (url) => {
-                return new Promise((resolve) => {
-                    https.get(url, (fileRes) => {
-                        if (fileRes.statusCode !== 200) {
-                            // Consume the response to free the socket
-                            fileRes.resume();
-                            console.error(`[downloadCV] URL returned status ${fileRes.statusCode}`);
-                            return resolve(false);
+            console.log(`[downloadCV] Fetching resource via Admin API: ${publicId}`);
+
+            const metaReq = https.get(contentUrl, (metaRes) => {
+                let metaBody = '';
+                metaRes.on('data', chunk => metaBody += chunk);
+                metaRes.on('end', () => {
+                    try {
+                        const meta = JSON.parse(metaBody);
+                        if (metaRes.statusCode !== 200 || !meta.secure_url) {
+                            console.error(`[downloadCV] Admin API error ${metaRes.statusCode}:`, metaBody.substring(0, 300));
+                            return next(new AppError('Failed to retrieve CV from cloud storage.', 502));
                         }
 
-                        const filename = (cv.title || 'cv').replace(/\s+/g, '_') + '.pdf';
-                        res.set({
-                            'Content-Type': 'application/pdf',
-                            'Content-Disposition': `inline; filename="${filename}"`,
-                            'Cache-Control': 'no-store'
+                        // Stream the file from the secure_url via server (proxy)
+                        // We need to follow the CDN URL but from server-side
+                        const fileUrl = new URL(meta.secure_url);
+                        const fileProtocol = fileUrl.protocol === 'https:' ? https : http;
+
+                        console.log(`[downloadCV] Streaming file from: ${meta.secure_url}`);
+
+                        // Try direct CDN access first (works if PDF delivery is enabled)
+                        fileProtocol.get(meta.secure_url, (fileRes) => {
+                            // If CDN returns 401, use the Admin API content download as fallback
+                            if (fileRes.statusCode === 401) {
+                                console.warn(`[downloadCV] CDN returned 401. Enable "PDF and ZIP delivery" in Cloudinary Settings > Security.`);
+                                console.log(`[downloadCV] Attempting Admin API download fallback...`);
+
+                                // Consume the failed response body
+                                fileRes.resume();
+
+                                // Use Cloudinary's explicit download_url from Admin API
+                                // The Admin API resource endpoint returns the URL, but we can construct
+                                // the authenticated content URL using the API
+                                const cloudinary = require('../utils/cloudinary');
+
+                                // Generate a download URL using the SDK
+                                const downloadUrl = cloudinary.url(publicId, {
+                                    resource_type: resourceType,
+                                    type: isAuthenticated ? 'authenticated' : 'upload',
+                                    sign_url: true,
+                                    secure: true,
+                                    flags: 'attachment'
+                                });
+
+                                // Try the signed URL with attachment flag
+                                https.get(downloadUrl, (dlRes) => {
+                                    if (dlRes.statusCode === 200) {
+                                        const filename = cv.title ? cv.title.replace(/\s+/g, '_') + '.pdf' : 'cv.pdf';
+                                        res.set({
+                                            'Content-Type': dlRes.headers['content-type'] || 'application/pdf',
+                                            'Content-Disposition': `inline; filename="${filename}"`,
+                                            'Cache-Control': 'no-store'
+                                        });
+                                        if (dlRes.headers['content-length']) {
+                                            res.set('Content-Length', dlRes.headers['content-length']);
+                                        }
+                                        return dlRes.pipe(res);
+                                    }
+
+                                    dlRes.resume();
+                                    console.error(`[downloadCV] Signed URL also failed: ${dlRes.statusCode}`);
+                                    console.error(`[downloadCV] ⚠️  FIX REQUIRED: Go to Cloudinary Dashboard → Settings → Security → Enable "PDF and ZIP files delivery"`);
+                                    return next(new AppError(
+                                        'CV download blocked by cloud storage security settings. Please contact the administrator to enable PDF delivery in Cloudinary settings.',
+                                        502
+                                    ));
+                                }).on('error', (err) => {
+                                    console.error('[downloadCV] Signed URL request failed:', err.message);
+                                    if (!res.headersSent) next(new AppError('Failed to download CV.', 502));
+                                });
+                                return;
+                            }
+
+                            // Follow redirects
+                            if (fileRes.statusCode === 301 || fileRes.statusCode === 302) {
+                                const redirectProtocol = fileRes.headers.location.startsWith('https') ? https : http;
+                                redirectProtocol.get(fileRes.headers.location, (redirectRes) => {
+                                    const filename = cv.title ? cv.title.replace(/\s+/g, '_') + '.pdf' : 'cv.pdf';
+                                    res.set({
+                                        'Content-Type': 'application/pdf',
+                                        'Content-Disposition': `inline; filename="${filename}"`,
+                                        'Cache-Control': 'no-store'
+                                    });
+                                    if (redirectRes.headers['content-length']) {
+                                        res.set('Content-Length', redirectRes.headers['content-length']);
+                                    }
+                                    redirectRes.pipe(res);
+                                }).on('error', (err) => {
+                                    console.error('[downloadCV] Redirect error:', err.message);
+                                    if (!res.headersSent) next(new AppError('Failed to stream CV.', 502));
+                                });
+                                return;
+                            }
+
+                            if (fileRes.statusCode !== 200) {
+                                fileRes.resume();
+                                console.error(`[downloadCV] CDN returned unexpected ${fileRes.statusCode}`);
+                                return next(new AppError('Failed to download CV from cloud storage.', 502));
+                            }
+
+                            // Success — stream the PDF to the client
+                            const filename = cv.title ? cv.title.replace(/\s+/g, '_') + '.pdf' : 'cv.pdf';
+                            res.set({
+                                'Content-Type': fileRes.headers['content-type'] || 'application/pdf',
+                                'Content-Disposition': `inline; filename="${filename}"`,
+                                'Cache-Control': 'no-store'
+                            });
+                            if (fileRes.headers['content-length']) {
+                                res.set('Content-Length', fileRes.headers['content-length']);
+                            }
+                            fileRes.pipe(res);
+                        }).on('error', (err) => {
+                            console.error('[downloadCV] CDN stream error:', err.message);
+                            if (!res.headersSent) next(new AppError('Failed to stream CV file.', 502));
                         });
-                        if (fileRes.headers['content-length']) {
-                            res.set('Content-Length', fileRes.headers['content-length']);
-                        }
 
-                        fileRes.pipe(res);
-                        fileRes.on('end', () => resolve(true));
-                        fileRes.on('error', () => resolve(false));
-                    }).on('error', () => resolve(false));
+                    } catch (parseErr) {
+                        console.error('[downloadCV] Failed to parse Admin API response:', parseErr.message);
+                        return next(new AppError('Failed to retrieve CV metadata.', 502));
+                    }
                 });
-            };
+            });
 
-            // Strategy 1: private_download_url with type:'upload' (no ext)
-            // private_download_url defaults to type:'private' which returns 404 for upload-type assets
-            try {
-                const dlUrl1 = cloudinary.utils.private_download_url(publicIdNoExt, 'pdf', {
-                    resource_type: resourceType,
-                    type: 'upload',
-                    expires_at: Math.floor(Date.now() / 1000) + 300,
-                });
-                console.log(`[downloadCV] Strategy 1 - private_download (upload, no ext): ${dlUrl1}`);
-                const ok = await tryFetchAndStream(dlUrl1);
-                if (ok) return;
-            } catch (e) {
-                console.log(`[downloadCV] Strategy 1 failed: ${e.message}`);
-            }
+            metaReq.on('error', (err) => {
+                console.error('[downloadCV] Admin API request failed:', err.message);
+                return next(new AppError('Failed to reach cloud storage.', 502));
+            });
 
-            // Strategy 2: private_download_url with type:'upload' (with ext)
-            try {
-                const dlUrl2 = cloudinary.utils.private_download_url(publicIdWithExt, 'pdf', {
-                    resource_type: resourceType,
-                    type: 'upload',
-                    expires_at: Math.floor(Date.now() / 1000) + 300,
-                });
-                console.log(`[downloadCV] Strategy 2 - private_download (upload, with ext): ${dlUrl2}`);
-                const ok = await tryFetchAndStream(dlUrl2);
-                if (ok) return;
-            } catch (e) {
-                console.log(`[downloadCV] Strategy 2 failed: ${e.message}`);
-            }
-
-            // Strategy 3: private_download_url with type:'private' (no ext) — in case upload type was different
-            try {
-                const dlUrl3 = cloudinary.utils.private_download_url(publicIdNoExt, 'pdf', {
-                    resource_type: resourceType,
-                    expires_at: Math.floor(Date.now() / 1000) + 300,
-                });
-                console.log(`[downloadCV] Strategy 3 - private_download (private, no ext): ${dlUrl3}`);
-                const ok = await tryFetchAndStream(dlUrl3);
-                if (ok) return;
-            } catch (e) {
-                console.log(`[downloadCV] Strategy 3 failed: ${e.message}`);
-            }
-
-            // Strategy 4: Signed CDN URL with version from stored URL
-            try {
-                // Extract version from stored URL
-                const versionMatch = cv.file_path.match(/\/v(\d+)\//);
-                const version = versionMatch ? versionMatch[1] : undefined;
-
-                const signedUrl = cloudinary.url(publicIdWithExt, {
-                    resource_type: resourceType,
-                    type: 'upload',
-                    sign_url: true,
-                    version: version,
-                    secure: true
-                });
-                console.log(`[downloadCV] Strategy 4 - signed CDN (version=${version}): ${signedUrl}`);
-                const ok = await tryFetchAndStream(signedUrl);
-                if (ok) return;
-            } catch (e) {
-                console.log(`[downloadCV] Strategy 4 failed: ${e.message}`);
-            }
-
-            // All strategies failed
-            console.error(`[downloadCV] All download strategies failed, redirecting raw URL`);
-            return res.redirect(302, cv.file_path);
+            return; // Response handled by stream callbacks
         } catch (err) {
-            console.error('[downloadCV] Failed to proxy CV:', err.message);
-            return res.redirect(302, cv.file_path);
+            console.error('[downloadCV] Unexpected error:', err.message);
+            return next(new AppError('Failed to download CV from cloud storage.', 500));
         }
     }
 
@@ -279,9 +319,9 @@ exports.downloadCV = catchAsync(async (req, res, next) => {
     const filePath = path.isAbsolute(cv.file_path)
         ? cv.file_path
         : path.join(__dirname, '../../', cv.file_path);
-    
+
     console.log(`[downloadCV] Resolved file path: ${filePath}`);
-    
+
     if (!fs.existsSync(filePath)) {
         console.error(`[downloadCV] Local file missing: ${filePath}`);
         return next(new AppError('CV file not found on server. It may have been uploaded on a different machine. Please ask the candidate to re-upload their CV.', 404));
@@ -299,7 +339,7 @@ exports.uploadCV = catchAsync(async (req, res, next) => {
     // For Cloudinary uploads, req.file.path or req.file.secure_url will contain the global URL
     // For local uploads (fallback), we store the relative path
     const filePath = req.file.path || req.file.secure_url;
-    
+
     console.log(`[uploadCV] File processed. Path/URL: ${filePath}`);
 
     const newCV = await CV.create({

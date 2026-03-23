@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '@/components/ui/Pagination';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useGetEmployerJobs } from '@/hooks/api/employer/useEmployer';
-import { useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/api/jobs/useJobs';
+import { useCreateJob, useUpdateJob, useDeleteJob, useGetJobApplicantCount } from '@/hooks/api/jobs/useJobs';
 import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -211,6 +211,7 @@ const JobManagement = () => {
     const { mutate: createJob, isPending: isCreating } = useCreateJob();
     const { mutate: updateJob, isPending: isUpdating } = useUpdateJob();
     const { mutate: deleteJobMutation, isPending: isDeleting } = useDeleteJob();
+    const { mutateAsync: fetchApplicantCount } = useGetJobApplicantCount();
 
     // UI State
     const { state } = useLocation();
@@ -405,7 +406,7 @@ const JobManagement = () => {
         }, 100);
     };
 
-    const deleteJob = (id) => {
+    const deleteJob = async (id) => {
         const jobId = id;
         const jobToDelete = serverJobs.find(j => (j.id === jobId || j._id === jobId));
 
@@ -414,9 +415,21 @@ const JobManagement = () => {
             return;
         }
 
+        // Fetch real applicant count for the warning message
+        let applicantCount = jobToDelete.applicants || 0;
+        try {
+            applicantCount = await fetchApplicantCount(jobId);
+        } catch (e) {
+            // fallback to local count
+        }
+
+        const warningMsg = applicantCount > 0
+            ? `This job has ${applicantCount} applicant${applicantCount > 1 ? 's' : ''}. Deleting it will remove their application history. Are you sure you want to proceed?`
+            : `Are you sure? You will not be able to get "${jobToDelete.title}" back after you delete it.`;
+
         showModal(
-            'Delete this job?',
-            `Are you sure? You will not be able to get "${jobToDelete.title}" back after you delete it.`,
+            applicantCount > 0 ? 'Warning: Job Has Applicants' : 'Delete this job?',
+            warningMsg,
             'confirm',
             () => {
                 const loadingToast = toast.loading('Deleting...');

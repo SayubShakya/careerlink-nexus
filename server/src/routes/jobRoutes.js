@@ -17,6 +17,7 @@ router.post('/', protect, restrictTo('employer'), jobController.createJob);
 router.patch('/:id', protect, restrictTo('employer'), jobController.updateJob);
 router.put('/:id', protect, restrictTo('employer'), jobController.updateJob);
 router.delete('/:id', protect, restrictTo('employer'), jobController.deleteJob);
+router.get('/:id/applicant-count', protect, restrictTo('employer'), jobController.getJobApplicantCount);
 router.get('/:id/applicants', protect, restrictTo('employer'), applicationController.getApplicationsByJob);
 
 module.exports = router;

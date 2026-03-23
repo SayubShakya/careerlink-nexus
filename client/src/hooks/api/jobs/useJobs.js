@@ -87,6 +87,18 @@ export const useDeleteJob = () => {
 };
 
 /**
+ * Hook to fetch the applicant count for a job (used before delete confirmation)
+ */
+export const useGetJobApplicantCount = () => {
+    return useMutation({
+        mutationFn: async (id) => {
+            const response = await api.get(API_ENDPOINTS.JOBS.APPLICANT_COUNT(id));
+            return response.data.data.applicantCount;
+        }
+    });
+};
+
+/**
  * Hook to fetch jobs applied by current job seeker
  */
 export const useGetAppliedJobs = () => {
